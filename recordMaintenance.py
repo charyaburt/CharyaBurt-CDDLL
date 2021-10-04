@@ -13,6 +13,7 @@ import platform
 import argparse         # This loads the "argparse" module, used for parsing input arguments which allows us to have a verbose mode
 import config
 import hashlib
+import shutil           # Needed for auto-deaccsion subprocess
 from datetime import datetime   # This lades the datetime module, used for getting dates and timestamps
 from pprint import pprint
 from airtable import Airtable
@@ -26,6 +27,8 @@ def main():
     parser.add_argument('-gf', '--Get-Filenames',dest='gf',action='store_true',default=False,help="Runs the filename harvesting subprocess. This should really only be done once")
     parser.add_argument('-gc', '--Get-Checksums',dest='gc',action='store_true',default=False,help="Runs the checksum harvesting subcprocess. This should really only be done once")
     parser.add_argument('-vc', '--Validate-Checksums',dest='vc',action='store_true',default=False,help="Runs the checksum validation subcprocess. This should be run on a regular basis")
+    parser.add_argument('-fa', '--File-Audit',dest='fa',action='store_true',default=False,help="Runs a file-level audio subcprocess. This is more detailed than the auto-audio, which only checks that the Unique ID folders exist. This checks that files exist as well")
+    parser.add_argument('-ad', '--Auto-Deaccession',dest='ad',action='store_true',default=False,help="Runs the auto-deaccession subcprocess. This moves all records marked \"Not in Library\" to a _Trash folder. This should be run on a regular basis")
     args = parser.parse_args()
 
     if args.d:
@@ -37,7 +40,7 @@ def main():
     verbose_level = levels[min(len(levels)-1,args.verbose)]
 
     logDir = os.getcwd()               # The log will be created at the working directory
-    logName = 'simplyPyAt'                                 # The script will be named log.log
+    logName = 'recordMaintenance_' + datetime.today().strftime('%Y-%m-%d')  # The script will be named log.log
     logPath = logDir + "/" + logName + ".log"         # This creates the full log path based off the selected options
     LOG_FORMAT = '%(asctime)s - %(levelname)s: %(message)s' #Timestamp - Loglevel: Message
     logger = logging.getLogger()
@@ -101,8 +104,54 @@ def main():
         logging.error('This script has found at least one missing record. Please fix this before continuing')
         quit()
 
-    print('Archive is clean, moving on')
-    logging.info('Archive is clean, moving on')
+    print('Audit completed succesfully')
+    logging.info('Audit completed succesfully')
+
+    #This section performs a file-level audit
+    #For now it will only get the first filename, and warns if there is more than one file in the folder
+    if args.fa:
+        print('Performing a file-level audit')
+        logging.info('Performing a file-level audit')
+        missing_file_counter = 0
+        pages = airtable.get_iter()
+        for page in pages:
+            for record in page:
+                if record['fields']['In Library'] == "Yes":     #only process records that are in the library
+                    record_id = record['id']
+                    UID = record['fields']['Unique ID']
+                    try:                                        #checks to see if record has an entry in the File Name field. This will only process empty file names, so as not to overwrite
+                        airtable_filename = record['fields']['File Name']
+                    except Exception as e:
+                        logging.info('Updating filename for record %s' % UID)
+                    try:                                        #Need to have an try/except here because airtable errors if the field is empty. This is in case there is no Grouping
+                        group = record['fields']['Grouping']
+                    except Exception as e:
+                        group = ""
+                    if group == "":                             #In case there is no grouping, we don't want an extra slash
+                        path = os.path.join('/Volumes', drive_name, UID)    #will need to fix this to make it cross platform eventually
+                    else:
+                        path = os.path.join('/Volumes', drive_name, group, UID)    #will need to fix this to make it cross platform eventually
+                    files_list = []
+                    for f in os.listdir(path):
+                        if os.path.isfile(os.path.join(path, f)):
+                            if not f.startswith('.'):     #avoid hidden files
+                                files_list.append(f)
+                    files_list.sort()                      #sort the list so it'll always pick the first file.
+                    if len(files_list) > 1:
+                        logging.warning('Multiple files found in ' + UID + ', using ' + files_list[0])
+                        if airtable_filename != files_list[0]:
+                            missing_file_counter += 1
+                            logging.error('Filename Mismatch for record %s. Please fix this before continuing' % UID)
+                    elif len(files_list) == 0:
+                        logging.error('No files found in %s' % UID)
+                        missing_file_counter += 1
+                    else:
+                        if airtable_filename != files_list[0]:
+                            missing_file_counter += 1
+                            logging.error('Filename Mismatch for record %s. Please fix this before continuing' % UID)
+
+        logging.info('File-level audit complete, %i errors found.' % missing_file_counter)
+
 
     #This section harvests file names and puts them in Airtable's File Name field
     #For now it will only get the first filename, and warns if there is more than one file in the folder
@@ -117,7 +166,7 @@ def main():
                     record_id = record['id']
                     UID = record['fields']['Unique ID']
                     try:                                        #checks to see if record has an entry in the File Name field. This will only process empty file names, so as not to overwrite
-                        group = record['fields']['File Name']
+                        airtable_filename = record['fields']['File Name']
                         continue
                     except Exception as e:
                         logging.info('Updating filename for record %s' % UID)
@@ -210,6 +259,8 @@ def main():
         print('Validating Checksums and updating airtable')
         logging.info('Validating Checksums and updating airtable')
         update_counter = 0
+        checksum_error_counter = 0
+        checksum_validate_counter = 0
         pages = airtable.get_iter()
         for page in pages:
             for record in page:
@@ -241,9 +292,11 @@ def main():
                         if file_checksum == airtable_checksum:
                             logging.info('Checksum validation succesful for record %s' % UID)
                             update_dict = {'Checksum Valid': 'Yes', 'Last Checksum Validated Date': datetime.today().strftime('%Y-%m-%d')}
+                            checksum_validate_counter += 1
                         else:
                             logging.error('Checksum validation failed for record %s' % UID)
                             update_dict = {'Checksum Valid': 'No', 'Last Checksum Validated Date': datetime.today().strftime('%Y-%m-%d')}
+                            checksum_error_counter += 1
                     elif len(files_list) == 0:
                         logging.error('No files found in %s' % UID)
                         #update_dict = {'Checksum': 'NO FILE FOUND'}                    #Not to self, need better fail mode here
@@ -255,6 +308,7 @@ def main():
                         else:
                             logging.error('Checksum validation failed for record %s' % UID)
                             update_dict = {'Checksum Valid': 'No', 'Last Checksum Validated Date': datetime.today().strftime('%Y-%m-%d')}
+                            checksum_error_counter += 1
 
                     #THIS IS THE IMPORTANT BIT WHERE WE UPDATE THE TABLE!
                     try:
@@ -263,7 +317,55 @@ def main():
                         update_counter += 1
                     except Exception as e:
                         logging.error('Could not update checksum validation for record %s' % UID)
-        logging.info('Finished updating checksums for %i records' % update_counter)
+                        checksum_error_counter += 1
+        logging.info('Checksum Validation complete. %i records succesfully validated, %i Airtale records updated, %i errors encountered. ' % (checksum_validate_counter, update_counter, checksum_error_counter))
+
+    if args.ad:
+        print('Performing auto-deaccession')
+        logging.info('Performing auto-deaccession')
+        deaccession_errors = 0
+        deaccession_success = 0
+        update_counter = 0
+        pages = airtable.get_iter()
+        trash_path = os.path.join('/Volumes', drive_name, "_Trash")
+        if os.path.isdir(trash_path):
+            logging.info('Trash folder already exists')
+        else:
+            os.makedirs(trash_path, exist_ok=False)
+            logging.info('New trash folder created')
+        for page in pages:
+            for record in page:
+                if record['fields']['On Drive'] == "Yes":           #only process records that are marked as being on the drive
+                    if record['fields']['In Library'] == "No":      #We want to find files that are marked as not in the library, so we can remove them from the drive
+                        record_id = record['id']
+                        UID = record['fields']['Unique ID']
+                        try:                                        #Need to have an try/except here because airtable errors if the field is empty. This is in case there is no Grouping
+                            group = record['fields']['Grouping']
+                        except Exception as e:
+                            group = ""
+                        if group == "":                             #In case there is no grouping, we don't want an extra slash
+                            path = os.path.join('/Volumes', drive_name, UID)    #will need to fix this to make it cross platform eventually
+                        else:
+                            path = os.path.join('/Volumes', drive_name, group, UID)    #will need to fix this to make it cross platform eventually
+                        if os.path.isdir(path):
+                            logging.info('Deaccessioning record %s' % UID)
+                            update_dict = {'On Drive': "No"}
+                            shutil.move(path,trash_path)
+                            deaccession_success += 1
+                            #THIS IS THE IMPORTANT BIT WHERE WE UPDATE THE TABLE!
+                            try:
+                                airtable.update(record_id, update_dict)
+                                logging.info('Succesfully set On Drive to No for record %s ' % UID)
+                                update_counter += 1
+                            except Exception as e:
+                                logging.error('Could not set On Drive to No for record %s' % UID)
+                                deaccession_errors += 1
+                        else:
+                            logging.error('Could not find record %s. Ensure that file exists in proper location before running auto-deaccession' % UID)
+                            deaccession_errors += 1
+
+
+        logging.info('Auto deaccession complete. %i records succesfully deaccessioned, %i Airtale records updated, %i errors encountered.' % (deaccession_success, update_counter, deaccession_errors))
 
 
     logging.critical('========Script Complete========')
