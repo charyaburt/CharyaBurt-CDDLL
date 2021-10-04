@@ -262,7 +262,7 @@ def main():
                         logging.info('Succesfully updated checksum validation date for record %s ' % UID)
                         update_counter += 1
                     except Exception as e:
-                        logging.error('Could not update checksum validationd ate for record %s' % UID)
+                        logging.error('Could not update checksum validation for record %s' % UID)
         logging.info('Finished updating checksums for %i records' % update_counter)
 
 
