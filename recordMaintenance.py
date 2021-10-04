@@ -305,6 +305,7 @@ def main():
                         if file_checksum == airtable_checksum:
                             logging.info('Checksum validation succesful for record %s' % UID)
                             update_dict = {'Checksum Valid': 'Yes', 'Last Checksum Validated Date': datetime.today().strftime('%Y-%m-%d')}
+                            checksum_validate_counter += 1
                         else:
                             logging.error('Checksum validation failed for record %s' % UID)
                             update_dict = {'Checksum Valid': 'No', 'Last Checksum Validated Date': datetime.today().strftime('%Y-%m-%d')}
