@@ -10,9 +10,11 @@ import argparse         # This loads the "argparse" module, used for parsing inp
 import config
 import hashlib
 import shutil           # Needed for auto-deaccsion subprocess
+import pathlib             # Needed for find subprocess
 from datetime import datetime   # This lades the datetime module, used for getting dates and timestamps
 from pprint import pprint
 from airtable import Airtable
+
 
 def main():
 
@@ -25,6 +27,7 @@ def main():
     parser.add_argument('-vc', '--Validate-Checksums',dest='vc',action='store_true',default=False,help="Runs the checksum validation subcprocess. This should be run on a regular basis")
     parser.add_argument('-fa', '--File-Audit',dest='fa',action='store_true',default=False,help="Runs a file-level audio subcprocess. This is more detailed than the auto-audio, which only checks that the Unique ID folders exist. This checks that files exist as well")
     parser.add_argument('-ad', '--Auto-Deaccession',dest='ad',action='store_true',default=False,help="Runs the auto-deaccession subcprocess. This moves all records marked \"Not in Library\" to a _Trash folder. This should be run on a regular basis")
+    parser.add_argument('-f', '--Find',dest='f',action='store',help="Runs the find subcprocess. This returns the path of whatever record is searched for")
     args = parser.parse_args()
 
     if args.d:
@@ -77,28 +80,32 @@ def main():
     airtable = Airtable(base_key, table_name, api_key)
 
     #Perform a record-level audit. Quit upon failure
-    if not recordAudit(airtable, drive_name, args):
+    if not recordAudit(airtable, drive_name):
         quit()
 
     #perform a file-level audit.
     if args.fa:
-        fileAudit(airtable, drive_name, args)
+        fileAudit(airtable, drive_name)
 
     #Harvest filenames
     if args.gf:
-        getFilenames(airtable, drive_name, args)
+        getFilenames(airtable, drive_name)
 
     #Harvest checksums
     if args.gc:
-        getChecksums(airtable, drive_name, args)
+        getChecksums(airtable, drive_name)
 
     #Validate checksums
     if args.vc:
-        validateChecksums(airtable, drive_name, args)
+        validateChecksums(airtable, drive_name)
 
     #Perform audio-deaccession
     if args.ad:
-        autoDeaccession(airtable, drive_name, args)
+        autoDeaccession(airtable, drive_name)
+
+    #Perform find subcprocess
+    if args.f:
+        findRecord(args.f, drive_name)
 
     logging.critical('========Script Complete========')
 
@@ -120,7 +127,7 @@ def generateHash(inputFile, blocksize=65536):
 
     return md5.hexdigest()
 
-def recordAudit(airtable, drive_name, args):
+def recordAudit(airtable, drive_name):
     #This performs a quick audit and will exit if it finds the drive out of sync with the airtable
     pages = airtable.get_iter()
     logging.info('Performing Record Audit between Airtable and Drive titled: %s' % drive_name)
@@ -150,7 +157,7 @@ def recordAudit(airtable, drive_name, args):
     logging.info('Record Level Audit completed succesfully')
     return True
 
-def fileAudit(airtable, drive_name, args):
+def fileAudit(airtable, drive_name):
     print('Performing a file-level audit')
     logging.info('Performing a file-level audit')
     missing_file_counter = 0
@@ -194,7 +201,7 @@ def fileAudit(airtable, drive_name, args):
     logging.info('File-level audit complete, %i errors found.' % missing_file_counter)
     return
 
-def getFilenames(airtable, drive_name, args):
+def getFilenames(airtable, drive_name):
     #This section harvests file names and puts them in Airtable's File Name field
     #For now it will only get the first filename, and warns if there is more than one file in the folder
     print('Harvesting File names and updating airtable')
@@ -244,7 +251,7 @@ def getFilenames(airtable, drive_name, args):
     logging.info('Finished updating filenames for %i records' % update_counter)
     return
 
-def validateChecksums(airtable, drive_name, args):
+def validateChecksums(airtable, drive_name):
     #This section validates file checksums and updates the "last validated date" field
     #For now it will only get the first filename, and warns if there is more than one file in the folder
     print('Validating Checksums and updating airtable')
@@ -313,7 +320,7 @@ def validateChecksums(airtable, drive_name, args):
     logging.info('Checksum Validation complete. %i records succesfully validated, %i Airtable records updated, %i errors encountered. ' % (checksum_validate_counter, update_counter, checksum_error_counter))
     return
 
-def autoDeaccession(airtable, drive_name, args):
+def autoDeaccession(airtable, drive_name):
     print('Performing auto-deaccession')
     logging.info('Performing auto-deaccession')
     deaccession_errors = 0
@@ -362,7 +369,7 @@ def autoDeaccession(airtable, drive_name, args):
     return
 
 
-def getChecksums(airtable, drive_name, args):
+def getChecksums(airtable, drive_name):
     #This section harvests file checksums and puts them in Airtable's Checksum field
     #For now it will only get the first filename, and warns if there is more than one file in the folder
     print('Harvesting Checksums and updating airtable')
@@ -414,6 +421,32 @@ def getChecksums(airtable, drive_name, args):
                     logging.error('Could not update checksums for record %s' % UID)
     logging.info('Checksum harvest complete. %i checksums generated, %i Airtable records updated, %i warnings encountered, %i errors encountered.' % (checksum_counter, update_counter, warning_counter, error_counter))
     return
+
+def findRecord(UID, drive_name):
+    # Performs the find subprocess. Returns the full path of the record folder.
+    # It will first look for the file in a group, if it can't find it in a group it looks as the root level
+    # If it can't find it anywhere it throws an error
+
+    p = pathlib.Path('/Volumes/' + drive_name).glob('**/' + UID)
+    files = [x for x in p if x.is_dir()]
+    nontrash_Records = []   #making a list of records not in the trash can
+    for file in files:
+        if '_Trash' not in str(file):
+            nontrash_Records.append(file)
+    if len(nontrash_Records) == 1:
+        #print(str(files[0]))                                            #commented out standard output
+        logging.info('Record %s found at: %s' % (UID, str(nontrash_Records[0])))
+    elif len(nontrash_Records) == 0:
+        #print('ERROR: Record %s not found' % (UID))                     #commented out standard output
+        logging.error('Record %s not found' % (UID))
+    elif len(nontrash_Records) > 1:
+        #print('ERROR: Multiple versions of record %s found at the following locations:' % (UID))    #commented out standard output
+        logging.error('Multiple versions of %s found at the following locations:' % (UID))
+        for file in nontrash_Records:
+            #print('%s' % (str(file)))                                   #commented out standard output
+            logging.error('%s' % (str(file)))
+
+
 
 # Standard boilerplate to call the main() function to begin
 # the program.
