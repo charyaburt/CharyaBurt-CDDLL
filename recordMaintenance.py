@@ -75,7 +75,7 @@ def main():
     base_key=config.BASE_ID         #This stuff comes from the config.py file. Very important!
     api_key=config.API_KEY
     drive_name=config.DRIVE_NAME
-    table_name = "Videos"
+    table_name = config.TABLE_NAME
 
     airtable = Airtable(base_key, table_name, api_key)
 
@@ -134,7 +134,11 @@ def recordAudit(airtable, drive_name):
     missing_record_count = 0
     for page in pages:
         for record in page:
-            if record['fields']['In Library'] == "Yes":     #only process records that are in the library
+            try:
+                in_library = record['fields']['In Library']
+            except Exception as e:
+                in_library = "Not Found"
+            if in_library == "Yes":     #only process records that are in the library
                 UID = record['fields']['Unique ID']
                 try:                                        #Need to have an try/except here because airtable errors if the field is empty. This is in case there is no Group
                     group = record['fields']['Group']
@@ -164,7 +168,11 @@ def fileAudit(airtable, drive_name):
     pages = airtable.get_iter()
     for page in pages:
         for record in page:
-            if record['fields']['In Library'] == "Yes":     #only process records that are in the library
+            try:
+                in_library = record['fields']['In Library']
+            except Exception as e:
+                in_library = "Not Found"
+            if in_library == "Yes":     #only process records that are in the library
                 record_id = record['id']
                 UID = record['fields']['Unique ID']
                 try:                                        #checks to see if record has an entry in the File Name field. This will only process empty file names, so as not to overwrite
@@ -210,7 +218,11 @@ def getFilenames(airtable, drive_name):
     pages = airtable.get_iter()
     for page in pages:
         for record in page:
-            if record['fields']['In Library'] == "Yes":     #only process records that are in the library
+            try:
+                in_library = record['fields']['In Library']
+            except Exception as e:
+                in_library = "Not Found"
+            if in_library == "Yes":     #only process records that are in the library
                 record_id = record['id']
                 UID = record['fields']['Unique ID']
                 try:                                        #checks to see if record has an entry in the File Name field. This will only process empty file names, so as not to overwrite
@@ -262,7 +274,11 @@ def validateChecksums(airtable, drive_name):
     pages = airtable.get_iter()
     for page in pages:
         for record in page:
-            if record['fields']['In Library'] == "Yes":     #only process records that are in the library
+            try:
+                in_library = record['fields']['In Library']
+            except Exception as e:
+                in_library = "Not Found"
+            if in_library == "Yes":     #only process records that are in the library
                 record_id = record['id']
                 UID = record['fields']['Unique ID']
                 try:                                        #checks to see if record has an entry in the checksum field. This will only process records with existing checksums
@@ -335,7 +351,11 @@ def autoDeaccession(airtable, drive_name):
         logging.info('New trash folder created')
     for page in pages:
         for record in page:
-            if record['fields']['On Drive'] == "Yes":           #only process records that are marked as being on the drive
+            try:
+                in_library = record['fields']['In Library']
+            except Exception as e:
+                in_library = "Not Found"
+            if in_library == "Yes":     #only process records that are in the library
                 if record['fields']['In Library'] == "No":      #We want to find files that are marked as not in the library, so we can remove them from the drive
                     record_id = record['id']
                     UID = record['fields']['Unique ID']
@@ -381,7 +401,11 @@ def getChecksums(airtable, drive_name):
     pages = airtable.get_iter()
     for page in pages:
         for record in page:
-            if record['fields']['In Library'] == "Yes":     #only process records that are in the library
+            try:
+                in_library = record['fields']['In Library']
+            except Exception as e:
+                in_library = "Not Found"
+            if in_library == "Yes":     #only process records that are in the library
                 record_id = record['id']
                 UID = record['fields']['Unique ID']
                 try:                                        #checks to see if record has an entry in the Checksum field. This will only process files with no checksum already, so as not to overwrite
