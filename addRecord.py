@@ -108,20 +108,63 @@ def addToArchive(airtable, drive_name, recordID, file_path):
                     record_airtable_group = ""
 
     if record_airtable_group == "":                             #In case there is no Group, we don't want an extra slash
-        new_path = os.path.join('/Volumes', drive_name, recordID, file_name)    #will need to fix this to make it cross platform eventually
+        new_group_path = None
+        new_record_path = os.path.join('/Volumes', drive_name, recordID)
+        new_file_path = os.path.join('/Volumes', drive_name, recordID, file_name)
     else:
-        new_path = os.path.join('/Volumes', drive_name, record_airtable_group, recordID, file_name)
+        new_group_path = os.path.join('/Volumes', drive_name, record_airtable_group)
+        new_record_path = os.path.join('/Volumes', drive_name, record_airtable_group, recordID)
+        new_file_path = os.path.join('/Volumes', drive_name, record_airtable_group, recordID, file_name)
 
     logging.info('Generating checksum for record ID: %s' % recordID)
     checksum = generateHash(file_path)
     logging.info('Checksum generating completed!')
     checksum_update_dict = {'Checksum': checksum}
     filename_update_dict = {'File Name': file_name}
-    print(checksum_update_dict)
-    print(filename_update_dict)
-    print(record_airtable_id)
-    print(new_path)
+    on_drive_update_dict = {'On Drive': "Yes"}
+    in_library_update_dict = {'In Library': "Yes"}
 
+    #Check to see if group folder exists, if not creates it
+    if new_group_path == None:
+        logging.info('No group selected for this record. Record folder will exist at the root level of the drive')
+    elif os.path.isdir(new_group_path):
+        logging.info('Group folder already exists')
+    else:
+        logging.info('Group folder does not exist. Creating it now')
+        os.makedirs(new_group_path, exist_ok=False)
+        logging.info('Sucess creating Group folder')
+
+    #Check to see if record folder exists, if not creates it. if it exist and the file is already there it quits because that's not supposed to happen
+    if os.path.isdir(new_record_path):
+        logging.warning('Record ID Folder Already Exists')
+        if os.path.isfile(new_file_path):
+            logging.error('File already exists in the archive! Quitting Now')
+            logging.critical('========Script Complete========')
+            quit()
+    else:
+        os.makedirs(new_record_path, exist_ok=False)
+
+    #Move the file to the drive
+    try:    #doing the move in a try block just in case
+        shutil.move(file_path,new_record_path)
+        logging.info('Sucess moving file to drive')
+    except Exception as e:
+        logging.error('Failed to move file to drive. Quitting Now')
+        logging.critical('========Script Complete========')
+        quit()
+
+    #now that we've succesfully put the file on the drive, let's put the filename and checksum in airtable
+    updateRecord(airtable, record_airtable_id, checksum_update_dict, recordID, 'Checksum')
+    updateRecord(airtable, record_airtable_id, filename_update_dict, recordID, 'Filename')
+    updateRecord(airtable, record_airtable_id, on_drive_update_dict, recordID, 'On Drive')
+    updateRecord(airtable, record_airtable_id, in_library_update_dict, recordID, 'In Library')
+
+def updateRecord(airtable, record_airtable_id, update_dict, UID, field_name):
+    try:
+        airtable.update(record_airtable_id, update_dict)
+        logging.info('Succesfully updated %s for Record ID: %s ' % (field_name, UID))
+    except Exception as e:
+        logging.error('Could not updated %s for record %s' % (field_name, UID))
 
 def checkRecordArg(airtable, drive_name, recordID):
     if recordID is None:
