@@ -1,9 +1,7 @@
-script to add a file to the archive.
-	create the airtable record first
-	run the script, type in the record number and then drag in the file. boom done.
-
 Script to move record folders from their old location to a new location.
 	can work on all records or just one record
 	finds records that don't line up with airtable, lists them before moving them then moves them
 
 Script to upload files to vimeo
+
+Work on documentation!
