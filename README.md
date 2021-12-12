@@ -10,6 +10,16 @@
 ### Python Libraries
 
 - Airtable: `pip3 install airtable-python-wrapper`
+- Vimeo: `pip3 install PyVimeo`
+
+### API Credentials
+
+You'll need to get API logins and credentials from Airtable and Vimeo.
+
+Rename `config_template.py` to `config.py` and then fill out the credentials from the API websites
+
+Airtable: https://support.airtable.com/hc/en-us/articles/219046777-How-do-I-get-my-API-key-
+Vimeo: https://developer.vimeo.com/apps
 
 ## Scripts
 
