@@ -1,7 +1,4 @@
-Script to move record folders from their old location to a new location.
-	can work on all records or just one record
-	finds records that don't line up with airtable, lists them before moving them then moves them
-
 Script to upload files to vimeo
+   needs to harvest link and put it in airtable
 
-Work on documentation!
+Work on documentation!n

@@ -25,6 +25,7 @@ def main():
     parser.add_argument('-gf', '--Get-Filenames',dest='gf',action='store_true',default=False,help="Runs the filename harvesting subprocess. This should really only be done once")
     parser.add_argument('-gc', '--Get-Checksums',dest='gc',action='store_true',default=False,help="Runs the checksum harvesting subcprocess. This should really only be done once")
     parser.add_argument('-vc', '--Validate-Checksums',dest='vc',action='store_true',default=False,help="Runs the checksum validation subcprocess. This should be run on a regular basis")
+    parser.add_argument('-dv', '--Download-Vimeo',dest='dv',action='store_true',default=False,help="Runs the Vimeo Download subcprocess. This likely won't ever actually need to be run if the archive is being properly maintained")
     parser.add_argument('-fa', '--File-Audit',dest='fa',action='store_true',default=False,help="Runs a file-level audio subcprocess. This is more detailed than the auto-audio, which only checks that the Unique ID folders exist. This checks that files exist as well")
     parser.add_argument('-ad', '--Auto-Deaccession',dest='ad',action='store_true',default=False,help="Runs the auto-deaccession subcprocess. This moves all records marked \"Not in Library\" to a _Trash folder. This should be run on a regular basis")
     parser.add_argument('-f', '--Find',dest='f',action='store',help="Runs the find subcprocess. This returns the path of whatever record is searched for")
@@ -107,6 +108,10 @@ def main():
     if args.f:
         findRecord(args.f, drive_name)
 
+    #Perform Download Vimeo subcprocess
+    if args.dv:
+        downloadVimeo(airtable, drive_name)
+
     logging.critical('========Script Complete========')
 
 ## End of main function
@@ -132,10 +137,16 @@ def recordAudit(airtable, drive_name):
     pages = airtable.get_iter()
     logging.info('Performing Record Audit between Airtable and Drive titled: %s' % drive_name)
     missing_record_count = 0
+    not_added_record_count = 0
+    warning_count = 0
     for page in pages:
         for record in page:
             try:
                 in_library = record['fields']['In Library']
+                try:
+                    on_drive = record['fields']['On Drive']
+                except Exception as e:
+                    on_drive = "Not Found"
             except Exception as e:
                 in_library = "Not Found"
             if in_library == "Yes":     #only process records that are in the library
@@ -149,17 +160,122 @@ def recordAudit(airtable, drive_name):
                 else:
                     path = os.path.join('/Volumes', drive_name, group, UID)    #will need to fix this to make it cross platform eventually
                 if not os.path.isdir(path):
-                    logging.error('Could not find record %s' % UID)
-                    missing_record_count += 1
+                    if on_drive == "Yes":     # only mark is missing if it's supposed to be on the drive
+                        logging.error('Could not find record %s' % UID)
+                        missing_record_count += 1
+                    if on_drive == "No":     #an exception for records not labeled as "On Drive" yet, which will likely not occur once the intial setup is complete
+                        logging.warning('The following record has not been properly added to the drive yet: %s' % UID)
+                        not_added_record_count += 1
+                try:
+                    at_file_name = record['fields']['File Name']
+                except Exception as e:
+                    at_file_name = "Not Found"
+                try:
+                    at_checksum = record['fields']['Checksum']
+                except Exception as e:
+                    at_checksum = "Not Found"
+                if at_file_name == "Not Found" and at_checksum == "Not Found":
+                    logging.warning('Record %s has no file name or checksum values in Airtable. Run the -gf then -gc subprocesses to harvest this metadata' % UID)
+                    warning_count += 1
+                elif at_file_name == "Not Found":
+                    logging.warning('Record %s has no file name value in Airtable. Run -gf subprocess to harvest file names' % UID)
+                    warning_count += 1
+                elif at_checksum == "Not Found":
+                    logging.warning('Record %s has no checksum value in Airtable. Run -gc subprocess to harvest checksums' % UID)
+                    warning_count += 1
     if missing_record_count > 0:
         print('ERROR: This script has found at least one missing record. Please consult the log and fix this problem before continuing')
         logging.error('This script has found at least one missing record. Please fix this before continuing')
+        if not_added_record_count > 0:
+            logging.warning('There are records in the Airtable that have not yet been added onto the drive. This should be addressed as soon as possible')
+            warning_count += 1
         logging.critical('========Script Complete========')
         return False
+    else:
+        if not_added_record_count > 0:
+            logging.warning('There are records in the Airtable that have not yet been added onto the drive. This should be addressed as soon as possible')
+            warning_count += 1
+        if warning_count == 0:
+            print('Record Level Audit completed succesfully')
+            logging.info('Record Level Audit completed succesfully')
+        else:
+            print('Record Level Audit completed succesfully, however '+ str(warning_count) +' warnings were encountered. Please read the log for details')
+            logging.info('Record Level Audit completed succesfully, however %i warnings were encountered. Please read the log for details', warning_count)
+        return True
 
-    print('Record Level Audit completed succesfully')
-    logging.info('Record Level Audit completed succesfully')
-    return True
+def downloadVimeo(airtable, drive_name):
+    print('Performing the Download Vimeo subprocess')
+    logging.info('Performing the Download Vimeo subprocess')
+    success_counter = 0
+    warning_counter = 0
+    error_counter = 0
+    pages = airtable.get_iter()
+    for page in pages:
+        for record in page:
+            UID = record['fields']['Unique ID']
+            try:
+                in_library = record['fields']['In Library']
+            except Exception as e:
+                in_library = "Not Found"
+            if in_library == "Yes":     #only process records that are in the library
+                try:
+                    on_drive = record['fields']['On Drive']
+                except Exception as e:
+                    on_drive = "Not Found"
+                if on_drive == "No":     #only process records that are not On Drive
+                    try:
+                        vimeoLink = record['fields']['Vimeo Link 1']     #check to see if vimeo link exists
+                    except Exception as e:
+                        vimeoLink = "No Link"
+                        logging.warning('Record ' + UID + ' Marked as In Library and Not On Drive, but no Vimeo Link found. Skipping')
+                        warning_counter += 1
+                        continue
+                    try:
+                        vimeoPassword = record['fields']['Vimeo 1 Password']     #check to see if vimeo password exists
+                    except Exception as e:
+                        vimeoPassword = "No Password"
+                    record_id = record['id']
+                    try:                                        #checks to see if record has an entry in the File Name field. This will only process empty file names, so as not to overwrite
+                        airtable_filename = record['fields']['File Name']
+                    except Exception as e:
+                        logging.info('Downloading file from Vimeo: %s' % UID)
+                    try:                                        #Need to have an try/except here because airtable errors if the field is empty. This is in case there is no Group
+                        group = record['fields']['Group']
+                    except Exception as e:
+                        group = ""
+                    if group == "":                             #In case there is no Group, we don't want an extra slash
+                        path = os.path.join('/Volumes', drive_name, UID)    #will need to fix this to make it cross platform eventually
+                    else:
+                        path = os.path.join('/Volumes', drive_name, group, UID)    #will need to fix this to make it cross platform eventually
+                    if not os.path.isdir(path):     #see if record path exists, if not make it
+                        os.makedirs(path, exist_ok=False)
+                        logging.info('Folder for %s created', UID)
+                    ydl_command = "youtube-dl -f best -o '" + path + "/%(title)s.%(ext)s' --video-password '" + vimeoPassword + "' " + vimeoLink
+                    return_code = subprocess.call(ydl_command, shell=True)
+                    if return_code == 0: #success
+                        logging.info('Succesfully downloaded file from Vimeo: %s' % UID)
+                        update_dict = {'On Drive': "Yes"}
+                        try:
+                            airtable.update(record_id, update_dict)
+                            logging.info('Succesfully updated On Drive to Yes for record %s ' % UID)
+                            success_counter += 1
+                        except Exception as e:
+                            logging.warning('Could not update On Drive field for record %s. Please do this manually!' % UID)
+                            warning_counter += 1
+                    elif return_code == 1: #fail
+                        logging.info('Failed to download file from Vimeo: %s' % UID)
+                        error_counter += 1
+                    else:                   #idk if this is possible, but putting it in here anyway just in case
+                        logging.warning('Something strange happened when trying to download the file from Vimeo: %s' % UID)
+                        warning_counter += 1
+                    #print(ydl_command) #GOTTA TEST THIS
+                else:   #ignore if record is already  "On Drive"
+                    continue
+            else:   #ignore if record is not "In Library"
+                continue
+
+    logging.info('Vimeo download complete, %i files downloaded, %i warnings encountered, %i errors found.' % (success_counter, warning_counter, error_counter))
+    return
 
 def fileAudit(airtable, drive_name):
     print('Performing a file-level audit')
