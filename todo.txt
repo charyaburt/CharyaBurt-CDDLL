@@ -1,4 +1,3 @@
-Script to upload files to vimeo
-   needs to harvest link and put it in airtable
+need to deinterlace all itnerlaced files
 
 Work on documentation!n
