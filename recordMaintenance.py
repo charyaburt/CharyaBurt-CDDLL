@@ -10,7 +10,8 @@ import argparse         # This loads the "argparse" module, used for parsing inp
 import config
 import hashlib
 import shutil           # Needed for auto-deaccsion subprocess
-import pathlib             # Needed for find subprocess
+import pathlib          # Needed for find subprocess
+import vimeo            # Needed for uploading files to Vimeo
 from datetime import datetime   # This lades the datetime module, used for getting dates and timestamps
 from pprint import pprint
 from airtable import Airtable
@@ -26,6 +27,7 @@ def main():
     parser.add_argument('-gc', '--Get-Checksums',dest='gc',action='store_true',default=False,help="Runs the checksum harvesting subcprocess. This should really only be done once")
     parser.add_argument('-vc', '--Validate-Checksums',dest='vc',action='store_true',default=False,help="Runs the checksum validation subcprocess. This should be run on a regular basis")
     parser.add_argument('-dv', '--Download-Vimeo',dest='dv',action='store_true',default=False,help="Runs the Vimeo Download subcprocess. This likely won't ever actually need to be run if the archive is being properly maintained")
+    parser.add_argument('-uv', '--Upload-Vimeo',dest='uv',nargs='?',type=int,default=0,const=5,help="Runs the Vimeo Upload subcprocess. By default this will upload the first 5 files it finds that need to be uploaded to Vimeo. If you put a number after the -uv flag it will upload that number of files that it finds")
     parser.add_argument('-fa', '--File-Audit',dest='fa',action='store_true',default=False,help="Runs a file-level audio subcprocess. This is more detailed than the auto-audio, which only checks that the Unique ID folders exist. This checks that files exist as well")
     parser.add_argument('-ad', '--Auto-Deaccession',dest='ad',action='store_true',default=False,help="Runs the auto-deaccession subcprocess. This moves all records marked \"Not in Library\" to a _Trash folder. This should be run on a regular basis")
     parser.add_argument('-f', '--Find',dest='f',action='store',help="Runs the find subcprocess. This returns the path of whatever record is searched for")
@@ -73,6 +75,8 @@ def main():
 
 #Need to test for dependencies here. Config.py as well as libraries
 
+    # Setup Airtable Credentials for API
+
     base_key=config.BASE_ID         #This stuff comes from the config.py file. Very important!
     api_key=config.API_KEY
     drive_name=config.DRIVE_NAME
@@ -108,9 +112,27 @@ def main():
     if args.f:
         findRecord(args.f, drive_name)
 
-    #Perform Download Vimeo subcprocess
+    #Perform Download Vimeo subprocess
     if args.dv:
         downloadVimeo(airtable, drive_name)
+
+    #Perform Upload Vimeo subprocess
+    if args.uv > 0:
+
+        v = vimeo.VimeoClient(
+        token=config.YOUR_ACCESS_TOKEN,
+        key=config.YOUR_CLIENT_ID,
+        secret=config.YOUR_CLIENT_SECRET
+        )
+
+        ## Make the request to the server for the "/me" endpoint.
+        about_me = v.get('/me')
+
+        ## Make sure we got back a successful response.
+        assert about_me.status_code == 200
+
+        uploadVimeo(airtable, v, drive_name, args.uv)
+        # Setup Vimeo Credentials for API_KEY
 
     logging.critical('========Script Complete========')
 
@@ -355,10 +377,13 @@ def getFilenames(airtable, drive_name):
                 else:
                     path = os.path.join('/Volumes', drive_name, group, UID)    #will need to fix this to make it cross platform eventually
                 files_list = []
-                for f in os.listdir(path):
-                    if os.path.isfile(os.path.join(path, f)):
-                        if not f.startswith('.'):     #avoid hidden files
-                            files_list.append(f)
+                try:
+                    for f in os.listdir(path):
+                        if os.path.isfile(os.path.join(path, f)):
+                            if not f.startswith('.'):     #avoid hidden files
+                                files_list.append(f)
+                except Exception as e:
+                    logging.error('No folder found for %s' % UID)
                 files_list.sort()                      #sort the list so it'll always pick the first file.
                 if len(files_list) > 1:
                     logging.warning('Multiple files found in ' + UID + ', using ' + files_list[0])
@@ -586,6 +611,111 @@ def findRecord(UID, drive_name):
             #print('%s' % (str(file)))                                   #commented out standard output
             logging.error('%s' % (str(file)))
 
+def uploadVimeo(airtable, v, drive_name, quantity):
+    # Uploads videos from airtable records to vimeo
+    # Uses the description, title, location, and dancers to fill out the vimeo details
+    # You cannot choose a file to upload, the script will simply start uploading them in order as it finds records with "Yes" as Uplaod to Vimeo but not Vimeo Link
+    # The script will automatically run on 5 files and then quit, but you can define how many files you want it to run on
+    print('Uploading files to Vimeo')
+    logging.info('Uploading files to Vimeo')
+    update_counter = 0
+    upload_counter = 0
+    warning_counter = 0
+    error_counter = 0
+    pages = airtable.get_iter()
+    for page in pages:
+        for record in page:
+            if upload_counter == quantity:
+                break
+            try:
+                in_library = record['fields']['In Library']
+            except Exception as e:
+                in_library = "Not Found"
+            if in_library == "Yes":     #only process records that are in the library
+                record_id = record['id']
+                UID = record['fields']['Unique ID']
+                try:                                        #checks to see if record has an entry in the Checksum field. This will only process files with no checksum already, so as not to overwrite
+                    airtable_vimeo_link = record['fields']['Vimeo Link 1']
+                    continue
+                except Exception as e:
+                    logging.info('Uploading file to Vimeo for record %s' % UID)
+                try:                                        #checks to see if record has an entry in the Checksum field. This will only process files with no checksum already, so as not to overwrite
+                    airtable_filename = record['fields']['File Name']
+                except Exception as e:
+                    logging.warning('No File Name in Airtable record for %s. Skipping for now, please run File Name harvesting.' % UID)
+                    warning_counter =+ 1
+                    continue
+                try:                                        #Need to have an try/except here because airtable errors if the field is empty. This is in case there is no Group
+                    group = record['fields']['Group']
+                except Exception as e:
+                    group = ""
+                if group == "":                             #In case there is no Group, we don't want an extra slash
+                    file_path = os.path.join('/Volumes', drive_name, UID, airtable_filename)    #will need to fix this to make it cross platform eventually
+                else:
+                    file_path = os.path.join('/Volumes', drive_name, group, UID, airtable_filename)    #will need to fix this to make it cross platform eventually
+
+                # This section harvests info from airtable to populate the vimeo record
+                try:
+                    airtable_vimeo_access = record['fields']['Vimeo 1 Accessiblity']
+                except:
+                    airtable_vimeo_access = "Private"
+                try:
+                    airtable_title = record['fields']['Title']
+                except:
+                    airtable_title = ""
+                try:
+                    airtable_description = record['fields']['Description']
+                except:
+                    airtable_description = ""
+                try:
+                    airtable_vimeo_password = record['fields']['Vimeo 1 Password']
+                except:
+                    if airtable_vimeo_access == "Private":
+                        airtable_vimeo_password = "Charya#1dance"
+                    else:
+                        airtable_vimeo_password = ""
+                try:
+                    airtable_date = record['fields']['Date']
+                except:
+                    airtable_date = ""
+
+                if airtable_description == "" and airtable_date == "":
+                    full_description = config.VIMEO_DEFAULT_DESCRIPTION
+                elif airtable_description == "":
+                    full_description = "Date Created: " + airtable_date + "\n\n" + config.VIMEO_DEFAULT_DESCRIPTION
+                elif airtable_date == "":
+                    full_description = airtable_description + "\n\n" + config.VIMEO_DEFAULT_DESCRIPTION
+                else:
+                    full_description = airtable_description + "\n\nDate Created: " + airtable_date + "\n\n" + config.VIMEO_DEFAULT_DESCRIPTION
+                # THIS IS WHERE WE'LL UPLOAD THE FILE TO VIMEO
+                try:
+                    if airtable_vimeo_access == "Public":
+                        vimeoDict = {'name': airtable_title, 'description': full_description, 'privacy':{'view' : 'public'}}
+                    elif airtable_vimeo_access == "Only Me":
+                        vimeoDict = {'name': airtable_title, 'description': full_description, 'privacy':{'view' : 'nobody'}}
+                    elif airtable_vimeo_access == "Private":
+                        vimeoDict = {'name': airtable_title, 'description': full_description, 'privacy':{'view' : 'password'}, 'password': airtable_vimeo_password}
+                    else:
+                        vimeoDict = {'name': airtable_title, 'description': full_description, 'privacy':{'view' : 'nobody'}}
+                    video_uri = v.upload(file_path,data=vimeoDict)
+                    vimeo_link = 'https://vimeo.com/' + video_uri.split('/')[-1]
+                    update_dict = {'Vimeo Link 1': vimeo_link}
+                    upload_counter += 1
+                except Exception as e:
+                    logging.error('Could not upload file to Vimeo for record %s.' % UID)
+                    error_counter += 1
+                    continue
+
+                #THIS IS THE IMPORTANT BIT WHERE WE UPDATE THE TABLE!
+
+                try:
+                    airtable.update(record_id, update_dict)
+                    logging.info('Succesfully added Vimeo link for record %s ' % UID)
+                    update_counter += 1
+                except Exception as e:
+                    logging.error('Could not added Vimeo link for record %s' % UID)
+    logging.info('Vimeo Upload. %i files uploaded, %i Airtable records updated, %i warnings encountered, %i errors encountered.' % (upload_counter, update_counter, warning_counter, error_counter))
+    return
 
 
 # Standard boilerplate to call the main() function to begin
