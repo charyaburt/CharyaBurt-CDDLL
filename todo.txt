@@ -1,3 +1,14 @@
-need to deinterlace all itnerlaced files
+harvest metadata besides checksum.
+possibly find a way to deal with access files.
+   my idea here is to name access files in a way that they come second in the folder nest, then it's not a problem
+   or alternatively, have the script know to ignore access files? idk?
 
-Work on documentation!n
+need access files creator!! can be simple, just copy over size and aspect, deinterlace nad make h264
+
+need to deinterlace all interlaced files
+
+Work on documentation!
+   Really need to deep dive into how to properly nest and create access files
+   so...i made a new field for the access copy Filenames
+
+add a thing that harvests access copy filenames if they exist in the vimeo upload!!
