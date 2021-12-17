@@ -317,6 +317,10 @@ def fileAudit(airtable, drive_name):
                     airtable_filename = record['fields']['File Name']
                 except Exception as e:
                     logging.info('Updating filename for record %s' % UID)
+                try:            #check to see if an access copy filename exists. if so it's ok for there to be two files.
+                    airtable_access_filename = record['fields']['Access Copy File Name']
+                except Exception as e:
+                    airtable_access_filename = ""
                 try:                                        #Need to have an try/except here because airtable errors if the field is empty. This is in case there is no Group
                     group = record['fields']['Group']
                 except Exception as e:
@@ -331,8 +335,8 @@ def fileAudit(airtable, drive_name):
                         if not f.startswith('.'):     #avoid hidden files
                             files_list.append(f)
                 files_list.sort()                      #sort the list so it'll always pick the first file.
-                if len(files_list) > 1:
-                    logging.warning('Multiple files found in ' + UID + ', using ' + files_list[0])
+                if len(files_list) > 1 and len(airtable_access_filename) == 0:
+                    logging.warning('Multiple files found in ' + UID + ' but no access copy listed in Airtable, using ' + files_list[0])
                     if airtable_filename != files_list[0]:
                         missing_file_counter += 1
                         logging.error('Filename Mismatch for record %s. Please fix this before continuing' % UID)
@@ -639,12 +643,16 @@ def uploadVimeo(airtable, v, drive_name, quantity):
                     continue
                 except Exception as e:
                     logging.info('Uploading file to Vimeo for record %s' % UID)
-                try:                                        #checks to see if record has an entry in the Checksum field. This will only process files with no checksum already, so as not to overwrite
-                    airtable_filename = record['fields']['File Name']
+                try:            #first, see if an access copy filename exists. If it does we're gonna use this instead.
+                    airtable_filename = record['fields']['Access Copy File Name']
+                    logging.info('Found an access copy filename for %s. The access copy will be uploaded to vimeo instead of the main file.' % UID)
                 except Exception as e:
-                    logging.warning('No File Name in Airtable record for %s. Skipping for now, please run File Name harvesting.' % UID)
-                    warning_counter =+ 1
-                    continue
+                    try:        #if no access copy filename then move ahead with the main file
+                        airtable_filename = record['fields']['File Name']
+                    except Exception as e:
+                        logging.warning('No File Name in Airtable record for %s. Skipping for now, please run File Name harvesting.' % UID)
+                        warning_counter =+ 1
+                        continue
                 try:                                        #Need to have an try/except here because airtable errors if the field is empty. This is in case there is no Group
                     group = record['fields']['Group']
                 except Exception as e:
