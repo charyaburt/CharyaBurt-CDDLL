@@ -244,16 +244,16 @@ def downloadVimeo(airtable, drive_name):
                     on_drive = record['fields']['On Drive']
                 except Exception as e:
                     on_drive = "Not Found"
-                if on_drive == "No":     #only process records that are not On Drive
+                if on_drive == "No" or on_drive == "Not Found":     #only process records that are not On Drive
                     try:
-                        vimeoLink = record['fields']['Vimeo Link 1']     #check to see if vimeo link exists
+                        vimeoLink = record['fields']['Vimeo Link']     #check to see if vimeo link exists
                     except Exception as e:
                         vimeoLink = "No Link"
                         logging.warning('Record ' + UID + ' Marked as In Library and Not On Drive, but no Vimeo Link found. Skipping')
                         warning_counter += 1
                         continue
                     try:
-                        vimeoPassword = record['fields']['Vimeo 1 Password']     #check to see if vimeo password exists
+                        vimeoPassword = record['fields']['Vimeo Password']     #check to see if vimeo password exists
                     except Exception as e:
                         vimeoPassword = "No Password"
                     record_id = record['id']
@@ -626,7 +626,7 @@ def uploadVimeo(airtable, v, drive_name, quantity):
     upload_counter = 0
     warning_counter = 0
     error_counter = 0
-    pages = airtable.get_iter()
+    pages = airtable. get_iter()
     for page in pages:
         for record in page:
             if upload_counter == quantity:
@@ -639,7 +639,7 @@ def uploadVimeo(airtable, v, drive_name, quantity):
                 record_id = record['id']
                 UID = record['fields']['Unique ID']
                 try:                                        #checks to see if record has an entry in the Checksum field. This will only process files with no checksum already, so as not to overwrite
-                    airtable_vimeo_link = record['fields']['Vimeo Link 1']
+                    airtable_vimeo_link = record['fields']['Vimeo Link']
                     continue
                 except Exception as e:
                     logging.info('Uploading file to Vimeo for record %s' % UID)
@@ -676,7 +676,7 @@ def uploadVimeo(airtable, v, drive_name, quantity):
                 except:
                     airtable_description = ""
                 try:
-                    airtable_vimeo_password = record['fields']['Vimeo 1 Password']
+                    airtable_vimeo_password = record['fields']['Vimeo Password']
                 except:
                     if airtable_vimeo_access == "Private":
                         airtable_vimeo_password = "Charya#1dance"
@@ -698,19 +698,22 @@ def uploadVimeo(airtable, v, drive_name, quantity):
                 # THIS IS WHERE WE'LL UPLOAD THE FILE TO VIMEO
                 try:
                     if airtable_vimeo_access == "Public":
-                        vimeoDict = {'name': airtable_title, 'description': full_description, 'privacy':{'view' : 'public'}}
+                        vimeoDict = {'name': airtable_title, 'description': full_description, 'privacy':{'view' : 'anybody'}}
                     elif airtable_vimeo_access == "Only Me":
                         vimeoDict = {'name': airtable_title, 'description': full_description, 'privacy':{'view' : 'nobody'}}
                     elif airtable_vimeo_access == "Private":
                         vimeoDict = {'name': airtable_title, 'description': full_description, 'privacy':{'view' : 'password'}, 'password': airtable_vimeo_password}
                     else:
                         vimeoDict = {'name': airtable_title, 'description': full_description, 'privacy':{'view' : 'nobody'}}
+                    #logging.info('Uploading file: %s' % file_path)
                     video_uri = v.upload(file_path,data=vimeoDict)
                     vimeo_link = 'https://vimeo.com/' + video_uri.split('/')[-1]
-                    update_dict = {'Vimeo Link 1': vimeo_link}
+                    update_dict = {'Vimeo Link': vimeo_link}
                     upload_counter += 1
                 except Exception as e:
                     logging.error('Could not upload file to Vimeo for record %s.' % UID)
+                    logging.error(e)
+                    #logging.error(vimeoDict)
                     error_counter += 1
                     continue
 
@@ -720,8 +723,10 @@ def uploadVimeo(airtable, v, drive_name, quantity):
                     airtable.update(record_id, update_dict)
                     logging.info('Succesfully added Vimeo link for record %s ' % UID)
                     update_counter += 1
+                    pages = airtable.get_iter() # Need to do this in order to refresh the token, which breaks after a certain period of time
                 except Exception as e:
                     logging.error('Could not added Vimeo link for record %s' % UID)
+                    logging.error('%s' % e)
     logging.info('Vimeo Upload. %i files uploaded, %i Airtable records updated, %i warnings encountered, %i errors encountered.' % (upload_counter, update_counter, warning_counter, error_counter))
     return
 
