@@ -664,7 +664,7 @@ def uploadVimeo(airtable, v, drive_name, quantity):
 
                 # This section harvests info from airtable to populate the vimeo record
                 try:
-                    airtable_vimeo_access = record['fields']['Vimeo 1 Accessiblity']
+                    airtable_vimeo_access = record['fields']['Vimeo Accessiblity']
                 except:
                     airtable_vimeo_access = "Private"
                 try:
