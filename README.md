@@ -2,15 +2,23 @@
 
 ## Required Dependencies
 
-### Software
+### Software (install in the following order)
 
-- Mediainfo
-- FFmpeg
+* Homebrew
+  - Install with the following command: `/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"`
+* Python 3
+  - Install with the following command: `brew install python3`
+* Mediainfo
+  - Install with the following command: `brew install mediainfo`
+* FFmpeg
+  - Install with the following command:  `brew install ffmpeg`
 
 ### Python Libraries
 
-- Airtable: `pip3 install airtable-python-wrapper`
-- Vimeo: `pip3 install PyVimeo`
+* Airtable:
+  - Install with the following command: `pip3 install airtable-python-wrapper`
+* Vimeo:
+  - Install with the following command: `pip3 install PyVimeo`
 
 ### API Credentials
 
