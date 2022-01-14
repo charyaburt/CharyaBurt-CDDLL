@@ -11,7 +11,7 @@
 * Mediainfo
   - Install with the following command: `brew install mediainfo`
 * youtube-dl
- - Install with the following command: `brew install youtube-dl`
+   - Install with the following command: `brew install youtube-dl`
 * FFmpeg
   - Install with the following command:  `brew install ffmpeg`
 
