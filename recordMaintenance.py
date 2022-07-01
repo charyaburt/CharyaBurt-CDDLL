@@ -78,20 +78,20 @@ def main():
 
     # Setup Airtable Credentials for API
 
-    base_key=config.BASE_ID         #This stuff comes from the config.py file. Very important!
-    api_key=config.API_KEY
+    #base_key=config.BASE_ID         #This stuff comes from the config.py file. Very important!
+    #api_key=config.API_KEY
     drive_name=config.DRIVE_NAME
-    table_name = config.TABLE_NAME
+    #table_name = config.TABLE_NAME #don't need this anymore. there's more tables so we need to ask for the info better.
 
-    airtable = Airtable(base_key, table_name, api_key)
+    #airtable = Airtable(base_key, table_name, api_key)
 
     #Perform a drive audit. Quit upon failure
-    if not driveAudit(airtable, drive_name):
+    if not driveAudit():
         quit()
 
     #perform a file-level audit.
     if args.aa:
-        airtableAudit(airtable, drive_name)
+        airtableAudit()
 
     #perform a file-level audit.
     if args.fa:
@@ -159,11 +159,19 @@ def generateHash(inputFile, blocksize=65536):
 
     return md5.hexdigest()
 
-def driveAudit(airtable, drive_name):
+def getAirtablePages(table_name):
+    #takes table name, returns pages.
+    #BASE_ID and API_KEY come from config.py file.
+    airtable = Airtable(config.BASE_ID, table_name, config.API_KEY)
+    pages = airtable.get_iter()
+    return pages
+
+def driveAudit():
     #This performs a quick drive audit, checking to see if drive contains every reord labeled as "in library" in airtable
     #TODO -> harvest "on drive" info from related file record for more accurate maintenance
     #TODO -> drill down to filename and checksum name to see if that info needs to be harvested
-    pages = airtable.get_iter()
+    drive_name = config.DRIVE_NAME
+    pages = getAirtablePages("Records")
     logging.info('Performing Record Audit checking Drive against Airtable, using Drive titled: %s' % drive_name)
     missing_from_drive_count = 0
     correct_on_drive_count = 0
@@ -226,11 +234,10 @@ def driveAudit(airtable, drive_name):
 #            logging.info('Record Level Audit completed succesfully, however %i warnings were encountered. Please read the log for details', warning_count)
         return True
 
-def airtableAudit(airtable, drive_name):
+def airtableAudit():
     #This performs a quick drive audit, checking to see if drive contains every reord labeled as "in library" in airtableAudit
-
+    drive_name = config.DRIVE_NAME
     logging.info('Performing Airtable Audit checking Airtable against Drive titled: %s. This process can take a up to an hour, so sit back and relax.' % drive_name)
-
     in_airtable_and_in_library = 0
     in_airtable_not_in_library = 0
     missing_from_airtable_count = 0
@@ -240,7 +247,7 @@ def airtableAudit(airtable, drive_name):
         if os.path.isdir(os.path.join(drive_path, item)):
             if item.startswith("CB"):
                 found_in_airtable = False       # initiate found boolean as false
-                pages = airtable.get_iter()
+                pages = getAirtablePages("Records")
                 for page in pages:
                     for record in page:
                         RID = record['fields']['[Formula] Record Number']
@@ -254,7 +261,7 @@ def airtableAudit(airtable, drive_name):
                 if found_in_airtable:
                     if in_library == "Yes":
                         in_airtable_and_in_library += 1
-                        #logging.debug('Record %s was found in Airtable' % item)     
+                        #logging.debug('Record %s was found in Airtable' % item)
                     else:
                         in_airtable_not_in_library += 1
                         logging.error('Record %s was found in Airtable but was labeled "Not In Library" despite being on the drive' % item)

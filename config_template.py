@@ -4,7 +4,7 @@ DRIVE_NAME = ""   #The name of the hard drive the archive is on. This will chang
 # Airtable Credentials and Config
 BASE_ID = ""
 API_KEY = ""
-TABLE_NAME = ""
+#TABLE_NAME = ""    # this isn't quite necessary anymore
 
 # Vimeo Credentials
 YOUR_ACCESS_TOKEN = ""
