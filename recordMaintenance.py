@@ -155,74 +155,70 @@ def generateHash(inputFile, blocksize=65536):
     return md5.hexdigest()
 
 def recordAudit(airtable, drive_name):
-    #This performs a quick audit and will exit if it finds the drive out of sync with the airtable
+    #This performs a quick audit, checkint to see if the drive and airtable are in sync on both sides
+    #TODO -> harvest "on drive" info from related file record for more accurate maintenance
+    #TODO -> drill down to filename and checksum name to see if that info needs to be harvested
     pages = airtable.get_iter()
     logging.info('Performing Record Audit between Airtable and Drive titled: %s' % drive_name)
-    missing_record_count = 0
-    not_added_record_count = 0
+    missing_from_drive_count = 0
+    correct_on_drive_count = 0
+#    not_added_record_count = 0
     warning_count = 0
     for page in pages:
         for record in page:
             try:
-                in_library = record['fields']['In Library']
-                try:
-                    on_drive = record['fields']['On Drive']
-                except Exception as e:
-                    on_drive = "Not Found"
+                in_library = record['fields']['[Mnt] In Library']
             except Exception as e:
                 in_library = "Not Found"
             if in_library == "Yes":     #only process records that are in the library
-                UID = record['fields']['Unique ID']
-                try:                                        #Need to have an try/except here because airtable errors if the field is empty. This is in case there is no Group
-                    group = record['fields']['Group']
-                except Exception as e:
-                    group = ""
-                if group == "":                             #In case there is no Group, we don't want an extra slash
-                    path = os.path.join('/Volumes', drive_name, UID)    #will need to fix this to make it cross platform eventually
-                else:
-                    path = os.path.join('/Volumes', drive_name, group, UID)    #will need to fix this to make it cross platform eventually
+                UID = record['fields']['[Formula] Record Number']
+                path = os.path.join('/Volumes', drive_name, UID)    #will need to fix this to make it cross platform eventually
                 if not os.path.isdir(path):
-                    if on_drive == "Yes":     # only mark is missing if it's supposed to be on the drive
-                        logging.error('Could not find record %s' % UID)
-                        missing_record_count += 1
-                    if on_drive == "No":     #an exception for records not labeled as "On Drive" yet, which will likely not occur once the intial setup is complete
-                        logging.warning('The following record has not been properly added to the drive yet: %s' % UID)
-                        not_added_record_count += 1
-                try:
-                    at_file_name = record['fields']['File Name']
-                except Exception as e:
-                    at_file_name = "Not Found"
-                try:
-                    at_checksum = record['fields']['Checksum']
-                except Exception as e:
-                    at_checksum = "Not Found"
-                if at_file_name == "Not Found" and at_checksum == "Not Found":
-                    logging.warning('Record %s has no file name or checksum values in Airtable. Run the -gf then -gc subprocesses to harvest this metadata' % UID)
-                    warning_count += 1
-                elif at_file_name == "Not Found":
-                    logging.warning('Record %s has no file name value in Airtable. Run -gf subprocess to harvest file names' % UID)
-                    warning_count += 1
-                elif at_checksum == "Not Found":
-                    logging.warning('Record %s has no checksum value in Airtable. Run -gc subprocess to harvest checksums' % UID)
-                    warning_count += 1
-    if missing_record_count > 0:
-        print('ERROR: This script has found at least one missing record. Please consult the log and fix this problem before continuing')
-        logging.error('This script has found at least one missing record. Please fix this before continuing')
-        if not_added_record_count > 0:
-            logging.warning('There are records in the Airtable that have not yet been added onto the drive. This should be addressed as soon as possible')
-            warning_count += 1
+#                    if on_drive == "Yes":     # only mark is missing if it's supposed to be on the drive
+                    logging.error('Could not find record %s' % UID)
+                    missing_from_drive_count += 1
+#                    if on_drive == "No":     #an exception for records not labeled as "On Drive" yet, which will likely not occur once the intial setup is complete
+#                        logging.warning('The following record has not been properly added to the drive yet: %s' % UID)
+#                        not_added_record_count += 1
+                else:
+                    correct_on_drive_count += 1
+
+#                try:
+#                    at_file_name = record['fields']['File Name']
+#                except Exception as e:
+#                    at_file_name = "Not Found"
+#                try:
+#                    at_checksum = record['fields']['Checksum']
+#                except Exception as e:
+#                    at_checksum = "Not Found"
+#                if at_file_name == "Not Found" and at_checksum == "Not Found":
+#                    logging.warning('Record %s has no file name or checksum values in Airtable. Run the -gf then -gc subprocesses to harvest this metadata' % UID)
+#                    warning_count += 1
+#                elif at_file_name == "Not Found":
+#                    logging.warning('Record %s has no file name value in Airtable. Run -gf subprocess to harvest file names' % UID)
+#                    warning_count += 1
+#                elif at_checksum == "Not Found":
+#                    logging.warning('Record %s has no checksum value in Airtable. Run -gc subprocess to harvest checksums' % UID)
+#                    warning_count += 1
+    if missing_from_drive_count > 0:
+        print('ERROR: This script has found %i missing record(s). Please consult the log and fix this problem before continuing. %i record(s) were succesfully located' % (missing_from_drive_count, correct_on_drive_count))
+        logging.error('This script has %i missing record(s). Please fix this before continuing.' % missing_from_drive_count)
+        logging.info('%i record(s) were succesfully located' % correct_on_drive_count)
+#        if not_added_record_count > 0:
+#            logging.warning('There are records in the Airtable that have not yet been added onto the drive. This should be addressed as soon as possible')
+#            warning_count += 1
         logging.critical('========Script Complete========')
         return False
     else:
-        if not_added_record_count > 0:
-            logging.warning('There are records in the Airtable that have not yet been added onto the drive. This should be addressed as soon as possible')
-            warning_count += 1
-        if warning_count == 0:
-            print('Record Level Audit completed succesfully')
-            logging.info('Record Level Audit completed succesfully')
-        else:
-            print('Record Level Audit completed succesfully, however '+ str(warning_count) +' warnings were encountered. Please read the log for details')
-            logging.info('Record Level Audit completed succesfully, however %i warnings were encountered. Please read the log for details', warning_count)
+#        if not_added_record_count > 0:3
+#            logging.warning('There are records in the Airtable that have not yet been added onto the drive. This should be addressed as soon as possible')
+#            warning_count += 1
+#        if warning_count == 0:
+        print('Record Level Audit completed. %i record(s) were succesfully located' % correct_on_drive_count)
+        logging.info('Record Level Audit completed succesfully. %i record(s) were succesfully located' % correct_on_drive_count)
+#        else:
+#            print('Record Level Audit completed succesfully, however '+ str(warning_count) +' warnings were encountered. Please read the log for details')
+#            logging.info('Record Level Audit completed succesfully, however %i warnings were encountered. Please read the log for details', warning_count)
         return True
 
 def downloadVimeo(airtable, drive_name):
