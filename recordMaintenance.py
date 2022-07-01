@@ -159,7 +159,7 @@ def recordAudit(airtable, drive_name):
     #TODO -> harvest "on drive" info from related file record for more accurate maintenance
     #TODO -> drill down to filename and checksum name to see if that info needs to be harvested
     pages = airtable.get_iter()
-    logging.info('Performing Record Audit between Airtable and Drive titled: %s' % drive_name)
+    logging.info('Performing Record Audit checking Drive against Airtable, using Drive titled: %s' % drive_name)
     missing_from_drive_count = 0
     correct_on_drive_count = 0
 #    not_added_record_count = 0
