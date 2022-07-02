@@ -29,7 +29,7 @@ def main():
     parser.add_argument('-dv', '--Download-Vimeo',dest='dv',action='store_true',default=False,help="Runs the Vimeo Download subcprocess. This likely won't ever actually need to be run if the archive is being properly maintained")
     parser.add_argument('-uv', '--Upload-Vimeo',dest='uv',nargs='?',type=int,default=0,const=5,help="Runs the Vimeo Upload subcprocess. By default this will upload the first 5 files it finds that need to be uploaded to Vimeo. If you put a number after the -uv flag it will upload that number of files that it finds")
     parser.add_argument('-fa', '--File-Audit',dest='fa',action='store_true',default=False,help="Runs a file-level audio subcprocess. This is more detailed than the auto-audio, which only checks that the Unique ID folders exist. This checks that files exist as well")
-    parser.add_argument('-aa', '--Airtable-Audit',dest='aa',action='store_true',default=False,help="Runs the airtable audit subcprocess. This checks to see that every record found in the drive (at the root level) can be found in the airtable")
+    parser.add_argument('-aa', '--Airtable-Audit',dest='aa',action='store_true',default=False,help="Runs the record level Airtable audit subcprocess. This checks to see that every record found in the drive (at the root level) can be found in the airtable")
     parser.add_argument('-ad', '--Auto-Deaccession',dest='ad',action='store_true',default=False,help="Runs the auto-deaccession subcprocess. This moves all records marked \"Not in Library\" to a _Trash folder. This should be run on a regular basis")
     parser.add_argument('-f', '--Find',dest='f',action='store',help="Runs the find subcprocess. This returns the path of whatever record is searched for")
     args = parser.parse_args()
@@ -172,7 +172,7 @@ def driveAudit():
     #TODO -> drill down to filename and checksum name to see if that info needs to be harvested
     drive_name = config.DRIVE_NAME
     pages = getAirtablePages("Records")
-    logging.info('Performing Record Audit checking Drive against Airtable, using Drive titled: %s' % drive_name)
+    logging.info('Performing record level drive audit. Checking Drive against Airtable, using Drive titled: %s' % drive_name)
     missing_from_drive_count = 0
     correct_on_drive_count = 0
 #    not_added_record_count = 0
@@ -214,8 +214,8 @@ def driveAudit():
 #                    logging.warning('Record %s has no checksum value in Airtable. Run -gc subprocess to harvest checksums' % UID)
 #                    warning_count += 1
     if missing_from_drive_count > 0:
-        print('ERROR: This script has found %i missing record(s). Please consult the log and fix this problem before continuing. %i record(s) were succesfully located' % (missing_from_drive_count, correct_on_drive_count))
-        logging.error('This script has %i missing record(s). Please fix this before continuing.' % missing_from_drive_count)
+        print('ERROR: Record level drive audit has found %i missing record(s). Please consult the log and fix this problem before continuing. %i record(s) were succesfully located' % (missing_from_drive_count, correct_on_drive_count))
+        logging.error('Record level drive audit has identified %i missing record(s). Please fix this before continuing.' % missing_from_drive_count)
         logging.info('%i record(s) were succesfully located' % correct_on_drive_count)
 #        if not_added_record_count > 0:
 #            logging.warning('There are records in the Airtable that have not yet been added onto the drive. This should be addressed as soon as possible')
@@ -227,8 +227,8 @@ def driveAudit():
 #            logging.warning('There are records in the Airtable that have not yet been added onto the drive. This should be addressed as soon as possible')
 #            warning_count += 1
 #        if warning_count == 0:
-        print('Record Level Audit completed. %i record(s) were succesfully located' % correct_on_drive_count)
-        logging.info('Record Level Audit completed succesfully. %i record(s) were succesfully located' % correct_on_drive_count)
+        print('Record level drive audit completed. %i record(s) were succesfully located' % correct_on_drive_count)
+        logging.info('Record level drive audit completed succesfully. %i record(s) were succesfully located' % correct_on_drive_count)
 #        else:
 #            print('Record Level Audit completed succesfully, however '+ str(warning_count) +' warnings were encountered. Please read the log for details')
 #            logging.info('Record Level Audit completed succesfully, however %i warnings were encountered. Please read the log for details', warning_count)
@@ -237,29 +237,29 @@ def driveAudit():
 def airtableAudit():
     #This performs a quick drive audit, checking to see if drive contains every reord labeled as "in library" in airtableAudit
     drive_name = config.DRIVE_NAME
-    logging.info('Performing Airtable Audit checking Airtable against Drive titled: %s. This process can take a up to an hour, so sit back and relax.' % drive_name)
+    logging.info('Performing Record level Airtable audit checking Airtable against Drive titled: %s.' % drive_name)
     in_airtable_and_in_library = 0
     in_airtable_not_in_library = 0
     missing_from_airtable_count = 0
+
+    record_dict = {}
+    pages = getAirtablePages("Records")
+    for page in pages:
+        for record in page:
+            RID = record['fields']['[Formula] Record Number']
+            try:
+                in_library = record['fields']['[Mnt] In Library']
+            except Exception as e:
+                in_library = "No"
+            record_dict.update({RID: in_library})
 
     drive_path = os.path.join('/Volumes', drive_name)
     for item in os.listdir(drive_path):
         if os.path.isdir(os.path.join(drive_path, item)):
             if item.startswith("CB"):
                 found_in_airtable = False       # initiate found boolean as false
-                pages = getAirtablePages("Records")
-                for page in pages:
-                    for record in page:
-                        RID = record['fields']['[Formula] Record Number']
-                        if RID == item:          #if the record folder in the drive matches an airtable records
-                            found_in_airtable = True
-                            try:
-                                in_library = record['fields']['[Mnt] In Library']
-                            except Exception as e:
-                                in_library = "No"
-
-                if found_in_airtable:
-                    if in_library == "Yes":
+                if item in record_dict:
+                    if record_dict.get(item) == "Yes":
                         in_airtable_and_in_library += 1
                         #logging.debug('Record %s was found in Airtable' % item)
                     else:
@@ -268,20 +268,19 @@ def airtableAudit():
                 else:
                     logging.error('Could not find record %s on the Airtable' % item)
                     missing_from_airtable_count += 1
-
     if missing_from_airtable_count > 0:
-        print('ERROR: This script has found %i record(s) on driving missing from the Airtable. Please consult the log and fix this problem before continuing. %i record(s) were succesfully located' % (missing_from_airtable_count, in_airtable_and_in_library))
-        logging.error('This script identified %i missing record(s). Please fix this before continuing.' % missing_from_airtable_count)
-        logging.info('%i record(s) were succesfully located' % in_airtable_and_in_library)
-        return
+        print('ERROR: This script has found %i record(s) on driving missing from the Airtable. Please consult the log and fix this problem before continuing.' % missing_from_airtable_count)
+        logging.error('This script identified %i record(s) missing from Airtable. Please fix this before continuing.' % missing_from_airtable_count)
     if in_airtable_not_in_library > 0:
-        print('ERROR: This script has found %i record(s) on driving marked as "Not In Library" in Airtable. Please consult the log and fix this problem before continuing. %i record(s) were succesfully located' % (in_airtable_not_in_library, in_airtable_and_in_library))
-        logging.error('This script identified %i record(s) marked as "Not In Library" in Airtable. Please fix this before continuing.' % in_airtable_not_in_library)
-        logging.info('%i record(s) were succesfully located' % in_airtable_and_in_library)
-        return
+        print('ERROR: This script has found %i record(s) on the drive marked as "Not In Library" in Airtable. Please consult the log and fix this problem before continuing.' % in_airtable_not_in_library)
+        logging.error('This script identified %i record(s) on the drive marked as "Not In Library" in Airtable. Please fix this before continuing.' % in_airtable_not_in_library)
     if missing_from_airtable_count == 0 and in_airtable_not_in_library == 0:
-        print('Airtable Audit completed succesfully. %i record(s) were succesfully located.' % in_airtable_and_in_library)
-        logging.info('Airtable Audit completed succesfully. %i record(s) were succesfully located.' % in_airtable_and_in_library)
+        print('Record level Airtable audit completed succesfully, no errors found. %i record(s) were succesfully located.' % in_airtable_and_in_library)
+        logging.info('Record level Airtable audit completed succesfully, no errors found. %i record(s) were succesfully located.' % in_airtable_and_in_library)
+        return
+    else:
+        logging.info('Record level Airtable audit complete with errors, %i record(s) were succesfully located' % in_airtable_and_in_library)
+        return
 
 
 
