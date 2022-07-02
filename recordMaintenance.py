@@ -28,7 +28,7 @@ def main():
     parser.add_argument('-vc', '--Validate-Checksums',dest='vc',action='store_true',default=False,help="Runs the checksum validation subcprocess. This should be run on a regular basis")
     parser.add_argument('-dv', '--Download-Vimeo',dest='dv',action='store_true',default=False,help="Runs the Vimeo Download subcprocess. This likely won't ever actually need to be run if the archive is being properly maintained")
     parser.add_argument('-uv', '--Upload-Vimeo',dest='uv',nargs='?',type=int,default=0,const=5,help="Runs the Vimeo Upload subcprocess. By default this will upload the first 5 files it finds that need to be uploaded to Vimeo. If you put a number after the -uv flag it will upload that number of files that it finds")
-    parser.add_argument('-fa', '--File-Audit',dest='fa',action='store_true',default=False,help="Runs a file-level audio subcprocess. This is more detailed than the auto-audio, which only checks that the Unique ID folders exist. This checks that files exist as well")
+    parser.add_argument('-fa', '--File-Audit',dest='fa',action='store_true',default=False,help="Runs a file-level audit subcprocess. This is more detailed than the auto-audio, which only checks that the Unique ID folders exist. This checks that files exist as well")
     parser.add_argument('-aa', '--Airtable-Audit',dest='aa',action='store_true',default=False,help="Runs the record level Airtable audit subcprocess. This checks to see that every record found in the drive (at the root level) can be found in the airtable")
     parser.add_argument('-ad', '--Auto-Deaccession',dest='ad',action='store_true',default=False,help="Runs the auto-deaccession subcprocess. This moves all records marked \"Not in Library\" to a _Trash folder. This should be run on a regular basis")
     parser.add_argument('-f', '--Find',dest='f',action='store',help="Runs the find subcprocess. This returns the path of whatever record is searched for")
@@ -95,7 +95,7 @@ def main():
 
     #perform a file-level audit.
     if args.fa:
-        fileAudit(airtable, drive_name)
+        fileAudit()
 
     #Harvest filenames
     if args.gf:
@@ -358,56 +358,57 @@ def downloadVimeo(airtable, drive_name):
     logging.info('Vimeo download complete, %i files downloaded, %i warnings encountered, %i errors found.' % (success_counter, warning_counter, error_counter))
     return
 
-def fileAudit(airtable, drive_name):
+def fileAudit():
+    drive_name = config.DRIVE_NAME
     print('Performing a file-level audit')
     logging.info('Performing a file-level audit')
     missing_file_counter = 0
-    pages = airtable.get_iter()
+    file_found_counter = 0
+    error_count = 0
+    pages = getAirtablePages("Files")
+
     for page in pages:
-        for record in page:
+        for file in page:
             try:
-                in_library = record['fields']['In Library']
+                in_library = file['fields']['[Lookup] In Library'][0]
             except Exception as e:
                 in_library = "Not Found"
-            if in_library == "Yes":     #only process records that are in the library
-                record_id = record['id']
-                UID = record['fields']['Unique ID']
+            if in_library == 'Yes':     #only process records that are in the library
+                file_record_id = file['id']
+                RID = file['fields']['[Lookup] Record Number'][0]
                 try:                                        #checks to see if record has an entry in the File Name field. This will only process empty file names, so as not to overwrite
-                    airtable_filename = record['fields']['File Name']
+                    airtable_filename = file['fields']['[KEY] Full File Name']
                 except Exception as e:
-                    logging.info('Updating filename for record %s' % UID)
-                try:            #check to see if an access copy filename exists. if so it's ok for there to be two files.
-                    airtable_access_filename = record['fields']['Access Copy File Name']
-                except Exception as e:
-                    airtable_access_filename = ""
-                try:                                        #Need to have an try/except here because airtable errors if the field is empty. This is in case there is no Group
-                    group = record['fields']['Group']
-                except Exception as e:
-                    group = ""
-                if group == "":                             #In case there is no Group, we don't want an extra slash
-                    path = os.path.join('/Volumes', drive_name, UID)    #will need to fix this to make it cross platform eventually
+                    logging.error('Error retreiving file name for record %s. Please fix this record and continue' % RID)
+                    error_count += 1
+                file_path = os.path.join('/Volumes', drive_name, RID, airtable_filename)    #will need to fix this to make it cross platform eventually
+                if os.path.isfile(file_path):
+                    file_found_counter += 1
                 else:
-                    path = os.path.join('/Volumes', drive_name, group, UID)    #will need to fix this to make it cross platform eventually
-                files_list = []
-                for f in os.listdir(path):
-                    if os.path.isfile(os.path.join(path, f)):
-                        if not f.startswith('.'):     #avoid hidden files
-                            files_list.append(f)
-                files_list.sort()                      #sort the list so it'll always pick the first file.
-                if len(files_list) > 1 and len(airtable_access_filename) == 0:
-                    logging.warning('Multiple files found in ' + UID + ' but no access copy listed in Airtable, using ' + files_list[0])
-                    if airtable_filename != files_list[0]:
-                        missing_file_counter += 1
-                        logging.error('Filename Mismatch for record %s. Please fix this before continuing' % UID)
-                elif len(files_list) == 0:
-                    logging.error('No files found in %s' % UID)
+                    logging.error('Filename Mismatch for record %s, file %s. Please fix this before continuing' % (RID, airtable_filename))
                     missing_file_counter += 1
-                else:
-                    if airtable_filename != files_list[0]:
-                        missing_file_counter += 1
-                        logging.error('Filename Mismatch for record %s. Please fix this before continuing' % UID)
+                    error_count += 1
 
-    logging.info('File-level audit complete, %i errors found.' % missing_file_counter)
+                #files_list = []
+                #for f in os.listdir(path):
+                #    if os.path.isfile(os.path.join(path, f)):
+                #        if not f.startswith('.'):     #avoid hidden files
+                #            files_list.append(f)
+                #files_list.sort()                      #sort the list so it'll always pick the first file. I think we can get rid of this
+                #if len(files_list) > 1 and len(airtable_access_filename) == 0:
+                #    logging.warning('Multiple files found in ' + UID + ' but no access copy listed in Airtable, using ' + files_list[0])
+                #    if airtable_filename != files_list[0]:
+                #        missing_file_counter += 1
+                #        logging.error('Filename Mismatch for record %s. Please fix this before continuing' % UID)
+                #if len(files_list) == 0:
+                #    logging.error('No files found in %s' % RID)
+                #    missing_file_counter += 1
+                #else:
+                #    if airtable_filename != files_list[0]:
+                #        missing_file_counter += 1
+                #        logging.error('Filename Mismatch for record %s. Please fix this before continuing' % RID)
+
+    logging.info('File-level audit complete, %i errors found.' % error_count)
     return
 
 def getFilenames(airtable, drive_name):
