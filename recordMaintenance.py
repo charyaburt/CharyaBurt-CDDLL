@@ -103,11 +103,11 @@ def main():
 
     #Harvest checksums
     if args.gc:
-        getChecksums(airtable, drive_name)
+        getChecksums()
 
     #Validate checksums
     if args.vc:
-        validateChecksums(airtable, drive_name)
+        validateChecksums()
 
     #Perform audio-deaccession
     if args.ad:
@@ -411,6 +411,9 @@ def fileAudit():
     logging.info('File-level audit complete, %i errors found.' % error_count)
     return
 
+# This function is depractated until I can figure out the best way to handle it. i would need to create a file record if the record doesn't already exist, which is a bit of trouble
+#block commenting it out for now, will get around to replacing later.
+"""
 def getFilenames(airtable, drive_name):
     #This section harvests file names and puts them in Airtable's File Name field
     #For now it will only get the first filename, and warns if there is more than one file in the folder
@@ -467,77 +470,72 @@ def getFilenames(airtable, drive_name):
                     logging.error('Could not update filename for record %s' % UID)
     logging.info('Finished updating filenames for %i records' % update_counter)
     return
+"""
 
-def validateChecksums(airtable, drive_name):
+def validateChecksums():
+    #this has been succesfull updated
     #This section validates file checksums and updates the "last validated date" field
     #For now it will only get the first filename, and warns if there is more than one file in the folder
+    drive_name = config.DRIVE_NAME
+    airtable = Airtable(config.BASE_ID, "Files", config.API_KEY)
     print('Validating Checksums and updating airtable')
     logging.info('Validating Checksums and updating airtable')
     update_counter = 0
     checksum_error_counter = 0
     checksum_validate_counter = 0
-    pages = airtable.get_iter()
+    pages = getAirtablePages("Files")
+
+    file_dict_list = []    #need to put everything in a list of dicts so that airtable doesn't time out
     for page in pages:
-        for record in page:
+        for at_file in page:
             try:
-                in_library = record['fields']['In Library']
+                in_library = at_file['fields']['[Lookup] In Library'][0]
             except Exception as e:
                 in_library = "Not Found"
-            if in_library == "Yes":     #only process records that are in the library
-                record_id = record['id']
-                UID = record['fields']['Unique ID']
+            if in_library == 'Yes':     #only process records that are in the library
+                file_record_id = at_file['id']
+                RID = at_file['fields']['[Lookup] Record Number'][0]
+                try:                                        #checks to see if record has an entry in the File Name field. This will only process empty file names, so as not to overwrite
+                    airtable_filename = at_file['fields']['[KEY] Full File Name']
+                except Exception as e:
+                    logging.error('Error retreiving file name for record %s. Please fix this record and continue' % RID)
+                    error_count += 1
                 try:                                        #checks to see if record has an entry in the checksum field. This will only process records with existing checksums
-                    airtable_checksum = record['fields']['Checksum']
+                    airtable_checksum = at_file['fields']['[Data] Checksum']
                 except Exception as e:
-                    logging.warning('No Chucksum found for record %s. Skipping validation. Please run checksum creation subprocess to ensure records are up to date.' % UID)
+                    logging.warning('No Checksum found for record %s file %s. Skipping validation. Please run checksum creation subprocess to ensure records are up to date.' % (RID, airtable_filename))
                     continue
-                try:                                        #Need to have an try/except here because airtable errors if the field is empty. This is in case there is no Group
-                    group = record['fields']['Group']
-                except Exception as e:
-                    group = ""
-                if group == "":                             #In case there is no Group, we don't want an extra slash
-                    path = os.path.join('/Volumes', drive_name, UID)    #will need to fix this to make it cross platform eventually
-                else:
-                    path = os.path.join('/Volumes', drive_name, group, UID)    #will need to fix this to make it cross platform eventually
-                files_list = []
-                for f in os.listdir(path):
-                    if os.path.isfile(os.path.join(path, f)):
-                        if not f.startswith('.'):     #avoid hidden files
-                            files_list.append(f)
-                files_list.sort()                      #sort the list so it'll always pick the first file.
-                if len(files_list) > 1:
-                    logging.warning('Multiple files found in ' + UID + ', using ' + files_list[0])
-                    file_checksum = generateHash(os.path.join(path,files_list[0]))
-                    if file_checksum == airtable_checksum:
-                        logging.info('Checksum validation succesful for record %s' % UID)
-                        update_dict = {'Checksum Valid': 'Yes', 'Last Checksum Validated Date': datetime.today().strftime('%Y-%m-%d')}
-                        checksum_validate_counter += 1
-                    else:
-                        logging.error('Checksum validation failed for record %s' % UID)
-                        update_dict = {'Checksum Valid': 'No', 'Last Checksum Validated Date': datetime.today().strftime('%Y-%m-%d')}
-                        checksum_error_counter += 1
-                elif len(files_list) == 0:
-                    logging.error('No files found in %s' % UID)
-                    #update_dict = {'Checksum': 'NO FILE FOUND'}                    #Not to self, need better fail mode here
-                else:
-                    file_checksum = generateHash(os.path.join(path,files_list[0]))
-                    if file_checksum == airtable_checksum:
-                        logging.info('Checksum validation succesful for record %s' % UID)
-                        update_dict = {'Checksum Valid': 'Yes', 'Last Checksum Validated Date': datetime.today().strftime('%Y-%m-%d')}
-                        checksum_validate_counter += 1
-                    else:
-                        logging.error('Checksum validation failed for record %s' % UID)
-                        update_dict = {'Checksum Valid': 'No', 'Last Checksum Validated Date': datetime.today().strftime('%Y-%m-%d')}
-                        checksum_error_counter += 1
+                file_path = os.path.join('/Volumes', drive_name, RID, airtable_filename)    #will need to fix this to make it cross platform eventually
+                file_dict = {"RID": RID, "file_record_id": file_record_id, "airtable_checksum": airtable_checksum, "file_path": file_path}
+                file_dict_list.append(file_dict)
 
-                #THIS IS THE IMPORTANT BIT WHERE WE UPDATE THE TABLE!
-                try:
-                    airtable.update(record_id, update_dict)
-                    logging.info('Succesfully updated checksum validation date for record %s ' % UID)
-                    update_counter += 1
-                except Exception as e:
-                    logging.error('Could not update checksum validation for record %s' % UID)
-                    checksum_error_counter += 1
+        file_dict_list_sorted = sorted(file_dict_list, key=lambda d: d['RID'])     #sorts the list so the user can see the big numbers go up!
+        for file_dict_entry in file_dict_list_sorted:
+            #these next four lines are just here to show how to access dictionary entries for file info from airtable
+            #print("RID: " + file_dict_entry["RID"])
+            #print("file_record_id: " + file_dict_entry["file_record_id"])
+            #print("airtable_checksum: " + file_dict_entry["airtable_checksum"])
+            #print("file_path: " + file_dict_entry["file_path"])
+
+            file_checksum = generateHash(file_dict_entry["file_path"]) #this is where we actually get the checksum
+            if file_checksum == file_dict_entry["airtable_checksum"]:
+                logging.info('Checksum validation succesful for record %s' % file_dict_entry["RID"])
+                update_dict = {'[Data] Checksum Valid': 'Yes', '[Data] Last Checksum Validated Date': datetime.today().strftime('%Y-%m-%d')}
+                checksum_validate_counter += 1
+            else:
+                logging.error('Checksum validation failed for record %s' % file_dict_entry["RID"])
+                update_dict = {'[Data] Checksum Valid': 'No', '[Data] Last Checksum Validated Date': datetime.today().strftime('%Y-%m-%d')}
+                checksum_error_counter += 1
+
+            #THIS IS THE IMPORTANT BIT WHERE WE UPDATE THE TABLE!
+            try:
+                airtable.update(file_dict_entry["file_record_id"], update_dict)
+                logging.info('Succesfully updated checksum validation date for record %s ' % file_dict_entry["RID"])
+                update_counter += 1
+            except Exception as e:
+                logging.error('Could not update checksum validation for record %s' % file_dict_entry["RID"])
+                checksum_error_counter += 1
+
     logging.info('Checksum Validation complete. %i records succesfully validated, %i Airtable records updated, %i errors encountered. ' % (checksum_validate_counter, update_counter, checksum_error_counter))
     return
 
@@ -594,61 +592,71 @@ def autoDeaccession(airtable, drive_name):
     return
 
 
-def getChecksums(airtable, drive_name):
+def getChecksums():
     #This section harvests file checksums and puts them in Airtable's Checksum field
     #For now it will only get the first filename, and warns if there is more than one file in the folder
+    drive_name = config.DRIVE_NAME
+    airtable = Airtable(config.BASE_ID, "Files", config.API_KEY)
     print('Harvesting Checksums and updating airtable')
     logging.info('Harvesting Checksums and updating airtable')
     update_counter = 0
     checksum_counter = 0
     warning_counter = 0
     error_counter = 0
-    pages = airtable.get_iter()
+    pages = getAirtablePages("Files")
+
+    file_dict_list = []
     for page in pages:
-        for record in page:
+        for at_file in page:
             try:
-                in_library = record['fields']['In Library']
+                in_library = at_file['fields']['[Lookup] In Library'][0]
             except Exception as e:
                 in_library = "Not Found"
-            if in_library == "Yes":     #only process records that are in the library
-                record_id = record['id']
-                UID = record['fields']['Unique ID']
-                try:                                        #checks to see if record has an entry in the Checksum field. This will only process files with no checksum already, so as not to overwrite
-                    airtable_checksum = record['fields']['Checksum']
+            if in_library == 'Yes':     #only process records that are in the library
+                file_record_id = at_file['id']
+                RID = at_file['fields']['[Lookup] Record Number'][0]
+                try:                                        #checks to see if record has an entry in the File Name field. This will only process empty file names, so as not to overwrite
+                    airtable_filename = at_file['fields']['[KEY] Full File Name']
+                except Exception as e:
+                    logging.error('Error retreiving file name for record %s. Please fix this record and continue' % RID)
+                    error_count += 1
+                try:                                        #checks to see if record has an entry in the checksum field. This will only process records with existing checksums
+                    airtable_checksum = at_file['fields']['[Data] Checksum']
                     continue
                 except Exception as e:
-                    logging.info('Updating Checksum for record %s' % UID)
-                try:                                        #checks to see if record has an entry in the Checksum field. This will only process files with no checksum already, so as not to overwrite
-                    airtable_filename = record['fields']['File Name']
-                except Exception as e:
-                    logging.warning('No File Name in Airtable record for %s. Skipping for now, please run File Name harvesting.' % UID)
-                    warning_counter =+ 1
-                    continue
-                try:                                        #Need to have an try/except here because airtable errors if the field is empty. This is in case there is no Group
-                    group = record['fields']['Group']
-                except Exception as e:
-                    group = ""
-                if group == "":                             #In case there is no Group, we don't want an extra slash
-                    file_path = os.path.join('/Volumes', drive_name, UID, airtable_filename)    #will need to fix this to make it cross platform eventually
-                else:
-                    file_path = os.path.join('/Volumes', drive_name, group, UID, airtable_filename)    #will need to fix this to make it cross platform eventually
-                try:
-                    checksum = generateHash(file_path)
-                    update_dict = {'Checksum': checksum}
-                    checksum_counter += 1
-                except Exception as e:
-                    logging.error('Could not gather checksums for record %s. Check that filename is correct' % UID)
-                    error_counter += 1
-                    continue
+                    logging.info('No Checksum found for record %s file %s. Checksum will be harvested.' % (RID, airtable_filename))
+                file_path = os.path.join('/Volumes', drive_name, RID, airtable_filename)    #will need to fix this to make it cross platform eventually
+                file_dict = {"RID": RID, "file_record_id": file_record_id, "file_path": file_path}
+                file_dict_list.append(file_dict)
 
-                #THIS IS THE IMPORTANT BIT WHERE WE UPDATE THE TABLE!
-                try:
-                    airtable.update(record_id, update_dict)
-                    logging.info('Succesfully updated checksum for record %s ' % UID)
-                    update_counter += 1
-                except Exception as e:
-                    logging.error('Could not update checksums for record %s' % UID)
-    logging.info('Checksum harvest complete. %i checksums generated, %i Airtable records updated, %i warnings encountered, %i errors encountered.' % (checksum_counter, update_counter, warning_counter, error_counter))
+    if len(file_dict_list) == 0:
+        logging.info('All files in Airtable have checksums. No checksums will be updated. If you would like to regenerate checksums please remove the data in the "[Data] Checksum" field in Airtable and run this subprocess again.')
+    else:
+        file_dict_list_sorted = sorted(file_dict_list, key=lambda d: d['RID'])     #sorts the list so the user can see the big numbers go up!
+        for file_dict_entry in file_dict_list_sorted:
+            #these next four lines are just here to show how to access dictionary entries for file info from airtable
+            #print("RID: " + file_dict_entry["RID"])
+            #print("file_record_id: " + file_dict_entry["file_record_id"])
+            #print("airtable_checksum: " + file_dict_entry["airtable_checksum"])
+            #print("file_path: " + file_dict_entry["file_path"])
+
+            try:
+                checksum = generateHash(file_dict_entry["file_path"])
+                update_dict = {'[Data] Checksum': checksum}
+                checksum_counter += 1
+            except Exception as e:
+                logging.error('Could not gather checksums for record %s, filename %s. Check that filename is correct' % (file_dict_entry["RID"], file_dict_entry["file_path"]))
+                error_counter += 1
+                continue
+
+            #THIS IS THE IMPORTANT BIT WHERE WE UPDATE THE TABLE!
+            try:
+                airtable.update(file_dict_entry["file_record_id"], update_dict)
+                logging.info('Succesfully updated checksum for record %s ' % file_dict_entry["RID"])
+                update_counter += 1
+            except Exception as e:
+                logging.error('Could not update checksums for record %s' % file_dict_entry["RID"])
+        logging.info('Checksum harvest complete. %i checksums generated, %i Airtable records updated, %i warnings encountered, %i errors encountered.' % (checksum_counter, update_counter, warning_counter, error_counter))
     return
 
 def findRecord(UID, drive_name):
