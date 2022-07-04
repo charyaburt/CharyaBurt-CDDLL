@@ -509,32 +509,32 @@ def validateChecksums():
                 file_dict = {"RID": RID, "file_record_id": file_record_id, "airtable_checksum": airtable_checksum, "file_path": file_path}
                 file_dict_list.append(file_dict)
 
-        file_dict_list_sorted = sorted(file_dict_list, key=lambda d: d['RID'])     #sorts the list so the user can see the big numbers go up!
-        for file_dict_entry in file_dict_list_sorted:
-            #these next four lines are just here to show how to access dictionary entries for file info from airtable
-            #print("RID: " + file_dict_entry["RID"])
-            #print("file_record_id: " + file_dict_entry["file_record_id"])
-            #print("airtable_checksum: " + file_dict_entry["airtable_checksum"])
-            #print("file_path: " + file_dict_entry["file_path"])
+    file_dict_list_sorted = sorted(file_dict_list, key=lambda d: d['RID'])     #sorts the list so the user can see the big numbers go up!
+    for file_dict_entry in file_dict_list_sorted:
+        #these next four lines are just here to show how to access dictionary entries for file info from airtable
+        #print("RID: " + file_dict_entry["RID"])
+        #print("file_record_id: " + file_dict_entry["file_record_id"])
+        #print("airtable_checksum: " + file_dict_entry["airtable_checksum"])
+        #print("file_path: " + file_dict_entry["file_path"])
 
-            file_checksum = generateHash(file_dict_entry["file_path"]) #this is where we actually get the checksum
-            if file_checksum == file_dict_entry["airtable_checksum"]:
-                logging.info('Checksum validation succesful for record %s' % file_dict_entry["RID"])
-                update_dict = {'[Data] Checksum Valid': 'Yes', '[Data] Last Checksum Validated Date': datetime.today().strftime('%Y-%m-%d')}
-                checksum_validate_counter += 1
-            else:
-                logging.error('Checksum validation failed for record %s' % file_dict_entry["RID"])
-                update_dict = {'[Data] Checksum Valid': 'No', '[Data] Last Checksum Validated Date': datetime.today().strftime('%Y-%m-%d')}
-                checksum_error_counter += 1
+        file_checksum = generateHash(file_dict_entry["file_path"]) #this is where we actually get the checksum
+        if file_checksum == file_dict_entry["airtable_checksum"]:
+            logging.info('Checksum validation succesful for record %s' % file_dict_entry["RID"])
+            update_dict = {'[Data] Checksum Valid': 'Yes', '[Data] Last Checksum Validated Date': datetime.today().strftime('%Y-%m-%d')}
+            checksum_validate_counter += 1
+        else:
+            logging.error('Checksum validation failed for record %s' % file_dict_entry["RID"])
+            update_dict = {'[Data] Checksum Valid': 'No', '[Data] Last Checksum Validated Date': datetime.today().strftime('%Y-%m-%d')}
+            checksum_error_counter += 1
 
-            #THIS IS THE IMPORTANT BIT WHERE WE UPDATE THE TABLE!
-            try:
-                airtable.update(file_dict_entry["file_record_id"], update_dict)
-                logging.info('Succesfully updated checksum validation date for record %s ' % file_dict_entry["RID"])
-                update_counter += 1
-            except Exception as e:
-                logging.error('Could not update checksum validation for record %s' % file_dict_entry["RID"])
-                checksum_error_counter += 1
+        #THIS IS THE IMPORTANT BIT WHERE WE UPDATE THE TABLE!
+        try:
+            airtable.update(file_dict_entry["file_record_id"], update_dict)
+            logging.info('Succesfully updated checksum validation date for record %s ' % file_dict_entry["RID"])
+            update_counter += 1
+        except Exception as e:
+            logging.error('Could not update checksum validation for record %s' % file_dict_entry["RID"])
+            checksum_error_counter += 1
 
     logging.info('Checksum Validation complete. %i records succesfully validated, %i Airtable records updated, %i errors encountered. ' % (checksum_validate_counter, update_counter, checksum_error_counter))
     return
