@@ -29,7 +29,6 @@ def main():
     parser.add_argument('-dv', '--Download-Vimeo',dest='dv',action='store_true',default=False,help="Runs the Vimeo Download subcprocess. This likely won't ever actually need to be run if the archive is being properly maintained")
     parser.add_argument('-uv', '--Upload-Vimeo',dest='uv',nargs='?',type=int,default=0,const=5,help="Runs the Vimeo Upload subcprocess. By default this will upload the first 5 files it finds that need to be uploaded to Vimeo. If you put a number after the -uv flag it will upload that number of files that it finds")
     parser.add_argument('-fa', '--File-Audit',dest='fa',action='store_true',default=False,help="Runs a file-level audit subcprocess. This is more detailed than the auto-audio, which only checks that the Unique ID folders exist. This checks that files exist as well")
-    parser.add_argument('-aa', '--Airtable-Audit',dest='aa',action='store_true',default=False,help="Runs the record level Airtable audit subcprocess. This checks to see that every record found in the drive (at the root level) can be found in the airtable")
     parser.add_argument('-ad', '--Auto-Deaccession',dest='ad',action='store_true',default=False,help="Runs the auto-deaccession subcprocess. This moves all records marked \"Not in Library\" to a _Trash folder. This should be run on a regular basis")
     parser.add_argument('-f', '--Find',dest='f',action='store',help="Runs the find subcprocess. This returns the path of whatever record is searched for")
     args = parser.parse_args()
@@ -90,8 +89,8 @@ def main():
         quit()
 
     #perform a file-level audit.
-    if args.aa:
-        airtableAudit()
+    if not airtableAudit():
+        quit()
 
     #perform a file-level audit.
     if args.fa:
@@ -167,7 +166,7 @@ def getAirtablePages(table_name):
     return pages
 
 def driveAudit():
-    #This performs a quick drive audit, checking to see if drive contains every reord labeled as "in library" in airtable
+    #This performs a quick drive audit, checking to see if drive contains every record labeled as "in library" in airtable
     #TODO -> harvest "on drive" info from related file record for more accurate maintenance
     #TODO -> drill down to filename and checksum name to see if that info needs to be harvested
     drive_name = config.DRIVE_NAME
@@ -180,11 +179,11 @@ def driveAudit():
     for page in pages:
         for record in page:
             try:
-                in_library = record['fields']['[Mnt] In Library']
+                in_library = record['fields'][config.IN_LIBRARY]
             except Exception as e:
                 in_library = "Not Found"
             if in_library == "Yes":     #only process records that are in the library
-                RID = record['fields']['[Formula] Record Number']
+                RID = record['fields'][config.RECORD_NUMBER]
                 path = os.path.join('/Volumes', drive_name, RID)    #will need to fix this to make it cross platform eventually
                 if not os.path.isdir(path):
 #                    if on_drive == "Yes":     # only mark is missing if it's supposed to be on the drive
@@ -246,9 +245,9 @@ def airtableAudit():
     pages = getAirtablePages("Records")
     for page in pages:
         for record in page:
-            RID = record['fields']['[Formula] Record Number']
+            RID = record['fields'][config.RECORD_NUMBER]
             try:
-                in_library = record['fields']['[Mnt] In Library']
+                in_library = record['fields'][config.IN_LIBRARY]
             except Exception as e:
                 in_library = "No"
             record_dict.update({RID: in_library})
@@ -277,10 +276,10 @@ def airtableAudit():
     if missing_from_airtable_count == 0 and in_airtable_not_in_library == 0:
         print('Record level Airtable audit completed succesfully, no errors found. %i record(s) were succesfully located.' % in_airtable_and_in_library)
         logging.info('Record level Airtable audit completed succesfully, no errors found. %i record(s) were succesfully located.' % in_airtable_and_in_library)
-        return
+        return True
     else:
         logging.info('Record level Airtable audit complete with errors, %i record(s) were succesfully located' % in_airtable_and_in_library)
-        return
+        return False
 
 
 
@@ -370,14 +369,14 @@ def fileAudit():
     for page in pages:
         for file in page:
             try:
-                in_library = file['fields']['[Lookup] In Library'][0]
+                in_library = file['fields'][config.IN_LIBRARY_LOOKUP][0]
             except Exception as e:
                 in_library = "Not Found"
             if in_library == 'Yes':     #only process records that are in the library
                 file_record_id = file['id']
-                RID = file['fields']['[Lookup] Record Number'][0]
+                RID = file['fields'][config.RECORD_NUMBER_LOOKUP][0]
                 try:                                        #checks to see if record has an entry in the File Name field. This will only process empty file names, so as not to overwrite
-                    airtable_filename = file['fields']['[KEY] Full File Name']
+                    airtable_filename = file['fields'][config.FULL_FILE_NAME]
                 except Exception as e:
                     logging.error('Error retreiving file name for record %s. Please fix this record and continue' % RID)
                     error_count += 1
@@ -489,19 +488,19 @@ def validateChecksums():
     for page in pages:
         for at_file in page:
             try:
-                in_library = at_file['fields']['[Lookup] In Library'][0]
+                in_library = at_file['fields'][config.IN_LIBRARY_LOOKUP][0]
             except Exception as e:
                 in_library = "Not Found"
             if in_library == 'Yes':     #only process records that are in the library
                 file_record_id = at_file['id']
-                RID = at_file['fields']['[Lookup] Record Number'][0]
+                RID = at_file['fields'][config.RECORD_NUMBER_LOOKUP][0]
                 try:                                        #checks to see if record has an entry in the File Name field. This will only process empty file names, so as not to overwrite
-                    airtable_filename = at_file['fields']['[KEY] Full File Name']
+                    airtable_filename = at_file['fields'][config.FULL_FILE_NAME]
                 except Exception as e:
                     logging.error('Error retreiving file name for record %s. Please fix this record and continue' % RID)
                     error_count += 1
                 try:                                        #checks to see if record has an entry in the checksum field. This will only process records with existing checksums
-                    airtable_checksum = at_file['fields']['[Data] Checksum']
+                    airtable_checksum = at_file['fields'][config.CHECKSUM]
                 except Exception as e:
                     logging.warning('No Checksum found for record %s file %s. Skipping validation. Please run checksum creation subprocess to ensure records are up to date.' % (RID, airtable_filename))
                     continue
@@ -609,19 +608,19 @@ def getChecksums():
     for page in pages:
         for at_file in page:
             try:
-                in_library = at_file['fields']['[Lookup] In Library'][0]
+                in_library = at_file['fields'][config.IN_LIBRARY_LOOKUP][0]
             except Exception as e:
                 in_library = "Not Found"
             if in_library == 'Yes':     #only process records that are in the library
                 file_record_id = at_file['id']
-                RID = at_file['fields']['[Lookup] Record Number'][0]
+                RID = at_file['fields'][config.RECORD_NUMBER_LOOKUP][0]
                 try:                                        #checks to see if record has an entry in the File Name field. This will only process empty file names, so as not to overwrite
-                    airtable_filename = at_file['fields']['[KEY] Full File Name']
+                    airtable_filename = at_file['fields'][config.FULL_FILE_NAME]
                 except Exception as e:
                     logging.error('Error retreiving file name for record %s. Please fix this record and continue' % RID)
                     error_count += 1
                 try:                                        #checks to see if record has an entry in the checksum field. This will only process records with existing checksums
-                    airtable_checksum = at_file['fields']['[Data] Checksum']
+                    airtable_checksum = at_file['fields'][config.CHECKSUM]
                     continue
                 except Exception as e:
                     logging.info('No Checksum found for record %s file %s. Checksum will be harvested.' % (RID, airtable_filename))
@@ -642,7 +641,7 @@ def getChecksums():
 
             try:
                 checksum = generateHash(file_dict_entry["file_path"])
-                update_dict = {'[Data] Checksum': checksum}
+                update_dict = {config.CHECKSUM: checksum}
                 checksum_counter += 1
             except Exception as e:
                 logging.error('Could not gather checksums for record %s, filename %s. Check that filename is correct' % (file_dict_entry["RID"], file_dict_entry["file_path"]))
