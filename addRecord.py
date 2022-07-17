@@ -80,9 +80,16 @@ def main():
     #if not airtableAudit():
     #    quit()
 
-    filePath = '/Volumes/Charya03/__testing/TestFile01.mp4'
+    #file with no audio
+    #filePath = '/Volumes/Morgan G-Drive/VideoProjects/OceansOfPhantasy/_GoodSourceMP4s/C64/FloatingBalls.mp4'
+    #file with Audio
+    filePath = '/Volumes/Morgan G-Drive/VideoProjects/OceansOfPhantasy/Captures/20180930/Gabe04.mov'
     mediainfo_text = getMediaInfo(filePath)
-    print(mediainfo_text)
+    #print(mediainfo_text)
+    airtable_update_dict = parseMediaInfo(filePath, mediainfo_text, "1234")
+    print(airtable_update_dict)
+    if checkForAccessFile(airtable_update_dict):
+        createAccessFile(filePath, airtable_update_dict)
 
     quit()
 
@@ -103,6 +110,25 @@ def main():
     logging.critical('========Script Complete========')
 
 ## End of main function
+
+def checkForAccessFile(airtable_update_dict):
+    if "Interlaced" in airtable_update_dict['video scan type']: #needs access file if it's interlaced
+        logging.info('File named %s is Interlaced. Making a Progressive access file' % airtable_update_dict['filename'])
+        return True
+    if int(airtable_update_dict['file size']) > 5000000000: #needs access file if it's too big
+        logging.info('File named %s is larger than 5GB. Making a smaller access file' % airtable_update_dict['filename'])
+        return True
+    else:
+        return False
+
+def createAccessFile(filePath, airtable_update_dict):
+    fileNameExtension = filePath.split(".")[-1]
+    accessFilePath = filePath.split("." + fileNameExtension)[0] + "_access.mp4"
+    ffmpeg_string = "/usr/local/bin/ffmpeg -hide_banner -loglevel panic -i '%s' -c:v libx264 -pix_fmt yuv420p -movflags faststart -crf 18 -vf yadif -y '%s'" %(filePath, accessFilePath)
+    logging.info("Running FFmpeg command: %s" % ffmpeg_string)
+    cmd = [ffmpeg_string]
+    ffmpeg_out = subprocess.Popen(cmd, stdout=subprocess.PIPE, shell=True).communicate()[0]
+    logging.info("Finished Running FFmpeg command")
 
 def getMediaInfo(filePath):
     cmd = [ '/usr/local/bin/mediainfo', '-f', '--Output=XML', filePath ]
@@ -404,163 +430,95 @@ def getAirtablePages(table_name):
     pages = airtable.get_iter()
     return pages
 
-def parseMediaInfo(filePath, media_info_text, record_id):
+def parseMediaInfo(filePath, media_info_text, file_id):
     # The following line initializes the dict.
-    airtable_update_dict = {"record_id" : record_id, "filename" : "", "duration" : "", "file_size" : "", "format" : "", "video codec" : "", "video bit depth" : "", "video scan type" : "", "video frame rate" : "", "video frame size" : "", "video aspect ratio" : "", "audio bit depth" : "", "audio sampling rate" : "", "audio codec" : ""}
+    airtable_update_dict = {config.FILENAME : "", config.DURATION : "", config.FILE_SIZE_STRING : "", config.FILE_SIZE : "", config.FILE_FORMAT : "", config.VIDEO_CODEC : "", config.VIDEO_BIT_DEPTH : "", config.VIDEO_SCAN_TYPE : "", config.VIDEO_FRAME_RATE : "", config.VIDEO_FRAME_SIZE : "", config.VIDEO_ASPECT_RATIO : "", config.AUDIO_BIT_DEPTH : "", config.AUDIO_SAMPLING_RATE : "", config.AUDIO_CODEC : ""}
     fileNameTemp = os.path.basename(filePath)
     fileNameExtension = fileNameTemp.split(".")[-1]
-    airtable_update_dict["filename"] = fileNameTemp.split("." + fileNameExtension)[0]
-    barcodeTemp = airtable_update_dict["instantiationIdentifierDigital__c"]
-    #Catch for Disney Filesnames
-    if "WDA_" in airtable_update_dict["instantiationIdentifierDigital__c"]:
-        print bcolors.OKGREEN + "Renaming File for Disney Specs" + bcolors.ENDC
-        airtable_update_dict["instantiationIdentifierDigital__c"] = "_".join(barcodeTemp.split("_")[1:])
-    try:
-        barcodeTemp = str(barcodeTemp).split("_")[0]
-        airtable_update_dict["Name"] = barcodeTemp.split("BAVC")[1]
-    except:
-        print bcolors.FAIL + "Error parsing filename, No Barcode given for this file!\n\n" + bcolors.ENDC
+    airtable_update_dict[config.FILENAME] = fileNameTemp.split("." + fileNameExtension)[0]
+    media_info_text = media_info_text.decode()
+    logging.info("Parsing mediainfo for file: %s" % airtable_update_dict[config.FILENAME])
 
     try:
         mi_General_Text = (media_info_text.split("<track type=\"General\">"))[1].split("</track>")[0]
-        mi_Video_Text = (media_info_text.split("<track type=\"Video\">"))[1].split("</track>")[0]
+
+        try:
+            mi_Video_Text = (media_info_text.split("<track type=\"Video\">"))[1].split("</track>")[0]
+        except:
+            logging.warning('Could not parse video track for file %s. If this file is supposed to have video it may be corrupted' %  airtable_update_dict[config.FILENAME])
         try:
             mi_Audio_Text = (media_info_text.split("<track type=\"Audio\">"))[1].split("</track>")[0]
         except:
-            mi_Audio_Text = (media_info_text.split("<track type=\"Audio\" typeorder=\"1\">"))[1].split("</track>")[0]
+            logging.warning('Could not parse audio track for file %s. If this file is supposed to have audio it may be corrupted' %  airtable_update_dict[config.FILENAME])
+
     except:
-        print bcolors.FAIL + "MEDIAINFO ERROR: Could not parse tracks for " + airtable_update_dict["instantiationIdentifierDigital__c"] + "\n\n" + bcolors.ENDC
+        logging.error("MEDIAINFO ERROR: Could not parse tracks for " + airtable_update_dict[config.FILENAME])
 
     # General Stuff
 
     try:
-        airtable_update_dict["essenceTrackDuration__c"] = (mi_General_Text.split("<Duration>"))[6].split("</Duration>")[0]
+        airtable_update_dict[config.DURATION] = (mi_General_Text.split("<Duration_String3>"))[1].split("</Duration_String3>")[0]
     except:
-        print bcolors.FAIL + "MEDIAINFO ERROR: Could not parse Duration for " + airtable_update_dict["instantiationIdentifierDigital__c"] + "\n\n" + bcolors.ENDC
+        logging.error("MEDIAINFO ERROR: Could not parse Duration for " + airtable_update_dict[config.FILENAME])
     try:
-        fileFormatTemp = (mi_General_Text.split("<Format>"))[1].split("</Format>")[0]
-        if fileFormatTemp == "MPEG-4":
-            airtable_update_dict["instantiationDigital__c"] = "MOV"
-        elif fileFormatTemp == "Matroska":
-            airtable_update_dict["instantiationDigital__c"] = "MKV"
-        elif fileFormatTemp == "DV":
-            airtable_update_dict["instantiationDigital__c"] = "DV"
-        elif fileFormatTemp == "Wave":
-            airtable_update_dict["instantiationDigital__c"] = "WAV"
-        elif fileFormatTemp == "MPEG-TS":
-            airtable_update_dict["instantiationDigital__c"] = "MPEG-TS"
+        airtable_update_dict[config.FILE_FORMAT] = (mi_General_Text.split("<Format_String>"))[1].split("</Format_String>")[0]
     except:
-        print bcolors.FAIL + "MEDIAINFO ERROR: Could not File Format for " + airtable_update_dict["instantiationIdentifierDigital__c"] + "\n\n" + bcolors.ENDC
+        logging.error("MEDIAINFO ERROR: Could not File Format for " + airtable_update_dict[config.FILENAME])
     try:
-        airtable_update_dict["instantiationFileSize__c"] = (mi_General_Text.split("<File_size>"))[6].split("</File_size>")[0]
+        airtable_update_dict[config.FILE_SIZE_STRING] = (mi_General_Text.split("<FileSize_String4>"))[1].split("</FileSize_String4>")[0]
     except:
-        print bcolors.FAIL + "MEDIAINFO ERROR: Could not parse File Size for " + airtable_update_dict["instantiationIdentifierDigital__c"] + "\n\n" + bcolors.ENDC
+        logging.error("MEDIAINFO ERROR: Could not parse File Size for " + airtable_update_dict[config.FILENAME])
+    try:
+        airtable_update_dict[config.FILE_SIZE] = (mi_General_Text.split("<FileSize>"))[1].split("</FileSize>")[0]
+    except:
+        logging.error("MEDIAINFO ERROR: Could not parse File Size for " + airtable_update_dict[config.FILENAME])
 
         # Video Stuff
 
     try:
-        airtable_update_dict["essenceTrackEncodingVideo__c"] = (mi_Video_Text.split("<Codec_ID>"))[1].split("</Codec_ID>")[0]
-        if airtable_update_dict["essenceTrackEncodingVideo__c"] == "v210":
-            airtable_update_dict["essenceTrackEncodingVideo__c"] = "Uncompressed 10-bit (v210)"
-        elif airtable_update_dict["essenceTrackEncodingVideo__c"] == "apch":
-            airtable_update_dict["essenceTrackEncodingVideo__c"] = "Apple ProRes 422 HQ"
-        elif airtable_update_dict["essenceTrackEncodingVideo__c"] == "apcn":
-            airtable_update_dict["essenceTrackEncodingVideo__c"] = "Apple ProRes 422"
-        elif airtable_update_dict["essenceTrackEncodingVideo__c"] == "apcs":
-            airtable_update_dict["essenceTrackEncodingVideo__c"] = "Apple ProRes 422 LT"
-        elif airtable_update_dict["essenceTrackEncodingVideo__c"] == "apco":
-            airtable_update_dict["essenceTrackEncodingVideo__c"] = "Apple ProRes 422 Proxy"
-        elif airtable_update_dict["essenceTrackEncodingVideo__c"] == "ap4h":
-            airtable_update_dict["essenceTrackEncodingVideo__c"] = "Apple ProRes 4444"
-        elif "FFV1" in airtable_update_dict["essenceTrackEncodingVideo__c"]:
-            airtable_update_dict["essenceTrackEncodingVideo__c"] = "FFV1"
-        elif "ProRes" in airtable_update_dict["essenceTrackEncodingVideo__c"] and proresFlag == False:
-            print bcolors.FAIL + "Skipping ProRes File! (run with flag -pr to parse ProRes)" + bcolors.ENDC
-            return "prores"
-        else:
-            airtable_update_dict["essenceTrackEncodingVideo__c"] = (mi_Video_Text.split("<Commercial_name>"))[1].split("</Commercial_name>")[0]
+        airtable_update_dict[config.VIDEO_CODEC] = (mi_Video_Text.split("<CodecID>"))[1].split("</CodecID>")[0]
     except:
-        try:
-            airtable_update_dict["essenceTrackEncodingVideo__c"] = "DV"
-        except:
-            print bcolors.FAIL + "MEDIAINFO ERROR: Could not parse Video Track Encoding for " + airtable_update_dict["instantiationIdentifierDigital__c"] + "\n\n" + bcolors.ENDC
+        logging.error("MEDIAINFO ERROR: Could not parse Video Track Encoding for " + airtable_update_dict[config.FILENAME])
     try:
-        if "ProRes" in airtable_update_dict["essenceTrackEncodingVideo__c"]:
-            airtable_update_dict["essenceTrackBitDepthVideo__c"] = "10 bits"
-        else:
-            airtable_update_dict["essenceTrackBitDepthVideo__c"] = (mi_Video_Text.split("<Bit_depth>"))[2].split("</Bit_depth>")[0]
+        airtable_update_dict[config.VIDEO_BIT_DEPTH] = (mi_Video_Text.split("<BitDepth>"))[1].split("</BitDepth>")[0]
     except:
-        print bcolors.FAIL + "MEDIAINFO ERROR: Could not parse Video Bit Depth for " + airtable_update_dict["instantiationIdentifierDigital__c"] + "\n\n" + bcolors.ENDC
+        logging.error("MEDIAINFO ERROR: Could not parse Video Bit Depth for " + airtable_update_dict[config.FILENAME])
     try:
-        airtable_update_dict["essenceTrackCompressionMode__c"] = (mi_Video_Text.split("<Compression_mode>"))[1].split("</Compression_mode>")[0]
+        airtable_update_dict[config.VIDEO_SCAN_TYPE] = (mi_Video_Text.split("<ScanType_String>"))[1].split("</ScanType_String>")[0]
     except:
-        if "ProRes" in airtable_update_dict["essenceTrackEncodingVideo__c"]:
-            airtable_update_dict["essenceTrackCompressionMode__c"] = "Lossy"
-        else:
-            print bcolors.FAIL + "MEDIAINFO ERROR: Could not parse Compression Mode for " + airtable_update_dict["instantiationIdentifierDigital__c"] + "\n\n" + bcolors.ENDC
+        logging.error("MEDIAINFO ERROR: Could not parse Scan Type for " + airtable_update_dict[config.FILENAME])
     try:
-        airtable_update_dict["essenceTrackScanType__c"] = (mi_Video_Text.split("<Scan_type>"))[1].split("</Scan_type>")[0]
+        airtable_update_dict[config.VIDEO_FRAME_RATE] = (mi_Video_Text.split("<FrameRate>"))[1].split("</FrameRate>")[0]
     except:
-        print bcolors.FAIL + "MEDIAINFO ERROR: Could not parse Scan Type for " + airtable_update_dict["instantiationIdentifierDigital__c"] + "\n\n" + bcolors.ENDC
-    try:
-        airtable_update_dict["essenceTrackFrameRate__c"] = (mi_Video_Text.split("<Frame_rate>"))[1].split("</Frame_rate>")[0]
-        if airtable_update_dict["essenceTrackFrameRate__c"] == "29.970":
-            airtable_update_dict["essenceTrackFrameRate__c"] = "29.97"
-    except:
-        print bcolors.FAIL + "MEDIAINFO ERROR: Could not parse Frame Rate for " + airtable_update_dict["instantiationIdentifierDigital__c"] + "\n\n" + bcolors.ENDC
+        logging.error("MEDIAINFO ERROR: Could not parse Frame Rate for " + airtable_update_dict[config.FILENAME])
     try:
         frame_width = (mi_Video_Text.split("<Width>"))[1].split("</Width>")[0]
     except:
-        print bcolors.FAIL + "MEDIAINFO ERROR: Could not parse Frame Width for " + airtable_update_dict["instantiationIdentifierDigital__c"] + "\n\n" + bcolors.ENDC
+        logging.error("MEDIAINFO ERROR: Could not parse Frame Width for " + airtable_update_dict[config.FILENAME])
     try:
         frame_height = (mi_Video_Text.split("<Height>"))[1].split("</Height>")[0]
     except:
-        print bcolors.FAIL + "MEDIAINFO ERROR: Could not parse Frame Height for " + airtable_update_dict["instantiationIdentifierDigital__c"] + "\n\n" + bcolors.ENDC
-    airtable_update_dict["essenceTrackFrameSize__c"] = frame_width + " x " + frame_height
+        logging.error("MEDIAINFO ERROR: Could not parse Frame Height for " + airtable_update_dict[config.FILENAME])
+
+    airtable_update_dict[config.VIDEO_FRAME_SIZE] = frame_width + "x" + frame_height
+
     try:
-        airtable_update_dict["essenceTrackAspectRatio__c"] = (mi_Video_Text.split("<Display_aspect_ratio>"))[2].split("</Display_aspect_ratio>")[0]
+        airtable_update_dict[config.VIDEO_ASPECT_RATIO] = (mi_Video_Text.split("<DisplayAspectRatio_String>"))[1].split("</DisplayAspectRatio_String>")[0]
     except:
-        print bcolors.FAIL + "MEDIAINFO ERROR: Could not parse Display Aspect Rastio for " + airtable_update_dict["instantiationIdentifierDigital__c"] + "\n\n" + bcolors.ENDC
-    try:
-        airtable_update_dict["instantiationDataRateVideo__c"] = (mi_Video_Text.split("<Bit_rate>"))[2].split("</Bit_rate>")[0]
-        airtable_update_dict["instantiationDataRateVideo__c"] = airtable_update_dict["instantiationDataRateVideo__c"].replace("/","p")
-    except:
-        #this catches the overall bitrate of FFV1 files. It's a bit of a fudge, but gets the point across
-        try:
-            airtable_update_dict["instantiationDataRateVideo__c"] = (mi_General_Text.split("<Overall_bit_rate>"))[2].split("</Overall_bit_rate>")[0]
-            airtable_update_dict["instantiationDataRateVideo__c"] = airtable_update_dict["instantiationDataRateVideo__c"].replace("/","p")
-        except:
-            print bcolors.FAIL + "MEDIAINFO ERROR: Could not parse Video Data Rate for " + airtable_update_dict["instantiationIdentifierDigital__c"] + "\n\n" + bcolors.ENDC
+        print("MEDIAINFO ERROR: Could not parse Display Aspect Rastio for " + airtable_update_dict[config.FILENAME])
 
         # Audio Stuff
     try:
-        airtable_update_dict["essenceTrackBitDepthAudio__c"] = (mi_Audio_Text.split("<Resolution>"))[1].split("</Resolution>")[0]
+        airtable_update_dict[config.AUDIO_SAMPLING_RATE] = (mi_Audio_Text.split("<SamplingRate>"))[1].split("</SamplingRate>")[0]
+    except:
+        logging.error("MEDIAINFO ERROR: Could not parse Audio Sampling Rate for " + airtable_update_dict[config.FILENAME])
+    try:
+        airtable_update_dict[config.AUDIO_CODEC] = (mi_Audio_Text.split("<Codec>"))[1].split("</Codec>")[0]
     except:
         try:
-            airtable_update_dict["essenceTrackBitDepthAudio__c"] = (mi_Audio_Text.split("<Bit_depth>"))[1].split("</Bit_depth>")[0]
+            airtable_update_dict[config.AUDIO_CODEC] = (mi_Audio_Text.split("<Format>"))[1].split("</Format>")[0]
         except:
-            if "HDV" in airtable_update_dict["essenceTrackEncodingVideo__c"]:
-                airtable_update_dict["essenceTrackBitDepthAudio__c"] = "N/A"
-            else:
-                print bcolors.FAIL + "MEDIAINFO ERROR: Could not parse Audio Bit Depth for " + airtable_update_dict["instantiationIdentifierDigital__c"] + "\n\n" + bcolors.ENDC
-    try:
-        samplingRate = (mi_Audio_Text.split("<Sampling_rate>"))[1].split("</Sampling_rate>")[0]
-        if samplingRate == "44100":
-            samplingRate = "44.1"
-        else:
-            samplingRate = int(samplingRate)/1000
-        airtable_update_dict["essenceTrackSamplingRate__c"] = str(samplingRate) + " kHz"
-    except:
-        print bcolors.FAIL + "MEDIAINFO ERROR: Could not parse Audio Sampling Rate for " + airtable_update_dict["instantiationIdentifierDigital__c"] + "\n\n" + bcolors.ENDC
-    try:
-        airtable_update_dict["essenceTrackEncodingAudio__c"] = (mi_Audio_Text.split("<Codec>"))[1].split("</Codec>")[0]
-        if airtable_update_dict["essenceTrackEncodingAudio__c"] == "PCM":
-            airtable_update_dict["essenceTrackEncodingAudio__c"] = "Linear PCM"
-    except:
-        try:
-            airtable_update_dict["essenceTrackEncodingAudio__c"] = (mi_Audio_Text.split("<Format>"))[1].split("</Format>")[0]
-        except:
-            print bcolors.FAIL + "MEDIAINFO ERROR: Could not parse Audio Track Encoding for " + airtable_update_dict["instantiationIdentifierDigital__c"] + "\n\n" + bcolors.ENDC
+            logging.error("MEDIAINFO ERROR: Could not parse Audio Track Encoding for " + airtable_update_dict[config.FILENAME])
 
     return airtable_update_dict
 
