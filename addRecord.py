@@ -80,6 +80,12 @@ def main():
     #if not airtableAudit():
     #    quit()
 
+    filePath = '/Volumes/Charya03/__testing/TestFile01.mp4'
+    mediainfo_text = getMediaInfo(filePath)
+    print(mediainfo_text)
+
+    quit()
+
     #Creates list of records to be processed
     record_dict_list = findRecordToAdd()
 
@@ -97,6 +103,11 @@ def main():
     logging.critical('========Script Complete========')
 
 ## End of main function
+
+def getMediaInfo(filePath):
+    cmd = [ '/usr/local/bin/mediainfo', '-f', '--Output=XML', filePath ]
+    media_info = subprocess.Popen( cmd, stdout=subprocess.PIPE ).communicate()[0]
+    return media_info
 
 def verifyUserAddedFile(record_dict):
     #Verifies that the file added by the user conforms to proper specifications
@@ -392,6 +403,166 @@ def getAirtablePages(table_name):
     airtable = Airtable(config.BASE_ID, table_name, config.API_KEY)
     pages = airtable.get_iter()
     return pages
+
+def parseMediaInfo(filePath, media_info_text, record_id):
+    # The following line initializes the dict.
+    airtable_update_dict = {"record_id" : record_id, "filename" : "", "duration" : "", "file_size" : "", "format" : "", "essenceTrackEncodingVideo__c" : "", "essenceTrackBitDepthVideo__c" : "", "essenceTrackCompressionMode__c" : "", "essenceTrackScanType__c" : "", "essenceTrackFrameRate__c" : "", "essenceTrackFrameSize__c" : "", "essenceTrackAspectRatio__c" : "", "instantiationDataRateVideo__c" : "", "instantiationDigitalColorMatrix__c" : "", "instantiationDigitalColorSpace__c" : "", "instantiationDigitalChromaSubsampling__c" : "", "instantiationDataRateAudio__c" : "", "essenceTrackBitDepthAudio__c" : "", "essenceTrackSamplingRate__c" : "", "essenceTrackEncodingAudio__c" : "", "instantiationChannelConfigDigitalLayout__c" : "", "instantiationChannelConfigurationDigital__c" : "", "messageDigest" : "", "messageDigestAlgorithm" : ""}
+    fileNameTemp = os.path.basename(filePath)
+    fileNameExtension = fileNameTemp.split(".")[-1]
+    file_dict["instantiationIdentifierDigital__c"] = fileNameTemp.split("." + fileNameExtension)[0]
+    barcodeTemp = file_dict["instantiationIdentifierDigital__c"]
+    #Catch for Disney Filesnames
+    if "WDA_" in file_dict["instantiationIdentifierDigital__c"]:
+        print bcolors.OKGREEN + "Renaming File for Disney Specs" + bcolors.ENDC
+        file_dict["instantiationIdentifierDigital__c"] = "_".join(barcodeTemp.split("_")[1:])
+    try:
+        barcodeTemp = str(barcodeTemp).split("_")[0]
+        file_dict["Name"] = barcodeTemp.split("BAVC")[1]
+    except:
+        print bcolors.FAIL + "Error parsing filename, No Barcode given for this file!\n\n" + bcolors.ENDC
+
+    try:
+        mi_General_Text = (media_info_text.split("<track type=\"General\">"))[1].split("</track>")[0]
+        mi_Video_Text = (media_info_text.split("<track type=\"Video\">"))[1].split("</track>")[0]
+        try:
+            mi_Audio_Text = (media_info_text.split("<track type=\"Audio\">"))[1].split("</track>")[0]
+        except:
+            mi_Audio_Text = (media_info_text.split("<track type=\"Audio\" typeorder=\"1\">"))[1].split("</track>")[0]
+    except:
+        print bcolors.FAIL + "MEDIAINFO ERROR: Could not parse tracks for " + file_dict["instantiationIdentifierDigital__c"] + "\n\n" + bcolors.ENDC
+
+    # General Stuff
+
+    try:
+        file_dict["essenceTrackDuration__c"] = (mi_General_Text.split("<Duration>"))[6].split("</Duration>")[0]
+    except:
+        print bcolors.FAIL + "MEDIAINFO ERROR: Could not parse Duration for " + file_dict["instantiationIdentifierDigital__c"] + "\n\n" + bcolors.ENDC
+    try:
+        fileFormatTemp = (mi_General_Text.split("<Format>"))[1].split("</Format>")[0]
+        if fileFormatTemp == "MPEG-4":
+            file_dict["instantiationDigital__c"] = "MOV"
+        elif fileFormatTemp == "Matroska":
+            file_dict["instantiationDigital__c"] = "MKV"
+        elif fileFormatTemp == "DV":
+            file_dict["instantiationDigital__c"] = "DV"
+        elif fileFormatTemp == "Wave":
+            file_dict["instantiationDigital__c"] = "WAV"
+        elif fileFormatTemp == "MPEG-TS":
+            file_dict["instantiationDigital__c"] = "MPEG-TS"
+    except:
+        print bcolors.FAIL + "MEDIAINFO ERROR: Could not File Format for " + file_dict["instantiationIdentifierDigital__c"] + "\n\n" + bcolors.ENDC
+    try:
+        file_dict["instantiationFileSize__c"] = (mi_General_Text.split("<File_size>"))[6].split("</File_size>")[0]
+    except:
+        print bcolors.FAIL + "MEDIAINFO ERROR: Could not parse File Size for " + file_dict["instantiationIdentifierDigital__c"] + "\n\n" + bcolors.ENDC
+
+        # Video Stuff
+
+    try:
+        file_dict["essenceTrackEncodingVideo__c"] = (mi_Video_Text.split("<Codec_ID>"))[1].split("</Codec_ID>")[0]
+        if file_dict["essenceTrackEncodingVideo__c"] == "v210":
+            file_dict["essenceTrackEncodingVideo__c"] = "Uncompressed 10-bit (v210)"
+        elif file_dict["essenceTrackEncodingVideo__c"] == "apch":
+            file_dict["essenceTrackEncodingVideo__c"] = "Apple ProRes 422 HQ"
+        elif file_dict["essenceTrackEncodingVideo__c"] == "apcn":
+            file_dict["essenceTrackEncodingVideo__c"] = "Apple ProRes 422"
+        elif file_dict["essenceTrackEncodingVideo__c"] == "apcs":
+            file_dict["essenceTrackEncodingVideo__c"] = "Apple ProRes 422 LT"
+        elif file_dict["essenceTrackEncodingVideo__c"] == "apco":
+            file_dict["essenceTrackEncodingVideo__c"] = "Apple ProRes 422 Proxy"
+        elif file_dict["essenceTrackEncodingVideo__c"] == "ap4h":
+            file_dict["essenceTrackEncodingVideo__c"] = "Apple ProRes 4444"
+        elif "FFV1" in file_dict["essenceTrackEncodingVideo__c"]:
+            file_dict["essenceTrackEncodingVideo__c"] = "FFV1"
+        elif "ProRes" in file_dict["essenceTrackEncodingVideo__c"] and proresFlag == False:
+            print bcolors.FAIL + "Skipping ProRes File! (run with flag -pr to parse ProRes)" + bcolors.ENDC
+            return "prores"
+        else:
+            file_dict["essenceTrackEncodingVideo__c"] = (mi_Video_Text.split("<Commercial_name>"))[1].split("</Commercial_name>")[0]
+    except:
+        try:
+            file_dict["essenceTrackEncodingVideo__c"] = "DV"
+        except:
+            print bcolors.FAIL + "MEDIAINFO ERROR: Could not parse Video Track Encoding for " + file_dict["instantiationIdentifierDigital__c"] + "\n\n" + bcolors.ENDC
+    try:
+        if "ProRes" in file_dict["essenceTrackEncodingVideo__c"]:
+            file_dict["essenceTrackBitDepthVideo__c"] = "10 bits"
+        else:
+            file_dict["essenceTrackBitDepthVideo__c"] = (mi_Video_Text.split("<Bit_depth>"))[2].split("</Bit_depth>")[0]
+    except:
+        print bcolors.FAIL + "MEDIAINFO ERROR: Could not parse Video Bit Depth for " + file_dict["instantiationIdentifierDigital__c"] + "\n\n" + bcolors.ENDC
+    try:
+        file_dict["essenceTrackCompressionMode__c"] = (mi_Video_Text.split("<Compression_mode>"))[1].split("</Compression_mode>")[0]
+    except:
+        if "ProRes" in file_dict["essenceTrackEncodingVideo__c"]:
+            file_dict["essenceTrackCompressionMode__c"] = "Lossy"
+        else:
+            print bcolors.FAIL + "MEDIAINFO ERROR: Could not parse Compression Mode for " + file_dict["instantiationIdentifierDigital__c"] + "\n\n" + bcolors.ENDC
+    try:
+        file_dict["essenceTrackScanType__c"] = (mi_Video_Text.split("<Scan_type>"))[1].split("</Scan_type>")[0]
+    except:
+        print bcolors.FAIL + "MEDIAINFO ERROR: Could not parse Scan Type for " + file_dict["instantiationIdentifierDigital__c"] + "\n\n" + bcolors.ENDC
+    try:
+        file_dict["essenceTrackFrameRate__c"] = (mi_Video_Text.split("<Frame_rate>"))[1].split("</Frame_rate>")[0]
+        if file_dict["essenceTrackFrameRate__c"] == "29.970":
+            file_dict["essenceTrackFrameRate__c"] = "29.97"
+    except:
+        print bcolors.FAIL + "MEDIAINFO ERROR: Could not parse Frame Rate for " + file_dict["instantiationIdentifierDigital__c"] + "\n\n" + bcolors.ENDC
+    try:
+        frame_width = (mi_Video_Text.split("<Width>"))[1].split("</Width>")[0]
+    except:
+        print bcolors.FAIL + "MEDIAINFO ERROR: Could not parse Frame Width for " + file_dict["instantiationIdentifierDigital__c"] + "\n\n" + bcolors.ENDC
+    try:
+        frame_height = (mi_Video_Text.split("<Height>"))[1].split("</Height>")[0]
+    except:
+        print bcolors.FAIL + "MEDIAINFO ERROR: Could not parse Frame Height for " + file_dict["instantiationIdentifierDigital__c"] + "\n\n" + bcolors.ENDC
+    file_dict["essenceTrackFrameSize__c"] = frame_width + " x " + frame_height
+    try:
+        file_dict["essenceTrackAspectRatio__c"] = (mi_Video_Text.split("<Display_aspect_ratio>"))[2].split("</Display_aspect_ratio>")[0]
+    except:
+        print bcolors.FAIL + "MEDIAINFO ERROR: Could not parse Display Aspect Rastio for " + file_dict["instantiationIdentifierDigital__c"] + "\n\n" + bcolors.ENDC
+    try:
+        file_dict["instantiationDataRateVideo__c"] = (mi_Video_Text.split("<Bit_rate>"))[2].split("</Bit_rate>")[0]
+        file_dict["instantiationDataRateVideo__c"] = file_dict["instantiationDataRateVideo__c"].replace("/","p")
+    except:
+        #this catches the overall bitrate of FFV1 files. It's a bit of a fudge, but gets the point across
+        try:
+            file_dict["instantiationDataRateVideo__c"] = (mi_General_Text.split("<Overall_bit_rate>"))[2].split("</Overall_bit_rate>")[0]
+            file_dict["instantiationDataRateVideo__c"] = file_dict["instantiationDataRateVideo__c"].replace("/","p")
+        except:
+            print bcolors.FAIL + "MEDIAINFO ERROR: Could not parse Video Data Rate for " + file_dict["instantiationIdentifierDigital__c"] + "\n\n" + bcolors.ENDC
+
+        # Audio Stuff
+    try:
+        file_dict["essenceTrackBitDepthAudio__c"] = (mi_Audio_Text.split("<Resolution>"))[1].split("</Resolution>")[0]
+    except:
+        try:
+            file_dict["essenceTrackBitDepthAudio__c"] = (mi_Audio_Text.split("<Bit_depth>"))[1].split("</Bit_depth>")[0]
+        except:
+            if "HDV" in file_dict["essenceTrackEncodingVideo__c"]:
+                file_dict["essenceTrackBitDepthAudio__c"] = "N/A"
+            else:
+                print bcolors.FAIL + "MEDIAINFO ERROR: Could not parse Audio Bit Depth for " + file_dict["instantiationIdentifierDigital__c"] + "\n\n" + bcolors.ENDC
+    try:
+        samplingRate = (mi_Audio_Text.split("<Sampling_rate>"))[1].split("</Sampling_rate>")[0]
+        if samplingRate == "44100":
+            samplingRate = "44.1"
+        else:
+            samplingRate = int(samplingRate)/1000
+        file_dict["essenceTrackSamplingRate__c"] = str(samplingRate) + " kHz"
+    except:
+        print bcolors.FAIL + "MEDIAINFO ERROR: Could not parse Audio Sampling Rate for " + file_dict["instantiationIdentifierDigital__c"] + "\n\n" + bcolors.ENDC
+    try:
+        file_dict["essenceTrackEncodingAudio__c"] = (mi_Audio_Text.split("<Codec>"))[1].split("</Codec>")[0]
+        if file_dict["essenceTrackEncodingAudio__c"] == "PCM":
+            file_dict["essenceTrackEncodingAudio__c"] = "Linear PCM"
+    except:
+        try:
+            file_dict["essenceTrackEncodingAudio__c"] = (mi_Audio_Text.split("<Format>"))[1].split("</Format>")[0]
+        except:
+            print bcolors.FAIL + "MEDIAINFO ERROR: Could not parse Audio Track Encoding for " + file_dict["instantiationIdentifierDigital__c"] + "\n\n" + bcolors.ENDC
+
+    return file_dict
 
 
 
