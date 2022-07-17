@@ -2,3 +2,4 @@ config.py
 *.log
 __pycache__
 config.pyc
+*DS_Store
