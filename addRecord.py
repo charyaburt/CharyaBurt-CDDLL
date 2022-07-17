@@ -84,12 +84,18 @@ def main():
     #filePath = '/Volumes/Morgan G-Drive/VideoProjects/OceansOfPhantasy/_GoodSourceMP4s/C64/FloatingBalls.mp4'
     #file with Audio
     filePath = '/Volumes/Morgan G-Drive/VideoProjects/OceansOfPhantasy/Captures/20180930/Gabe04.mov'
+    #file with no video
+    #filePath = '/Volumes/Morgan G-Drive/AudioProjects/_WorksInProgress/_Kosmiche/RigidFog.wav'
     mediainfo_text = getMediaInfo(filePath)
     #print(mediainfo_text)
     airtable_update_dict = parseMediaInfo(filePath, mediainfo_text, "1234")
     print(airtable_update_dict)
-    if checkForAccessFile(airtable_update_dict):
-        createAccessFile(filePath, airtable_update_dict)
+    reason_list = []
+    reason_list = checkForAccessFile(airtable_update_dict)
+    if not reason_list:
+        print("no access file needed!")
+    else:
+        createAccessFile(filePath, airtable_update_dict, reason_list)
 
     quit()
 
@@ -112,23 +118,40 @@ def main():
 ## End of main function
 
 def checkForAccessFile(airtable_update_dict):
-    if "Interlaced" in airtable_update_dict['video scan type']: #needs access file if it's interlaced
-        logging.info('File named %s is Interlaced. Making a Progressive access file' % airtable_update_dict['filename'])
-        return True
-    if int(airtable_update_dict['file size']) > 5000000000: #needs access file if it's too big
-        logging.info('File named %s is larger than 5GB. Making a smaller access file' % airtable_update_dict['filename'])
-        return True
-    else:
-        return False
+    reason_list = []
+    if "Interlaced" in airtable_update_dict[config.VIDEO_SCAN_TYPE]: #needs access file if it's interlaced
+        reason_list.append("Interlaced")
+    if int(airtable_update_dict[config.FILE_SIZE]) > 5000000000: #needs access file if it's too big
+        reason_list.append("Large")
+    if airtable_update_dict[config.VIDEO_CODEC] == "None": #needs access file if it's too big
+        reason_list.append("No Video")
+    return reason_list
 
-def createAccessFile(filePath, airtable_update_dict):
+def createAccessFile(filePath, airtable_update_dict, reason_list):
     fileNameExtension = filePath.split(".")[-1]
     accessFilePath = filePath.split("." + fileNameExtension)[0] + "_access.mp4"
-    ffmpeg_string = "/usr/local/bin/ffmpeg -hide_banner -loglevel panic -i '%s' -c:v libx264 -pix_fmt yuv420p -movflags faststart -crf 18 -vf yadif -y '%s'" %(filePath, accessFilePath)
+    ffmpeg_base = "/usr/local/bin/ffmpeg -hide_banner -loglevel panic -i "
+    ffmpeg_middle = ""
+    if "No Video" in reason_list:
+        logging.info('File %s has no video, creating a video version for access file.' % airtable_update_dict[config.FILENAME])
+        ffmpeg_middle = "-filter_complex '[0:a]showwaves=s=640x480,format=yuv420p[vid]' -map '[vid]' -map 0:a -codec:v libx264 -crf 25 -preset fast -codec:a aac -strict -2 -b:a 192k -y"
+    elif "Interlaced" in reason_list and "Large" in reason_list:
+        logging.info('File named %s is Interlaced and over 5GB. Making a smaller Progressive access file' % airtable_update_dict[config.FILENAME])
+        ffmpeg_middle = "-c:v libx264 -pix_fmt yuv420p -movflags faststart -crf 18 -vf yadif -s 640x480 -aspect %s -y" % airtable_update_dict[config.VIDEO_ASPECT_RATIO]
+    elif "Interlaced" in reason_list:
+        logging.info('File named %s is Interlaced. Making a Progressive access file' % airtable_update_dict[config.FILENAME])
+        ffmpeg_middle = "-c:v libx264 -pix_fmt yuv420p -movflags faststart -crf 18 -vf yadif -y"
+    elif "Large" in reason_list:
+        logging.info('File named %s is larger than 5GB. Making a smaller access file' % airtable_update_dict[config.FILENAME])
+        ffmpeg_middle = "-c:v libx264 -pix_fmt yuv420p -movflags faststart -crf 18 -s 640x480 -aspect %s -y" % airtable_update_dict[config.VIDEO_ASPECT_RATIO]
+
+
+    ffmpeg_string = "%s '%s' %s '%s'" %(ffmpeg_base, filePath, ffmpeg_middle, accessFilePath)
     logging.info("Running FFmpeg command: %s" % ffmpeg_string)
     cmd = [ffmpeg_string]
     ffmpeg_out = subprocess.Popen(cmd, stdout=subprocess.PIPE, shell=True).communicate()[0]
     logging.info("Finished Running FFmpeg command")
+    #ffmpeg -i input.mp4 -filter_complex "[0:a]showwaves=s=1280x720,format=yuv420p[vid]" -map "[vid]" -map 0:a -codec:v libx264 -crf 18 -preset fast -codec:a aac -strict -2 -b:a 192k output.mp4
 
 def getMediaInfo(filePath):
     cmd = [ '/usr/local/bin/mediainfo', '-f', '--Output=XML', filePath ]
@@ -288,7 +311,7 @@ def addToArchive(airtable, drive_name, recordID, file_path):
 
     #now that we've succesfully put the file on the drive, let's put the filename and checksum in airtable
     updateRecord(airtable, record_airtable_id, checksum_update_dict, recordID, 'Checksum')
-    updateRecord(airtable, record_airtable_id, filename_update_dict, recordID, 'Filename')
+    updateRecord(airtable, record_airtable_id, filename_update_dict, recordID, config.FILENAME)
     updateRecord(airtable, record_airtable_id, on_drive_update_dict, recordID, 'On Drive')
     updateRecord(airtable, record_airtable_id, in_library_update_dict, recordID, 'In Library')
 
@@ -432,7 +455,7 @@ def getAirtablePages(table_name):
 
 def parseMediaInfo(filePath, media_info_text, file_id):
     # The following line initializes the dict.
-    airtable_update_dict = {config.FILENAME : "", config.DURATION : "", config.FILE_SIZE_STRING : "", config.FILE_SIZE : "", config.FILE_FORMAT : "", config.VIDEO_CODEC : "", config.VIDEO_BIT_DEPTH : "", config.VIDEO_SCAN_TYPE : "", config.VIDEO_FRAME_RATE : "", config.VIDEO_FRAME_SIZE : "", config.VIDEO_ASPECT_RATIO : "", config.AUDIO_BIT_DEPTH : "", config.AUDIO_SAMPLING_RATE : "", config.AUDIO_CODEC : ""}
+    airtable_update_dict = {config.FILENAME : "", config.DURATION : "", config.FILE_SIZE_STRING : "", config.FILE_SIZE : "", config.FILE_FORMAT : "", config.VIDEO_CODEC : "", config.VIDEO_BIT_DEPTH : "", config.VIDEO_SCAN_TYPE : "", config.VIDEO_FRAME_RATE : "", config.VIDEO_FRAME_SIZE : "", config.VIDEO_ASPECT_RATIO : "",  config.AUDIO_SAMPLING_RATE : "", config.AUDIO_CODEC : ""}
     fileNameTemp = os.path.basename(filePath)
     fileNameExtension = fileNameTemp.split(".")[-1]
     airtable_update_dict[config.FILENAME] = fileNameTemp.split("." + fileNameExtension)[0]
@@ -445,11 +468,19 @@ def parseMediaInfo(filePath, media_info_text, file_id):
         try:
             mi_Video_Text = (media_info_text.split("<track type=\"Video\">"))[1].split("</track>")[0]
         except:
-            logging.warning('Could not parse video track for file %s. If this file is supposed to have video it may be corrupted' %  airtable_update_dict[config.FILENAME])
+            logging.warning('Could not parse video track for file %s. If this file is supposed to have video it may be corrupted. The file will be processed as an audio only file' %  airtable_update_dict[config.FILENAME])
+            airtable_update_dict[config.VIDEO_CODEC] = "None"
+            airtable_update_dict[config.VIDEO_BIT_DEPTH] = "None"
+            airtable_update_dict[config.VIDEO_SCAN_TYPE] = "None"
+            airtable_update_dict[config.VIDEO_FRAME_RATE] = "None"
+            airtable_update_dict[config.VIDEO_FRAME_SIZE] = "None"
+            airtable_update_dict[config.VIDEO_ASPECT_RATIO] = "None"
         try:
             mi_Audio_Text = (media_info_text.split("<track type=\"Audio\">"))[1].split("</track>")[0]
         except:
-            logging.warning('Could not parse audio track for file %s. If this file is supposed to have audio it may be corrupted' %  airtable_update_dict[config.FILENAME])
+            logging.warning('Could not parse audio track for file %s. If this file is supposed to have audio it may be corrupted. This will be processed as a Video Only file' %  airtable_update_dict[config.FILENAME])
+            airtable_update_dict[config.AUDIO_CODEC] = "None"
+            airtable_update_dict[config.AUDIO_SAMPLING_RATE] = "None"
 
     except:
         logging.error("MEDIAINFO ERROR: Could not parse tracks for " + airtable_update_dict[config.FILENAME])
@@ -475,32 +506,33 @@ def parseMediaInfo(filePath, media_info_text, file_id):
 
         # Video Stuff
 
-    try:
-        airtable_update_dict[config.VIDEO_CODEC] = (mi_Video_Text.split("<CodecID>"))[1].split("</CodecID>")[0]
-    except:
-        logging.error("MEDIAINFO ERROR: Could not parse Video Track Encoding for " + airtable_update_dict[config.FILENAME])
-    try:
-        airtable_update_dict[config.VIDEO_BIT_DEPTH] = (mi_Video_Text.split("<BitDepth>"))[1].split("</BitDepth>")[0]
-    except:
-        logging.error("MEDIAINFO ERROR: Could not parse Video Bit Depth for " + airtable_update_dict[config.FILENAME])
-    try:
-        airtable_update_dict[config.VIDEO_SCAN_TYPE] = (mi_Video_Text.split("<ScanType_String>"))[1].split("</ScanType_String>")[0]
-    except:
-        logging.error("MEDIAINFO ERROR: Could not parse Scan Type for " + airtable_update_dict[config.FILENAME])
-    try:
-        airtable_update_dict[config.VIDEO_FRAME_RATE] = (mi_Video_Text.split("<FrameRate>"))[1].split("</FrameRate>")[0]
-    except:
-        logging.error("MEDIAINFO ERROR: Could not parse Frame Rate for " + airtable_update_dict[config.FILENAME])
-    try:
-        frame_width = (mi_Video_Text.split("<Width>"))[1].split("</Width>")[0]
-    except:
-        logging.error("MEDIAINFO ERROR: Could not parse Frame Width for " + airtable_update_dict[config.FILENAME])
-    try:
-        frame_height = (mi_Video_Text.split("<Height>"))[1].split("</Height>")[0]
-    except:
-        logging.error("MEDIAINFO ERROR: Could not parse Frame Height for " + airtable_update_dict[config.FILENAME])
+    if not airtable_update_dict[config.VIDEO_CODEC] == "None":
+        try:
+            airtable_update_dict[config.VIDEO_CODEC] = (mi_Video_Text.split("<CodecID>"))[1].split("</CodecID>")[0]
+        except:
+            logging.error("MEDIAINFO ERROR: Could not parse Video Track Encoding for " + airtable_update_dict[config.FILENAME])
+        try:
+            airtable_update_dict[config.VIDEO_BIT_DEPTH] = (mi_Video_Text.split("<BitDepth>"))[1].split("</BitDepth>")[0]
+        except:
+            logging.error("MEDIAINFO ERROR: Could not parse Video Bit Depth for " + airtable_update_dict[config.FILENAME])
+        try:
+            airtable_update_dict[config.VIDEO_SCAN_TYPE] = (mi_Video_Text.split("<ScanType_String>"))[1].split("</ScanType_String>")[0]
+        except:
+            logging.error("MEDIAINFO ERROR: Could not parse Scan Type for " + airtable_update_dict[config.FILENAME])
+        try:
+            airtable_update_dict[config.VIDEO_FRAME_RATE] = (mi_Video_Text.split("<FrameRate>"))[1].split("</FrameRate>")[0]
+        except:
+            logging.error("MEDIAINFO ERROR: Could not parse Frame Rate for " + airtable_update_dict[config.FILENAME])
+        try:
+            frame_width = (mi_Video_Text.split("<Width>"))[1].split("</Width>")[0]
+        except:
+            logging.error("MEDIAINFO ERROR: Could not parse Frame Width for " + airtable_update_dict[config.FILENAME])
+        try:
+            frame_height = (mi_Video_Text.split("<Height>"))[1].split("</Height>")[0]
+        except:
+            logging.error("MEDIAINFO ERROR: Could not parse Frame Height for " + airtable_update_dict[config.FILENAME])
 
-    airtable_update_dict[config.VIDEO_FRAME_SIZE] = frame_width + "x" + frame_height
+        airtable_update_dict[config.VIDEO_FRAME_SIZE] = frame_width + "x" + frame_height
 
     try:
         airtable_update_dict[config.VIDEO_ASPECT_RATIO] = (mi_Video_Text.split("<DisplayAspectRatio_String>"))[1].split("</DisplayAspectRatio_String>")[0]
@@ -508,17 +540,18 @@ def parseMediaInfo(filePath, media_info_text, file_id):
         print("MEDIAINFO ERROR: Could not parse Display Aspect Rastio for " + airtable_update_dict[config.FILENAME])
 
         # Audio Stuff
-    try:
-        airtable_update_dict[config.AUDIO_SAMPLING_RATE] = (mi_Audio_Text.split("<SamplingRate>"))[1].split("</SamplingRate>")[0]
-    except:
-        logging.error("MEDIAINFO ERROR: Could not parse Audio Sampling Rate for " + airtable_update_dict[config.FILENAME])
-    try:
-        airtable_update_dict[config.AUDIO_CODEC] = (mi_Audio_Text.split("<Codec>"))[1].split("</Codec>")[0]
-    except:
+    if not airtable_update_dict[config.AUDIO_CODEC] == "None":
         try:
-            airtable_update_dict[config.AUDIO_CODEC] = (mi_Audio_Text.split("<Format>"))[1].split("</Format>")[0]
+            airtable_update_dict[config.AUDIO_SAMPLING_RATE] = (mi_Audio_Text.split("<SamplingRate>"))[1].split("</SamplingRate>")[0]
         except:
-            logging.error("MEDIAINFO ERROR: Could not parse Audio Track Encoding for " + airtable_update_dict[config.FILENAME])
+            logging.error("MEDIAINFO ERROR: Could not parse Audio Sampling Rate for " + airtable_update_dict[config.FILENAME])
+        try:
+            airtable_update_dict[config.AUDIO_CODEC] = (mi_Audio_Text.split("<Codec>"))[1].split("</Codec>")[0]
+        except:
+            try:
+                airtable_update_dict[config.AUDIO_CODEC] = (mi_Audio_Text.split("<Format>"))[1].split("</Format>")[0]
+            except:
+                logging.error("MEDIAINFO ERROR: Could not parse Audio Track Encoding for " + airtable_update_dict[config.FILENAME])
 
     return airtable_update_dict
 
