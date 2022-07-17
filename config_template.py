@@ -27,7 +27,6 @@ VIDEO_SCAN_TYPE = "video scan type"
 VIDEO_FRAME_RATE = "video frame rate"
 VIDEO_FRAME_SIZE = "video frame size"
 VIDEO_ASPECT_RATIO = "video aspect ratio"
-AUDIO_BIT_DEPTH = "audio bit depth"
 AUDIO_SAMPLING_RATE = "audio sampling rate"
 AUDIO_CODEC = "audio codec"
 
