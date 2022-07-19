@@ -105,6 +105,7 @@ def main():
                 if createAirtableFileRecord(pres_airtable_create_dict):
                     logging.error("Finished creating airtable file entries for %s." % record_dict_list[0]['RID'])
                     print("Finished creating airtable file entries for %s." % record_dict_list[0]['RID'])
+                    updateAirtableField(record_dict_list[0]['record_id'],{config.FILE_PROCESS_STATUS: None},record_dict_list[0]['RID'])   #sets FILE_PROCESS_STATUS to blank because we're done!
                 else:
                     logging.error("Error creating airtable file entries for %s." % record_dict_list[0]['RID'])
                     print("Error creating airtable file entries for %s. See log for details" % record_dict_list[0]['RID'])
@@ -119,22 +120,13 @@ def main():
                 if createAirtableFileRecord(pres_airtable_create_dict) and createAirtableFileRecord(access_airtable_create_dict):
                     logging.error("Finished creating airtable file entries for %s." % record_dict_list[0]['RID'])
                     print("Finished creating airtable file entries for %s." % record_dict_list[0]['RID'])
+                    updateAirtableField(record_dict_list[0]['record_id'],{config.FILE_PROCESS_STATUS: None},record_dict_list[0]['RID'])   #sets FILE_PROCESS_STATUS to blank because we're done!
                 else:
                     logging.error("Error creating airtable file entries for %s." % record_dict_list[0]['RID'])
                     print("Error creating airtable file entries for %s. See log for details" % record_dict_list[0]['RID'])
-                #createAirtableFileRecord(access_airtable_create_dict)
 
     else:                       #batch mode
         print(record_dict_list)
-
-
-
-
-
-    quit()
-
-
-    #update_dict = {config.FILE_PROCESS_STATUS: ""}
 
     logging.critical('========Script Complete========')
 
