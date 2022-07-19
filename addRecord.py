@@ -83,22 +83,24 @@ def main():
     #Creates list of records to be processed
     record_dict_list = findRecordToAdd()
 
-    if args.b == False:         #single file mode
-        if not record_dict_list:
-            logging.info("No records are labeled as ready to update in Airtable (Intaking Local Data File). Please make sure to follow the proper workflow for adding a record to Airtable and try again")
+    if not record_dict_list:    #if list is empty
+        logging.info("No records are labeled as ready to update in Airtable (Intaking Local Data File). Please make sure to follow the proper workflow for adding a record to Airtable and try again")
+        quit()
+
+    if args.b == True:
+        logging.info("Running in batch mode!")
+    for record_dict in record_dict_list:
+        if not createRecordFolder(record_dict['RID']):  #quit upon error
             quit()
-        if not createRecordFolder(record_dict_list[0]['RID']):  #quit upon error
-            quit()
-        pres_file_path = verifyUserAddedFile(record_dict_list[0])    #this portion verifies that file is correct and returns the filepath
+        pres_file_path = verifyUserAddedFile(record_dict)    #this portion verifies that file is correct and returns the filepath
         if not pres_file_path:
             logging.error("There was an error retreiving the file path for the file in folder %s. Please try again" % record_dict_list[0]['RID'])
             quit()
         else:
-            processRecord(pres_file_path, record_dict_list[0])
+            processRecord(pres_file_path, record_dict)
+        if args.b == False:
+            quit()
 
-
-    else:                       #batch mode
-        print(record_dict_list)
 
     logging.critical('========Script Complete========')
 
@@ -247,6 +249,7 @@ def createRecordFolder(record_number):
             return False
     else:
         logging.error('Folder Already Exists. Exiting Script')
+        print("Script exited because of an error. See log for details")
         return False
 
 
