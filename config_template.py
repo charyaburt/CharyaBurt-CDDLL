@@ -16,19 +16,22 @@ CHECKSUM = "[Data] Checksum"
 FILE_PROCESS_STATUS = "[Mnt] File Processing Status"
 
 #Airtable File Metadata Fields
-FILENAME = "filename"
-DURATION = "duration"
-FILE_SIZE_STRING = "file size string"
-FILE_SIZE = "file size"
-FILE_FORMAT = "file format"
-VIDEO_CODEC = "video codec"
-VIDEO_BIT_DEPTH = "video bit depth"
-VIDEO_SCAN_TYPE = "video scan type"
-VIDEO_FRAME_RATE = "video frame rate"
-VIDEO_FRAME_SIZE = "video frame size"
-VIDEO_ASPECT_RATIO = "video aspect ratio"
-AUDIO_SAMPLING_RATE = "audio sampling rate"
-AUDIO_CODEC = "audio codec"
+FILENAME = "[Meta] File Name"
+DURATION = "[Meta] Duration"
+FILE_SIZE_STRING = "[Meta] File Size String"
+FILE_SIZE = "[Meta] File Size Bytes"
+FILE_FORMAT = "[Meta] File Format"
+VIDEO_CODEC = "[Meta] Video Codec"
+VIDEO_BIT_DEPTH = "[Meta] Video Bit Depth"
+VIDEO_SCAN_TYPE = "[Meta] Video Scan Type"
+VIDEO_FRAME_RATE = "[Meta] Video Frame Rate"
+VIDEO_FRAME_SIZE = "[Meta] Video Frame Size"
+VIDEO_ASPECT_RATIO = "[Meta] Video Aspect Ratio"
+AUDIO_SAMPLING_RATE = "[Meta] Audio Sampling Rate"
+AUDIO_CODEC = "[Meta] Audio Codec"
+
+#Various Hardcoded Values
+MAX_SIZE = 5000000000
 
 # Vimeo Credentials
 YOUR_ACCESS_TOKEN = ""
