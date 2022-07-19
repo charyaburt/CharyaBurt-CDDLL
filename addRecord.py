@@ -116,7 +116,7 @@ def processRecord(pres_file_path, record_dict_entry):
         pres_airtable_create_dict[config.COPY_VERSION] = "Master Copy"
         pres_airtable_create_dict[config.USE_FOR_ACCESS] = "Yes"
         if createAirtableFileRecord(pres_airtable_create_dict):
-            logging.error("Finished creating airtable file entries for %s." % record_dict_entry['RID'])
+            logging.info("Finished creating airtable file entries for %s." % record_dict_entry['RID'])
             print("Finished creating airtable file entries for %s." % record_dict_entry['RID'])
             updateAirtableField(record_dict_entry['record_id'],{config.FILE_PROCESS_STATUS: None},record_dict_entry['RID'])   #sets FILE_PROCESS_STATUS to blank because we're done!
         else:
@@ -131,7 +131,7 @@ def processRecord(pres_file_path, record_dict_entry):
         access_airtable_create_dict[config.COPY_VERSION] = "Access Copy"
         access_airtable_create_dict[config.USE_FOR_ACCESS] = "Yes"
         if createAirtableFileRecord(pres_airtable_create_dict) and createAirtableFileRecord(access_airtable_create_dict):
-            logging.error("Finished creating airtable file entries for %s." % record_dict_entry['RID'])
+            logging.info("Finished creating airtable file entries for %s." % record_dict_entry['RID'])
             print("Finished creating airtable file entries for %s." % record_dict_entry['RID'])
             updateAirtableField(record_dict_entry['record_id'],{config.FILE_PROCESS_STATUS: None},record_dict_entry['RID'])   #sets FILE_PROCESS_STATUS to blank because we're done!
         else:
