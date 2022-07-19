@@ -33,6 +33,7 @@ CHECKSUM = "[Data] Checksum"
 COPY_VERSION = "[Accs] Copy Version"
 USE_FOR_ACCESS = "[Accs] Use for Access"
 PARENT_ID = "[Rel] Part of Record"
+FULL_FILE_NAME = "[KEY] Full File Name"
 
 #Various Hardcoded Values
 MAX_SIZE = 5000000000
