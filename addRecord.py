@@ -121,7 +121,7 @@ def checkForAccessFile(airtable_update_dict):
     reason_list = []
     if "Interlaced" in airtable_update_dict[config.VIDEO_SCAN_TYPE]: #needs access file if it's interlaced
         reason_list.append("Interlaced")
-    if int(airtable_update_dict[config.FILE_SIZE]) > 5000000000: #needs access file if it's too big
+    if int(airtable_update_dict[config.FILE_SIZE]) > config.MAX_SIZE: #needs access file if it's too big
         reason_list.append("Large")
     if airtable_update_dict[config.VIDEO_CODEC] == "None": #needs access file if it's too big
         reason_list.append("No Video")
