@@ -186,7 +186,8 @@ def verifyUserAddedFile(record_dict):
     #returns the path to the file if all is good, returns None otherwise
     drive_name = config.DRIVE_NAME
     record_path = os.path.join('/Volumes', drive_name, record_dict['RID'])
-    userInput = input('Please add in the file you would like processing into the folder named %s. Once you have done so you may press any key to continue. You can also type "skip" to cancel. \n\n' % record_dict['RID'])
+    logging.info('Please add in the file you would like processing into the folder named %s. Once you have done so you may press any key to continue. You can also type "skip" to cancel.' % record_dict['RID'])
+    userInput = input('Please add in the file you would like processing into the folder named %s. Once you have done so you may press any key to continue. You can also type "skip" to cancel. \n' % record_dict['RID'])
     if userInput == "skip":
         return None
 
@@ -197,7 +198,8 @@ def verifyUserAddedFile(record_dict):
         if not f.startswith('.'):
             file_list.append(f)
     while len(file_list) == 0:
-        userInput = input('ERROR: No file found in folder named %s. Please add a file to the folder and press any key to continue. You can also type "skip" to cancel. \n\n' % record_dict['RID'])
+        logging.error('No file found in folder named %s. Please add a file to the folder and press any key to continue. You can also type "skip" to cancel.' % record_dict['RID'])
+        userInput = input('ERROR: No file found in folder named %s. Please add a file to the folder and press any key to continue. You can also type "skip" to cancel. \n' % record_dict['RID'])
         if userInput == "skip":
             return None
         file_list = []
@@ -205,7 +207,8 @@ def verifyUserAddedFile(record_dict):
             if not f.startswith('.'):
                 file_list.append(f)
     while len(file_list) > 1:
-        userInput = input('ERROR: %i files found in folder named %s. Make sure only one file is in the folder and press any key to continue. You can also type "skip" to cancel. \n\n' % (len(file_list), record_dict['RID']))
+        logging.error('%i files found in folder named %s. Make sure only one file is in the folder and press any key to continue. You can also type "skip" to cancel.' % (len(file_list), record_dict['RID']))
+        userInput = input('ERROR: %i files found in folder named %s. Make sure only one file is in the folder and press any key to continue. You can also type "skip" to cancel. \n' % (len(file_list), record_dict['RID']))
         if userInput == "skip":
             return None
         file_list = []
@@ -216,7 +219,8 @@ def verifyUserAddedFile(record_dict):
     #This sections makes sure that there are no single or double quotes in the file name
 
     while "\'" in file_list[0] or "\"" in file_list[0] or "`" in file_list[0]:
-        userInput = input('ERROR: The selected file has double quotes, single quotes, apostrophes, or ticks. Please remove these llegalar characters befor continuing. You can also type "skip" to cancel. \n\n')
+        logging.error('The selected file has double quotes, single quotes, apostrophes, or ticks. Please remove these llegalar characters befor continuing. You can also type "skip" to cancel.')
+        userInput = input('ERROR: The selected file has double quotes, single quotes, apostrophes, or ticks. Please remove these llegalar characters befor continuing. You can also type "skip" to cancel. \n')
         if userInput == "skip":
             return None
         file_list = []
