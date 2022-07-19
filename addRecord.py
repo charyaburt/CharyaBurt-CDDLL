@@ -478,8 +478,9 @@ def getAirtablePages(table_name):
 def parseMediaInfo(filePath, media_info_text, RID, parent_id):
     # The following line initializes the dict.
     parent_id_array = [parent_id]   #for some reason airatble needs this as an array.
-    airtable_create_dict = {config.PARENT_ID : parent_id_array, config.FILENAME : "", config.DURATION : "", config.FILE_SIZE_STRING : "", config.FILE_SIZE : "", config.FILE_FORMAT : "", config.VIDEO_CODEC : "", config.VIDEO_BIT_DEPTH : "", config.VIDEO_SCAN_TYPE : "", config.VIDEO_FRAME_RATE : "", config.VIDEO_FRAME_SIZE : "", config.VIDEO_ASPECT_RATIO : "",  config.AUDIO_SAMPLING_RATE : "", config.AUDIO_CODEC : "", config.CHECKSUM : "", config.COPY_VERSION : "", config.USE_FOR_ACCESS : ""}
+    airtable_create_dict = {config.PARENT_ID : parent_id_array, config.FULL_FILE_NAME : "", config.FILENAME : "", config.DURATION : "", config.FILE_SIZE_STRING : "", config.FILE_SIZE : "", config.FILE_FORMAT : "", config.VIDEO_CODEC : "", config.VIDEO_BIT_DEPTH : "", config.VIDEO_SCAN_TYPE : "", config.VIDEO_FRAME_RATE : "", config.VIDEO_FRAME_SIZE : "", config.VIDEO_ASPECT_RATIO : "",  config.AUDIO_SAMPLING_RATE : "", config.AUDIO_CODEC : "", config.CHECKSUM : "", config.COPY_VERSION : "", config.USE_FOR_ACCESS : ""}
     fileNameTemp = os.path.basename(filePath)
+    airtable_create_dict[config.FULL_FILE_NAME] = fileNameTemp
     fileNameExtension = fileNameTemp.split(".")[-1]
     airtable_create_dict[config.FILENAME] = fileNameTemp.split("." + fileNameExtension)[0]
     media_info_text = media_info_text.decode()
