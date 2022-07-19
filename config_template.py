@@ -29,6 +29,10 @@ VIDEO_FRAME_SIZE = "[Meta] Video Frame Size"
 VIDEO_ASPECT_RATIO = "[Meta] Video Frame Ratio"
 AUDIO_SAMPLING_RATE = "[Meta] Audio Sampling Rate"
 AUDIO_CODEC = "[Meta] Audio Codec"
+CHECKSUM = "[Data] Checksum"
+COPY_VERSION = "[Accs] Copy Version"
+USE_FOR_ACCESS = "[Accs] Use for Access"
+PARENT_ID = "[Rel] Part of Record"
 
 #Various Hardcoded Values
 MAX_SIZE = 5000000000
