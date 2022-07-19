@@ -36,7 +36,7 @@ def main():
     verbose_level = levels[min(len(levels)-1,args.verbose)]
 
     logDir = os.getcwd()               # The log will be created at the working directory
-    logName = 'addFile_' + datetime.today().strftime('%Y-%m-%d')  # The script will be named log.log
+    logName = 'addRecord_' + datetime.today().strftime('%Y-%m-%d')  # The script will be named log.log
     logPath = logDir + "/" + logName + ".log"         # This creates the full log path based off the selected options
     LOG_FORMAT = '%(asctime)s - %(levelname)s: %(message)s' #Timestamp - Loglevel: Message
     logger = logging.getLogger()
@@ -99,7 +99,7 @@ def main():
         else:
             processRecord(pres_file_path, record_dict)
         if args.b == False:
-            quit()
+            break
 
 
     logging.critical('========Script Complete========')
