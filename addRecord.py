@@ -94,36 +94,8 @@ def main():
             logging.error("There was an error retreiving the file path for the file in folder %s. Please try again" % record_dict_list[0]['RID'])
             quit()
         else:
-            mediainfo_text = getMediaInfo(pres_file_path)
-            pres_airtable_create_dict = parseMediaInfo(pres_file_path, mediainfo_text, record_dict_list[0]['RID'], record_dict_list[0]['record_id'])
-            reason_list = []       #list of reasons to create access files. is empty if no need for access file
-            reason_list = checkForAccessFile(pres_airtable_create_dict)
-            if not reason_list:
-                logging.info("No access copy needed. Creating airtable entry for file information")
-                pres_airtable_create_dict[config.COPY_VERSION] = "Master Copy"
-                pres_airtable_create_dict[config.USE_FOR_ACCESS] = "Yes"
-                if createAirtableFileRecord(pres_airtable_create_dict):
-                    logging.error("Finished creating airtable file entries for %s." % record_dict_list[0]['RID'])
-                    print("Finished creating airtable file entries for %s." % record_dict_list[0]['RID'])
-                    updateAirtableField(record_dict_list[0]['record_id'],{config.FILE_PROCESS_STATUS: None},record_dict_list[0]['RID'])   #sets FILE_PROCESS_STATUS to blank because we're done!
-                else:
-                    logging.error("Error creating airtable file entries for %s." % record_dict_list[0]['RID'])
-                    print("Error creating airtable file entries for %s. See log for details" % record_dict_list[0]['RID'])
-            else:   #if we need to create an access file, we do the following
-                pres_airtable_create_dict[config.COPY_VERSION] = "Master Copy"
-                pres_airtable_create_dict[config.USE_FOR_ACCESS] = "No"
-                access_file_path = createAccessFile(pres_file_path, pres_airtable_create_dict, reason_list)
-                access_mediainfo_text = getMediaInfo(access_file_path)
-                access_airtable_create_dict = parseMediaInfo(access_file_path, mediainfo_text, record_dict_list[0]['RID'], record_dict_list[0]['record_id'])
-                access_airtable_create_dict[config.COPY_VERSION] = "Access Copy"
-                access_airtable_create_dict[config.USE_FOR_ACCESS] = "Yes"
-                if createAirtableFileRecord(pres_airtable_create_dict) and createAirtableFileRecord(access_airtable_create_dict):
-                    logging.error("Finished creating airtable file entries for %s." % record_dict_list[0]['RID'])
-                    print("Finished creating airtable file entries for %s." % record_dict_list[0]['RID'])
-                    updateAirtableField(record_dict_list[0]['record_id'],{config.FILE_PROCESS_STATUS: None},record_dict_list[0]['RID'])   #sets FILE_PROCESS_STATUS to blank because we're done!
-                else:
-                    logging.error("Error creating airtable file entries for %s." % record_dict_list[0]['RID'])
-                    print("Error creating airtable file entries for %s. See log for details" % record_dict_list[0]['RID'])
+            processRecord(pres_file_path, record_dict_list[0])
+
 
     else:                       #batch mode
         print(record_dict_list)
@@ -131,6 +103,38 @@ def main():
     logging.critical('========Script Complete========')
 
 ## End of main function
+
+def processRecord(pres_file_path, record_dict_entry):
+    mediainfo_text = getMediaInfo(pres_file_path)
+    pres_airtable_create_dict = parseMediaInfo(pres_file_path, mediainfo_text, record_dict_entry['RID'], record_dict_entry['record_id'])
+    reason_list = []       #list of reasons to create access files. is empty if no need for access file
+    reason_list = checkForAccessFile(pres_airtable_create_dict)
+    if not reason_list:
+        logging.info("No access copy needed. Creating airtable entry for file information")
+        pres_airtable_create_dict[config.COPY_VERSION] = "Master Copy"
+        pres_airtable_create_dict[config.USE_FOR_ACCESS] = "Yes"
+        if createAirtableFileRecord(pres_airtable_create_dict):
+            logging.error("Finished creating airtable file entries for %s." % record_dict_entry['RID'])
+            print("Finished creating airtable file entries for %s." % record_dict_entry['RID'])
+            updateAirtableField(record_dict_entry['record_id'],{config.FILE_PROCESS_STATUS: None},record_dict_entry['RID'])   #sets FILE_PROCESS_STATUS to blank because we're done!
+        else:
+            logging.error("Error creating airtable file entries for %s." % record_dict_entry['RID'])
+            print("Error creating airtable file entries for %s. See log for details" % record_dict_entry['RID'])
+    else:   #if we need to create an access file, we do the following
+        pres_airtable_create_dict[config.COPY_VERSION] = "Master Copy"
+        pres_airtable_create_dict[config.USE_FOR_ACCESS] = "No"
+        access_file_path = createAccessFile(pres_file_path, pres_airtable_create_dict, reason_list)
+        access_mediainfo_text = getMediaInfo(access_file_path)
+        access_airtable_create_dict = parseMediaInfo(access_file_path, mediainfo_text, record_dict_entry['RID'], record_dict_entry['record_id'])
+        access_airtable_create_dict[config.COPY_VERSION] = "Access Copy"
+        access_airtable_create_dict[config.USE_FOR_ACCESS] = "Yes"
+        if createAirtableFileRecord(pres_airtable_create_dict) and createAirtableFileRecord(access_airtable_create_dict):
+            logging.error("Finished creating airtable file entries for %s." % record_dict_entry['RID'])
+            print("Finished creating airtable file entries for %s." % record_dict_entry['RID'])
+            updateAirtableField(record_dict_entry['record_id'],{config.FILE_PROCESS_STATUS: None},record_dict_entry['RID'])   #sets FILE_PROCESS_STATUS to blank because we're done!
+        else:
+            logging.error("Error creating airtable file entries for %s." % record_dict_entry['RID'])
+            print("Error creating airtable file entries for %s. See log for details" % record_dict_entry['RID'])
 
 def checkForAccessFile(airtable_create_dict):
     reason_list = []
