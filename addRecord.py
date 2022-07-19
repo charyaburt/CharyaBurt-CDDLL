@@ -107,8 +107,8 @@ def main():
 ## End of main function
 
 def processRecord(pres_file_path, record_dict_entry):
-    mediainfo_text = getMediaInfo(pres_file_path)
-    pres_airtable_create_dict = parseMediaInfo(pres_file_path, mediainfo_text, record_dict_entry['RID'], record_dict_entry['record_id'])
+    pres_mediainfo_text = getMediaInfo(pres_file_path)
+    pres_airtable_create_dict = parseMediaInfo(pres_file_path, pres_mediainfo_text, record_dict_entry['RID'], record_dict_entry['record_id'])
     reason_list = []       #list of reasons to create access files. is empty if no need for access file
     reason_list = checkForAccessFile(pres_airtable_create_dict)
     if not reason_list:
@@ -127,7 +127,7 @@ def processRecord(pres_file_path, record_dict_entry):
         pres_airtable_create_dict[config.USE_FOR_ACCESS] = "No"
         access_file_path = createAccessFile(pres_file_path, pres_airtable_create_dict, reason_list)
         access_mediainfo_text = getMediaInfo(access_file_path)
-        access_airtable_create_dict = parseMediaInfo(access_file_path, mediainfo_text, record_dict_entry['RID'], record_dict_entry['record_id'])
+        access_airtable_create_dict = parseMediaInfo(access_file_path, access_mediainfo_text, record_dict_entry['RID'], record_dict_entry['record_id'])
         access_airtable_create_dict[config.COPY_VERSION] = "Access Copy"
         access_airtable_create_dict[config.USE_FOR_ACCESS] = "Yes"
         if createAirtableFileRecord(pres_airtable_create_dict) and createAirtableFileRecord(access_airtable_create_dict):
