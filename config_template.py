@@ -31,7 +31,7 @@ AUDIO_SAMPLING_RATE = "Audio Sampling Rate"
 AUDIO_CODEC = "Audio Codec"
 CHECKSUM = "Checksum"
 COPY_VERSION = "Access Copy Version"
-USE_FOR_ACCESS = "Use for Access"
+#USE_FOR_ACCESS = "Use for Access"  #no longer needed
 PARENT_ID = "Part of Record"
 FULL_FILE_NAME = "Full File Name"
 
