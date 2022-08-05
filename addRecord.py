@@ -186,8 +186,8 @@ def verifyUserAddedFile(record_dict):
     #returns the path to the file if all is good, returns None otherwise
     drive_name = config.DRIVE_NAME
     record_path = os.path.join('/Volumes', drive_name, record_dict['RID'])
-    logging.info('Please add in the file you would like processing into the folder named %s. Once you have done so you may press any key to continue. You can also type "skip" to cancel.' % record_dict['RID'])
-    userInput = input('Please add in the file you would like processing into the folder named %s. Once you have done so you may press any key to continue. You can also type "skip" to cancel. \n' % record_dict['RID'])
+    logging.info('Please add in the file you would like processing into the folder named %s. Once you have done so you may press enter to continue. You can also type "skip" to cancel.' % record_dict['RID'])
+    userInput = input('Please add in the file you would like processing into the folder named %s. Once you have done so you may press enter to continue. You can also type "skip" to cancel. \n' % record_dict['RID'])
     if userInput == "skip":
         return None
 
