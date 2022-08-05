@@ -434,36 +434,52 @@ def parseMediaInfo(filePath, media_info_text, RID, parent_id):
     airtable_create_dict[config.FILENAME] = fileNameTemp.split("." + fileNameExtension)[0]
     media_info_text = media_info_text.decode()
     logging.info("Parsing mediainfo for file: %s" % airtable_create_dict[config.FILENAME])
+    file_type = None
 
     try:
         mi_General_Text = (media_info_text.split("<track type=\"General\">"))[1].split("</track>")[0]
 
         try:
             mi_Video_Text = (media_info_text.split("<track type=\"Video\">"))[1].split("</track>")[0]
+            file_type = "Video"
         except:
-            logging.warning('Could not parse video track for file %s. If this file is supposed to have video it may be corrupted. The file will be processed as an audio only file' %  airtable_create_dict[config.FILENAME])
-            airtable_create_dict[config.VIDEO_CODEC] = "None"
-            airtable_create_dict[config.VIDEO_BIT_DEPTH] = "None"
-            airtable_create_dict[config.VIDEO_SCAN_TYPE] = "None"
-            airtable_create_dict[config.VIDEO_FRAME_RATE] = "None"
-            airtable_create_dict[config.VIDEO_FRAME_SIZE] = "None"
-            airtable_create_dict[config.VIDEO_ASPECT_RATIO] = "None"
-        try:
-            mi_Audio_Text = (media_info_text.split("<track type=\"Audio\">"))[1].split("</track>")[0]
-        except:
-            logging.warning('Could not parse audio track for file %s. If this file is supposed to have audio it may be corrupted. This will be processed as a Video Only file' %  airtable_create_dict[config.FILENAME])
-            airtable_create_dict[config.AUDIO_CODEC] = "None"
-            airtable_create_dict[config.AUDIO_SAMPLING_RATE] = "None"
+            try:
+                mi_Image_Text = (media_info_text.split("<track type=\"Image\">"))[1].split("</track>")[0]
+                logging.info('Image file detected. The file %s will be processed as an image only file' %  airtable_create_dict[config.FILENAME])
+                file_type = "Image"
+                airtable_create_dict[config.VIDEO_CODEC] = "None"
+                airtable_create_dict[config.DURATION] = "None"
+                airtable_create_dict[config.VIDEO_BIT_DEPTH] = "None"
+                airtable_create_dict[config.VIDEO_SCAN_TYPE] = "None"
+                airtable_create_dict[config.VIDEO_FRAME_RATE] = "None"
+                airtable_create_dict[config.VIDEO_ASPECT_RATIO] = "None"
+                airtable_create_dict[config.AUDIO_CODEC] = "None"
+                airtable_create_dict[config.AUDIO_SAMPLING_RATE] = "None"
+            except:
+                logging.warning('Could not parse video track for file %s. If this file is supposed to have video it may be corrupted. The file will be processed as an audio only file' %  airtable_create_dict[config.FILENAME])
+                file_type = "Audio"
+                airtable_create_dict[config.VIDEO_CODEC] = "None"
+                airtable_create_dict[config.VIDEO_BIT_DEPTH] = "None"
+                airtable_create_dict[config.VIDEO_FRAME_SIZE] = "None"
+        if file_type != "Image":
+            try:
+                mi_Audio_Text = (media_info_text.split("<track type=\"Audio\">"))[1].split("</track>")[0]
+            except:
+                logging.warning('Could not parse audio track for file %s. If this file is supposed to have audio it may be corrupted. This will be processed as a Video Only file' %  airtable_create_dict[config.FILENAME])
+                file_type = "Silent"
+                airtable_create_dict[config.AUDIO_CODEC] = "None"
+                airtable_create_dict[config.AUDIO_SAMPLING_RATE] = "None"
 
     except:
         logging.error("MEDIAINFO ERROR: Could not parse tracks for " + airtable_create_dict[config.FILENAME])
 
     # General Stuff
 
-    try:
-        airtable_create_dict[config.DURATION] = (mi_General_Text.split("<Duration_String3>"))[1].split("</Duration_String3>")[0]
-    except:
-        logging.error("MEDIAINFO ERROR: Could not parse Duration for " + airtable_create_dict[config.FILENAME])
+    if file_type != "Image":
+        try:
+            airtable_create_dict[config.DURATION] = (mi_General_Text.split("<Duration_String3>"))[1].split("</Duration_String3>")[0]
+        except:
+            logging.error("MEDIAINFO ERROR: Could not parse Duration for " + airtable_create_dict[config.FILENAME])
     try:
         airtable_create_dict[config.FILE_FORMAT] = (mi_General_Text.split("<Format_String>"))[1].split("</Format_String>")[0]
     except:
@@ -525,6 +541,18 @@ def parseMediaInfo(filePath, media_info_text, RID, parent_id):
                 airtable_create_dict[config.AUDIO_CODEC] = (mi_Audio_Text.split("<Format>"))[1].split("</Format>")[0]
             except:
                 logging.error("MEDIAINFO ERROR: Could not parse Audio Track Encoding for " + airtable_create_dict[config.FILENAME])
+
+    #image Stuff
+    if file_type == "Image":
+        try:
+            frame_width = (mi_Image_Text.split("<Width>"))[1].split("</Width>")[0]
+        except:
+            logging.error("MEDIAINFO ERROR: Could not parse Image Width for " + airtable_create_dict[config.FILENAME])
+        try:
+            frame_height = (mi_Image_Text.split("<Height>"))[1].split("</Height>")[0]
+        except:
+            logging.error("MEDIAINFO ERROR: Could not parse Image Height for " + airtable_create_dict[config.FILENAME])
+        airtable_create_dict[config.VIDEO_FRAME_SIZE] = frame_width + "x" + frame_height
 
     #No longer harvesting checksum during this process, doing so after the records are updated
     #try:
