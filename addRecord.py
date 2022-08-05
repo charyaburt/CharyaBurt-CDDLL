@@ -163,7 +163,7 @@ def createAccessFile(filePath, airtable_create_dict, reason_list):
     #creates access file. returns access file path
     fileNameExtension = filePath.split(".")[-1]
     accessFilePath = filePath.split("." + fileNameExtension)[0] + "_access.mp4"
-    ffmpeg_base = "/usr/local/bin/ffmpeg -hide_banner -loglevel panic -i "
+    ffmpeg_base = config.FFMPEG_PATH + " -hide_banner -loglevel panic -i "
     ffmpeg_middle = ""
     if "No Video" in reason_list:
         logging.info('File %s has no video, creating a video version for access file.' % airtable_create_dict[config.FILENAME])
@@ -188,7 +188,7 @@ def createAccessFile(filePath, airtable_create_dict, reason_list):
     #ffmpeg -i input.mp4 -filter_complex "[0:a]showwaves=s=1280x720,format=yuv420p[vid]" -map "[vid]" -map 0:a -codec:v libx264 -crf 18 -preset fast -codec:a aac -strict -2 -b:a 192k output.mp4
 
 def getMediaInfo(filePath):
-    cmd = [ '/usr/local/bin/mediainfo', '-f', '--Output=XML', filePath ]
+    cmd = [ config.MEDIAINFO_PATH, '-f', '--Output=XML', filePath ]
     media_info = subprocess.Popen( cmd, stdout=subprocess.PIPE ).communicate()[0]
     return media_info
 
