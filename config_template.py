@@ -1,5 +1,6 @@
 # General Config Info
 DRIVE_NAME = ""   #The name of the hard drive the archive is on. This will change if you plug in a backup drive
+BACKUP_DRIVE_NAME = "" #The name of the backup drive
 
 # Airtable Credentials and Config
 BASE_ID = ""
