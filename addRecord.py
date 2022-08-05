@@ -93,11 +93,21 @@ def main():
         logging.info("Running in batch mode!")
     for record_dict in record_dict_list:
         if not createRecordFolder(record_dict['RID']):  #quit upon error
-            quit()
+            if post_process_list == []:
+                quit()
+            else:
+                break
         pres_file_path = verifyUserAddedFile(record_dict)    #this portion verifies that file is correct and returns the filepath
         if not pres_file_path:
             logging.error("There was an error retreiving the file path for the file in folder %s. Please try again" % record_dict_list[0]['RID'])
             quit()
+        elif pres_file_path == "IMAGES":        #process as group of images
+            image_list = verifyImageFiles(record_dict)
+            if len(image_list) > 0:
+                for image_path in image_list:
+                    print(image_path)
+                    file_id = processRecord(image_path, record_dict)
+                    post_process_list.append({"file_id": file_id, "post_file_path": image_path, "post_RID": record_dict['RID']})
         else:
             file_id = processRecord(pres_file_path, record_dict)
             post_process_list.append({"file_id": file_id, "post_file_path": pres_file_path, "post_RID": record_dict['RID']})
@@ -192,15 +202,88 @@ def getMediaInfo(filePath):
     media_info = subprocess.Popen( cmd, stdout=subprocess.PIPE ).communicate()[0]
     return media_info
 
+def verifyImageFiles(record_dict):
+    #Verifies that the image files in the folder conform to proper specifications
+    #returns the path to the file if all is good, returns None otherwise
+    #This first section makes sure that only one file is in the folder
+    drive_name = config.DRIVE_NAME
+    record_path = os.path.join('/Volumes', drive_name, record_dict['RID'])
+    file_list = []
+
+    for f in os.listdir(record_path):
+        if not f.startswith('.'):
+            pres_mediainfo_text = getMediaInfo(os.path.join(record_path,f))
+            if "track type=\"Image\"" in pres_mediainfo_text.decode():
+                file_list.append(os.path.join(record_path,f))
+
+    #This sections makes sure that there are no single or double quotes in the file name
+
+    while file_list == []:
+        logging.error('No images found in folder %s. please check the files, and press Enter to try again. You can also type "skip" to cancel.' % record_dict['RID'])
+        userInput = input('ERROR: No images found in folder %s. please check the files and press Enter to try again. You can also type "skip" to cancel. \n' % record_dict['RID'])
+        if userInput == "skip":
+            return None
+        for f in os.listdir(record_path):
+            if not f.startswith('.'):
+                pres_mediainfo_text = getMediaInfo(os.path.join(record_path,f))
+                if "track type=\"Image\"" in pres_mediainfo_text.decode():
+                    file_list.append(os.path.join(record_path,f))
+
+
+
+    while any("\'" in s for s in file_list):
+        bad_char = True
+        logging.error('A file has single quotes. Please remove these illegal characters before continuing. You can also type "skip" to cancel.')
+        userInput = input('ERROR: A file has single quotes. Please remove these illegal characters before continuing. You can also type "skip" to cancel. \n')
+        if userInput == "skip":
+            return None
+        file_list = []
+        for f in os.listdir(record_path):
+            if not f.startswith('.'):
+                pres_mediainfo_text = getMediaInfo(os.path.join(record_path,f))
+                if "track type=\"Image\"" in pres_mediainfo_text.decode():
+                    file_list.append(os.path.join(record_path,f))
+
+    while any("\"" in s for s in file_list):
+        bad_char = True
+        logging.error('A file has double quotes. Please remove these illegal characters before continuing. You can also type "skip" to cancel.')
+        userInput = input('ERROR: A file has double quotes. Please remove these illegal characters before continuing. You can also type "skip" to cancel. \n')
+        if userInput == "skip":
+            return None
+        file_list = []
+        for f in os.listdir(record_path):
+            if not f.startswith('.'):
+                pres_mediainfo_text = getMediaInfo(os.path.join(record_path,f))
+                if "track type=\"Image\"" in pres_mediainfo_text.decode():
+                    file_list.append(os.path.join(record_path,f))
+
+    while any("`" in s for s in file_list):
+        bad_char = True
+        logging.error('A file has a backtick in it. Please remove these illegal characters before continuing. You can also type "skip" to cancel.')
+        userInput = input('ERROR: A file has a backtick in it. Please remove these illegal characters before continuing. You can also type "skip" to cancel. \n')
+        if userInput == "skip":
+            return None
+        file_list = []
+        for f in os.listdir(record_path):
+            if not f.startswith('.'):
+                pres_mediainfo_text = getMediaInfo(os.path.join(record_path,f))
+                if "track type=\"Image\"" in pres_mediainfo_text.decode():
+                    file_list.append(os.path.join(record_path,f))
+
+
+    return file_list
+
 def verifyUserAddedFile(record_dict):
     #Verifies that the file added by the user conforms to proper specifications
     #returns the path to the file if all is good, returns None otherwise
     drive_name = config.DRIVE_NAME
     record_path = os.path.join('/Volumes', drive_name, record_dict['RID'])
     logging.info('Please add in the file you would like processing into the folder named %s. Once you have done so you may press enter to continue. You can also type "skip" to cancel.' % record_dict['RID'])
-    userInput = input('Please add in the file you would like processing into the folder named %s. Once you have done so you may press enter to continue. You can also type "skip" to cancel. \n' % record_dict['RID'])
+    userInput = input('Please add in the file you would like processing into the folder named %s. Once you have done so you may press enter to continue. If you want to upload multiple images you need to type "IMAGES" and press enter. You can also type "skip" to cancel. \n' % record_dict['RID'])
     if userInput == "skip":
         return None
+    if "image" in userInput.lower():
+        return "IMAGES"
 
     #This first section makes sure that only one file is in the folder
 
@@ -219,7 +302,9 @@ def verifyUserAddedFile(record_dict):
                 file_list.append(f)
     while len(file_list) > 1:
         logging.error('%i files found in folder named %s. Make sure only one file is in the folder and press any key to continue. You can also type "skip" to cancel.' % (len(file_list), record_dict['RID']))
-        userInput = input('ERROR: %i files found in folder named %s. Make sure only one file is in the folder and press any key to continue. You can also type "skip" to cancel. \n' % (len(file_list), record_dict['RID']))
+        userInput = input('ERROR: %i files found in folder named %s. Make sure only one file is in the folder and press any key to continue. If you want to upload images you need to type "IMAGES" and press enter. You can also type "skip" to cancel. \n' % (len(file_list), record_dict['RID']))
+        if "image" in userInput.lower():
+            return "IMAGES"
         if userInput == "skip":
             return None
         file_list = []
@@ -230,8 +315,8 @@ def verifyUserAddedFile(record_dict):
     #This sections makes sure that there are no single or double quotes in the file name
 
     while "\'" in file_list[0] or "\"" in file_list[0] or "`" in file_list[0]:
-        logging.error('The selected file has double quotes, single quotes, apostrophes, or ticks. Please remove these llegalar characters befor continuing. You can also type "skip" to cancel.')
-        userInput = input('ERROR: The selected file has double quotes, single quotes, apostrophes, or ticks. Please remove these llegalar characters befor continuing. You can also type "skip" to cancel. \n')
+        logging.error('The selected file has double quotes, single quotes, apostrophes, or ticks. Please remove these illegal characters befor continuing. You can also type "skip" to cancel.')
+        userInput = input('ERROR: The selected file has double quotes, single quotes, apostrophes, or ticks. Please remove these illegal characters befor continuing. You can also type "skip" to cancel. \n')
         if userInput == "skip":
             return None
         file_list = []
@@ -436,6 +521,7 @@ def parseMediaInfo(filePath, media_info_text, RID, parent_id):
     logging.info("Parsing mediainfo for file: %s" % airtable_create_dict[config.FILENAME])
     file_type = None
 
+
     try:
         mi_General_Text = (media_info_text.split("<track type=\"General\">"))[1].split("</track>")[0]
 
@@ -470,7 +556,7 @@ def parseMediaInfo(filePath, media_info_text, RID, parent_id):
                 airtable_create_dict[config.AUDIO_CODEC] = "None"
                 airtable_create_dict[config.AUDIO_SAMPLING_RATE] = "None"
 
-    except:
+    except Exception as e:
         logging.error("MEDIAINFO ERROR: Could not parse tracks for " + airtable_create_dict[config.FILENAME])
 
     # General Stuff
