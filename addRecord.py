@@ -87,6 +87,8 @@ def main():
         logging.info("No records are labeled as ready to update in Airtable (Intaking Local Data File). Please make sure to follow the proper workflow for adding a record to Airtable and try again")
         quit()
 
+    post_process_list = []
+
     if args.b == True:
         logging.info("Running in batch mode!")
     for record_dict in record_dict_list:
@@ -97,48 +99,57 @@ def main():
             logging.error("There was an error retreiving the file path for the file in folder %s. Please try again" % record_dict_list[0]['RID'])
             quit()
         else:
-            processRecord(pres_file_path, record_dict)
+            file_id = processRecord(pres_file_path, record_dict)
+            post_process_list.append({"file_id": file_id, "post_file_path": pres_file_path, "post_RID": record_dict['RID']})
         if args.b == False:
             break
 
+    logging.info("Processing checksums, this may take a while, check back in a few minutes")
+    for post_process_dict in post_process_list:
+        file_checksum = generateHash(post_process_dict["post_file_path"])
+        updateAirtableField(post_process_dict["file_id"], {config.CHECKSUM: file_checksum}, post_process_dict["post_RID"], "Files")
 
     logging.critical('========Script Complete========')
 
 ## End of main function
 
 def processRecord(pres_file_path, record_dict_entry):
+    #returns the record id, which we need later for updating the checksum
     pres_mediainfo_text = getMediaInfo(pres_file_path)
     pres_airtable_create_dict = parseMediaInfo(pres_file_path, pres_mediainfo_text, record_dict_entry['RID'], record_dict_entry['record_id'])
-    reason_list = []       #list of reasons to create access files. is empty if no need for access file
-    reason_list = checkForAccessFile(pres_airtable_create_dict)
-    if not reason_list:
-        logging.info("No access copy needed. Creating airtable entry for file information")
-        pres_airtable_create_dict[config.COPY_VERSION] = "Master Copy"
-        pres_airtable_create_dict[config.USE_FOR_ACCESS] = "Yes"
-        if createAirtableFileRecord(pres_airtable_create_dict):
-            logging.info("Finished creating airtable file entries for %s." % record_dict_entry['RID'])
-            print("Finished creating airtable file entries for %s." % record_dict_entry['RID'])
-            updateAirtableField(record_dict_entry['record_id'],{config.FILE_PROCESS_STATUS: None},record_dict_entry['RID'])   #sets FILE_PROCESS_STATUS to blank because we're done!
-        else:
-            logging.error("Error creating airtable file entries for %s." % record_dict_entry['RID'])
-            print("Error creating airtable file entries for %s. See log for details" % record_dict_entry['RID'])
-    else:   #if we need to create an access file, we do the following
-        pres_airtable_create_dict[config.COPY_VERSION] = "Master Copy"
-        pres_airtable_create_dict[config.USE_FOR_ACCESS] = "No"
-        access_file_path = createAccessFile(pres_file_path, pres_airtable_create_dict, reason_list)
-        access_mediainfo_text = getMediaInfo(access_file_path)
-        access_airtable_create_dict = parseMediaInfo(access_file_path, access_mediainfo_text, record_dict_entry['RID'], record_dict_entry['record_id'])
-        access_airtable_create_dict[config.COPY_VERSION] = "Access Copy"
-        access_airtable_create_dict[config.USE_FOR_ACCESS] = "Yes"
-        if createAirtableFileRecord(pres_airtable_create_dict) and createAirtableFileRecord(access_airtable_create_dict):
-            logging.info("Finished creating airtable file entries for %s." % record_dict_entry['RID'])
-            print("Finished creating airtable file entries for %s." % record_dict_entry['RID'])
-            updateAirtableField(record_dict_entry['record_id'],{config.FILE_PROCESS_STATUS: None},record_dict_entry['RID'])   #sets FILE_PROCESS_STATUS to blank because we're done!
-        else:
-            logging.error("Error creating airtable file entries for %s." % record_dict_entry['RID'])
-            print("Error creating airtable file entries for %s. See log for details" % record_dict_entry['RID'])
+    #reason_list = []       #list of reasons to create access files. is empty if no need for access file
+    #reason_list = checkForAccessFile(pres_airtable_create_dict)
+    #if not reason_list:
+    #    logging.info("No access copy needed. Creating airtable entry for file information")
+    pres_airtable_create_dict[config.COPY_VERSION] = "Master Copy"
+    #pres_airtable_create_dict[config.USE_FOR_ACCESS] = "Yes"
+    file_record = createAirtableFileRecord(pres_airtable_create_dict)
+    if file_record != False:
+        logging.info("Finished creating airtable file entries for %s." % record_dict_entry['RID'])
+        print("Finished creating airtable file entries for %s." % record_dict_entry['RID'])
+        updateAirtableField(record_dict_entry['record_id'],{config.FILE_PROCESS_STATUS: None},record_dict_entry['RID'], "Records")   #sets FILE_PROCESS_STATUS to blank because we're done!
+    else:
+        logging.error("Error creating airtable file entries for %s." % record_dict_entry['RID'])
+        print("Error creating airtable file entries for %s. See log for details" % record_dict_entry['RID'])
+    #else:   #if we need to create an access file, we do the following
+    #    pres_airtable_create_dict[config.COPY_VERSION] = "Master Copy"
+    #    pres_airtable_create_dict[config.USE_FOR_ACCESS] = "No"
+    #    access_file_path = createAccessFile(pres_file_path, pres_airtable_create_dict, reason_list)
+    #    access_mediainfo_text = getMediaInfo(access_file_path)
+    #    access_airtable_create_dict = parseMediaInfo(access_file_path, access_mediainfo_text, record_dict_entry['RID'], record_dict_entry['record_id'])
+    #    access_airtable_create_dict[config.COPY_VERSION] = "Access Copy"
+    #    access_airtable_create_dict[config.USE_FOR_ACCESS] = "Yes"
+    #    if createAirtableFileRecord(pres_airtable_create_dict) and createAirtableFileRecord(access_airtable_create_dict):
+    #        logging.info("Finished creating airtable file entries for %s." % record_dict_entry['RID'])
+    #        print("Finished creating airtable file entries for %s." % record_dict_entry['RID'])
+    #        updateAirtableField(record_dict_entry['record_id'],{config.FILE_PROCESS_STATUS: None},record_dict_entry['RID'], "Records")   #sets FILE_PROCESS_STATUS to blank because we're done!
+    #    else:
+    #        logging.error("Error creating airtable file entries for %s." % record_dict_entry['RID'])
+    #        print("Error creating airtable file entries for %s. See log for details" % record_dict_entry['RID'])
+    return file_record["id"]
 
 def checkForAccessFile(airtable_create_dict):
+    # NOT USING THIS ANYMORE IN THIS SCRIPT. MOVING TO UPLOAD SCRIPT
     reason_list = []
     if "Interlaced" in airtable_create_dict[config.VIDEO_SCAN_TYPE]: #needs access file if it's interlaced
         reason_list.append("Interlaced")
@@ -230,13 +241,13 @@ def verifyUserAddedFile(record_dict):
 
     return os.path.join('/Volumes', drive_name, record_dict['RID'], file_list[0])
 
-def updateAirtableField(record_id, update_dict, RID):
-    airtable = Airtable(config.BASE_ID, "Records", config.API_KEY)
+def updateAirtableField(record_id, update_dict, RID, Table):
+    airtable = Airtable(config.BASE_ID, Table, config.API_KEY)
     try:
         airtable.update(record_id, update_dict)
-        logging.info('Succesfully updated field \'%s\' for record %s ' % (str(list(update_dict.keys())[0]), RID))
+        logging.info('Succesfully updated field in table %s \'%s\' for record %s ' % (Table, str(list(update_dict.keys())[0]), RID))
     except Exception as e:
-        logging.error('Could not updated field \'%s\' for record %s ' % (str(list(update_dict.keys())[0]), RID))
+        logging.error('Could not updated field in table %s \'%s\' for record %s ' % (Table, str(list(update_dict.keys())[0]), RID))
         logging.error('%s' % e)
 
 def createRecordFolder(record_number):
@@ -244,6 +255,10 @@ def createRecordFolder(record_number):
     logging.info('Creating folder for record: %s.' % record_number)
     drive_name = config.DRIVE_NAME
     newpath = os.path.join('/Volumes', drive_name, record_number)
+    drivepath = os.path.join('/Volumes', drive_name)
+    if not os.path.exists(drivepath):
+        logging.error('Drive not found. Check that drive is mounted and make sure drive name is correct in config.py')
+        return False
     if not os.path.exists(newpath):
         try:
             os.makedirs(newpath)
@@ -277,79 +292,6 @@ def findRecordToAdd():
 
     record_dict_list_sorted = sorted(record_dict_list, key=lambda d: d['RID'])
     return record_dict_list_sorted
-
-def addToArchive(airtable, drive_name, recordID, file_path):
-    # This script collects the checksum and filename info and puts it in airtable, then moves the file to the correct location
-    # This part finds the airtable record ID so we can updated the filename and checksum info
-    file_name = os.path.basename(file_path)
-    pages = airtable.get_iter()
-    for page in pages:
-        for record in page:
-            if record['fields']['Unique ID'] == recordID:     #only process records that are in the library
-                record_airtable_id = record['id']
-                try:                                        #Need to have an try/except here because airtable errors if the field is empty. This is in case there is no Group
-                    record_airtable_group = record['fields']['Group']
-                except Exception as e:
-                    record_airtable_group = ""
-
-    if record_airtable_group == "":                             #In case there is no Group, we don't want an extra slash
-        new_group_path = None
-        new_record_path = os.path.join('/Volumes', drive_name, recordID)
-        new_file_path = os.path.join('/Volumes', drive_name, recordID, file_name)
-    else:
-        new_group_path = os.path.join('/Volumes', drive_name, record_airtable_group)
-        new_record_path = os.path.join('/Volumes', drive_name, record_airtable_group, recordID)
-        new_file_path = os.path.join('/Volumes', drive_name, record_airtable_group, recordID, file_name)
-
-    logging.info('Generating checksum for record ID: %s' % recordID)
-    checksum = generateHash(file_path)
-    logging.info('Checksum generating completed!')
-    checksum_update_dict = {'Checksum': checksum}
-    filename_update_dict = {'File Name': file_name}
-    on_drive_update_dict = {'On Drive': "Yes"}
-    in_library_update_dict = {'In Library': "Yes"}
-
-    #Check to see if group folder exists, if not creates it
-    if new_group_path == None:
-        logging.info('No group selected for this record. Record folder will exist at the root level of the drive')
-    elif os.path.isdir(new_group_path):
-        logging.info('Group folder already exists')
-    else:
-        logging.info('Group folder does not exist. Creating it now')
-        os.makedirs(new_group_path, exist_ok=False)
-        logging.info('Sucess creating Group folder')
-
-    #Check to see if record folder exists, if not creates it. if it exist and the file is already there it quits because that's not supposed to happen
-    if os.path.isdir(new_record_path):
-        logging.warning('Record ID Folder Already Exists')
-        if os.path.isfile(new_file_path):
-            logging.error('File already exists in the archive! Quitting Now')
-            logging.critical('========Script Complete========')
-            quit()
-    else:
-        os.makedirs(new_record_path, exist_ok=False)
-
-    #Move the file to the drive
-    try:    #doing the move in a try block just in case
-        shutil.move(file_path,new_record_path)
-        logging.info('Sucess moving file to drive')
-    except Exception as e:
-        logging.error('Failed to move file to drive. Quitting Now')
-        logging.critical('========Script Complete========')
-        quit()
-
-    #now that we've succesfully put the file on the drive, let's put the filename and checksum in airtable
-    updateRecord(airtable, record_airtable_id, checksum_update_dict, recordID, 'Checksum')
-    updateRecord(airtable, record_airtable_id, filename_update_dict, recordID, config.FILENAME)
-    updateRecord(airtable, record_airtable_id, on_drive_update_dict, recordID, 'On Drive')
-    updateRecord(airtable, record_airtable_id, in_library_update_dict, recordID, 'In Library')
-
-def updateRecord(airtable, record_airtable_id, update_dict, UID, field_name):
-    try:
-        airtable.update(record_airtable_id, update_dict)
-        logging.info('Succesfully updated %s for Record ID: %s ' % (field_name, UID))
-    except Exception as e:
-        logging.error('Could not updated %s for record %s' % (field_name, UID))
 
 
 def generateHash(inputFile, blocksize=65536):
@@ -485,7 +427,7 @@ def getAirtablePages(table_name):
 def parseMediaInfo(filePath, media_info_text, RID, parent_id):
     # The following line initializes the dict.
     parent_id_array = [parent_id]   #for some reason airatble needs this as an array.
-    airtable_create_dict = {config.PARENT_ID : parent_id_array, config.FULL_FILE_NAME : "", config.FILENAME : "", config.DURATION : "", config.FILE_SIZE_STRING : "", config.FILE_SIZE : "", config.FILE_FORMAT : "", config.VIDEO_CODEC : "", config.VIDEO_BIT_DEPTH : "", config.VIDEO_SCAN_TYPE : "", config.VIDEO_FRAME_RATE : "", config.VIDEO_FRAME_SIZE : "", config.VIDEO_ASPECT_RATIO : "",  config.AUDIO_SAMPLING_RATE : "", config.AUDIO_CODEC : "", config.CHECKSUM : "", config.COPY_VERSION : "", config.USE_FOR_ACCESS : ""}
+    airtable_create_dict = {config.PARENT_ID : parent_id_array, config.FULL_FILE_NAME : "", config.FILENAME : "", config.DURATION : "", config.FILE_SIZE_STRING : "", config.FILE_SIZE : "", config.FILE_FORMAT : "", config.VIDEO_CODEC : "", config.VIDEO_BIT_DEPTH : "", config.VIDEO_SCAN_TYPE : "", config.VIDEO_FRAME_RATE : "", config.VIDEO_FRAME_SIZE : "", config.VIDEO_ASPECT_RATIO : "",  config.AUDIO_SAMPLING_RATE : "", config.AUDIO_CODEC : "", config.COPY_VERSION : ""}
     fileNameTemp = os.path.basename(filePath)
     airtable_create_dict[config.FULL_FILE_NAME] = fileNameTemp
     fileNameExtension = fileNameTemp.split(".")[-1]
@@ -565,10 +507,10 @@ def parseMediaInfo(filePath, media_info_text, RID, parent_id):
 
         airtable_create_dict[config.VIDEO_FRAME_SIZE] = frame_width + "x" + frame_height
 
-    try:
-        airtable_create_dict[config.VIDEO_ASPECT_RATIO] = (mi_Video_Text.split("<DisplayAspectRatio_String>"))[1].split("</DisplayAspectRatio_String>")[0]
-    except:
-        print("MEDIAINFO ERROR: Could not parse Display Aspect Rastio for " + airtable_create_dict[config.FILENAME])
+        try:
+            airtable_create_dict[config.VIDEO_ASPECT_RATIO] = (mi_Video_Text.split("<DisplayAspectRatio_String>"))[1].split("</DisplayAspectRatio_String>")[0]
+        except:
+            print("MEDIAINFO ERROR: Could not parse Display Aspect Ratio for " + airtable_create_dict[config.FILENAME])
 
         # Audio Stuff
     if not airtable_create_dict[config.AUDIO_CODEC] == "None":
@@ -584,18 +526,18 @@ def parseMediaInfo(filePath, media_info_text, RID, parent_id):
             except:
                 logging.error("MEDIAINFO ERROR: Could not parse Audio Track Encoding for " + airtable_create_dict[config.FILENAME])
 
-    try:
-        airtable_create_dict[config.CHECKSUM] = generateHash(filePath)
-    except:
-        logging.error("MEDIAINFO ERROR: Could not generate checksum for " + airtable_create_dict[config.FILENAME])
+    #No longer harvesting checksum during this process, doing so after the records are updated
+    #try:
+    #    airtable_create_dict[config.CHECKSUM] = generateHash(filePath)
+    #except:
+    #    logging.error("MEDIAINFO ERROR: Could not generate checksum for " + airtable_create_dict[config.FILENAME])
 
     return airtable_create_dict
 
 def createAirtableFileRecord(pres_airtable_create_dict):
     try:
         airtable = Airtable(config.BASE_ID, "Files", config.API_KEY)
-        airtable.insert(pres_airtable_create_dict)
-        return True
+        return airtable.insert(pres_airtable_create_dict)
     except Exception as e:
         logging.error("Could not create an airtable file entry for file %s " % (pres_airtable_create_dict[config.FILENAME]))
         print(e)
