@@ -89,29 +89,32 @@ def main():
 
     post_process_list = []
 
-    if args.b == True:
+    if args.b == True:      #if running in batch mode log it
         logging.info("Running in batch mode!")
-    for record_dict in record_dict_list:
-        if not createRecordFolder(record_dict['RID']):  #quit upon error
-            if post_process_list == []:
+    for record_dict in record_dict_list:                #interate through records flagged for update
+        if not createRecordFolder(record_dict['RID']):  #create folder for new record (or use existing if user accepts)
+            if post_process_list == []:                 #if nothing else has been processed yet just quit the script.
+                logging.info('Quitting Script')
                 quit()
-            else:
+            else:                                        #if we're in batch mode and other rercords have been processed, exit the loop
+                logging.info('Quitting the file processing section, moving onto checksum processing')
                 break
-        pres_file_path = verifyUserAddedFile(record_dict)    #this portion verifies that file is correct and returns the filepath
-        if not pres_file_path:
+        verified_input = verifyUserAddedFile(record_dict)    #this portion verifies that file is correct and returns the filepath
+        if not verified_input:
             logging.error("There was an error retreiving the file path for the file in folder %s. Please try again" % record_dict_list[0]['RID'])
             quit()
-        elif pres_file_path == "IMAGES":        #process as group of images
-            image_list = verifyImageFiles(record_dict)
+        elif os.path.isdir(verified_input):        #process as an album (determined by verifyUserAddedFile())
+            input_album_path = verified_input
+            image_list = verifyImageFiles(record_dict, input_album_path)
             if len(image_list) > 0:
                 for image_path in image_list:
-                    print(image_path)
                     file_id = processRecord(image_path, record_dict)
                     post_process_list.append({"file_id": file_id, "post_file_path": image_path, "post_RID": record_dict['RID']})
         else:
+            pres_file_path = verified_input
             file_id = processRecord(pres_file_path, record_dict)
             post_process_list.append({"file_id": file_id, "post_file_path": pres_file_path, "post_RID": record_dict['RID']})
-        if args.b == False:
+        if args.b == False:     #break the loop if we're not in batch mode, since we're only updating one record
             break
 
     logging.info("Processing checksums, this may take a while, check back in a few minutes")
@@ -202,32 +205,33 @@ def getMediaInfo(filePath):
     media_info = subprocess.Popen( cmd, stdout=subprocess.PIPE ).communicate()[0]
     return media_info
 
-def verifyImageFiles(record_dict):
+def verifyImageFiles(record_dict, input_album_path):
     #Verifies that the image files in the folder conform to proper specifications
     #returns the path to the file if all is good, returns None otherwise
     #This first section makes sure that only one file is in the folder
     drive_name = config.DRIVE_NAME
-    record_path = os.path.join('/Volumes', drive_name, record_dict['RID'])
     file_list = []
 
-    for f in os.listdir(record_path):
+    for f in os.listdir(input_album_path):
         if not f.startswith('.'):
-            pres_mediainfo_text = getMediaInfo(os.path.join(record_path,f))
+            pres_mediainfo_text = getMediaInfo(os.path.join(input_album_path,f))
             if "track type=\"Image\"" in pres_mediainfo_text.decode():
-                file_list.append(os.path.join(record_path,f))
+                file_list.append(os.path.join(input_album_path,f))
 
     #This sections makes sure that there are no single or double quotes in the file name
+
+
 
     while file_list == []:
         logging.error('No images found in folder %s. please check the files, and press Enter to try again. You can also type "skip" to cancel.' % record_dict['RID'])
         userInput = input('ERROR: No images found in folder %s. please check the files and press Enter to try again. You can also type "skip" to cancel. \n' % record_dict['RID'])
         if userInput == "skip":
             return None
-        for f in os.listdir(record_path):
+        for f in os.listdir(input_album_path):
             if not f.startswith('.'):
-                pres_mediainfo_text = getMediaInfo(os.path.join(record_path,f))
+                pres_mediainfo_text = getMediaInfo(os.path.join(input_album_path,f))
                 if "track type=\"Image\"" in pres_mediainfo_text.decode():
-                    file_list.append(os.path.join(record_path,f))
+                    file_list.append(os.path.join(input_album_path,f))
 
 
 
@@ -238,11 +242,11 @@ def verifyImageFiles(record_dict):
         if userInput == "skip":
             return None
         file_list = []
-        for f in os.listdir(record_path):
+        for f in os.listdir(input_album_path):
             if not f.startswith('.'):
-                pres_mediainfo_text = getMediaInfo(os.path.join(record_path,f))
+                pres_mediainfo_text = getMediaInfo(os.path.join(input_album_path,f))
                 if "track type=\"Image\"" in pres_mediainfo_text.decode():
-                    file_list.append(os.path.join(record_path,f))
+                    file_list.append(os.path.join(input_album_path,f))
 
     while any("\"" in s for s in file_list):
         bad_char = True
@@ -251,11 +255,11 @@ def verifyImageFiles(record_dict):
         if userInput == "skip":
             return None
         file_list = []
-        for f in os.listdir(record_path):
+        for f in os.listdir(input_album_path):
             if not f.startswith('.'):
-                pres_mediainfo_text = getMediaInfo(os.path.join(record_path,f))
+                pres_mediainfo_text = getMediaInfo(os.path.join(input_album_path,f))
                 if "track type=\"Image\"" in pres_mediainfo_text.decode():
-                    file_list.append(os.path.join(record_path,f))
+                    file_list.append(os.path.join(input_album_path,f))
 
     while any("`" in s for s in file_list):
         bad_char = True
@@ -264,11 +268,11 @@ def verifyImageFiles(record_dict):
         if userInput == "skip":
             return None
         file_list = []
-        for f in os.listdir(record_path):
+        for f in os.listdir(input_album_path):
             if not f.startswith('.'):
-                pres_mediainfo_text = getMediaInfo(os.path.join(record_path,f))
+                pres_mediainfo_text = getMediaInfo(os.path.join(input_album_path,f))
                 if "track type=\"Image\"" in pres_mediainfo_text.decode():
-                    file_list.append(os.path.join(record_path,f))
+                    file_list.append(os.path.join(input_album_path,f))
 
 
     return file_list
@@ -278,53 +282,100 @@ def verifyUserAddedFile(record_dict):
     #returns the path to the file if all is good, returns None otherwise
     drive_name = config.DRIVE_NAME
     record_path = os.path.join('/Volumes', drive_name, record_dict['RID'])
-    logging.info('Please add in the file you would like processing into the folder named %s. Once you have done so you may press enter to continue. You can also type "skip" to cancel.' % record_dict['RID'])
-    userInput = input('Please add in the file you would like processing into the folder named %s. Once you have done so you may press enter to continue. If you want to upload multiple images you need to type "IMAGES" and press enter. You can also type "skip" to cancel. \n' % record_dict['RID'])
+    logging.info('Please add in the file or folder (album) you would like processing into the folder named %s. Once you have done so you may press enter to continue. You can also type "skip" to cancel.' % record_dict['RID'])
+    userInput = input('Please add in the file or folder (album) you would like processing into the folder named %s. Once you have done so you may press enter to continue. You can also type "skip" to cancel. \n' % record_dict['RID'])
     if userInput == "skip":
         return None
-    if "image" in userInput.lower():
-        return "IMAGES"
 
-    #This first section makes sure that only one file is in the folder
+    #This section sees if there is an album or multiple albums
+    album_list = []
+    for album_name in os.listdir(record_path):
+        if not album_name.startswith('.'):
+            album_path = os.path.join('/Volumes', drive_name, record_dict['RID'],album_name)
+            if os.path.isdir(album_path):
+                album_list.append(album_name)
 
-    file_list = []
-    for f in os.listdir(record_path):
-        if not f.startswith('.'):
-            file_list.append(f)
-    while len(file_list) == 0:
-        logging.error('No file found in folder named %s. Please add a file to the folder and press any key to continue. You can also type "skip" to cancel.' % record_dict['RID'])
-        userInput = input('ERROR: No file found in folder named %s. Please add a file to the folder and press any key to continue. You can also type "skip" to cancel. \n' % record_dict['RID'])
-        if userInput == "skip":
-            return None
+    if len(album_list) > 0:     #if an album was found we need to start verfiying the album structure
+
+        while len(album_list) > 1:
+            logging.error('%i albums found in folder named %s. Make sure only one album is in the folder and press any key to continue. You can also type "skip" to cancel.' % (len(album_list), record_dict['RID']))
+            userInput = input('ERROR: %i albums found in folder named %s. Make sure only one album is in the folder and press any key to continue. If you want to upload images you need to type "IMAGES" and press enter. You can also type "skip" to cancel. \n' % (len(album_list), record_dict['RID']))
+            if userInput == "skip":
+                return None
+            album_list = []
+            for album_name in os.listdir(record_path):
+                if not album_name.startswith('.'):
+                    album_path = os.path.join('/Volumes', drive_name, record_dict['RID'],album_name)
+                    if os.path.isdir(album_path):
+                        album_list.append(album_name)
+
+        while "\'" in album_list[0] or "\"" in album_list[0] or "`" in album_list[0]:
+            logging.error('The selected album has double quotes, single quotes, apostrophes, or ticks. Please remove these illegal characters befor continuing. You can also type "skip" to cancel.')
+            userInput = input('ERROR: The selected album has double quotes, single quotes, apostrophes, or ticks. Please remove these illegal characters befor continuing. You can also type "skip" to cancel. \n')
+            if userInput == "skip":
+                return None
+            album_list = []
+            for album_name in os.listdir(record_path):
+                if not album_name.startswith('.'):
+                    album_path = os.path.join('/Volumes', drive_name, record_dict['RID'],album_name)
+                    if os.path.isdir(album_path):
+                        album_list.append(album_name)
+
+        if len(album_list) == 1:                            #we get here if the album directory passes verification
+            logging.info('Processing Input as an Album')
+            print("Processing Input as an Album")
+            file_list = []                                  #check to see if there are files in the album, if not quit
+            for f in os.listdir(os.path.join('/Volumes', drive_name, record_dict['RID'],album_list[0])):
+                if not f.startswith('.'):
+                    file_list.append(f)
+            if len(file_list) == 0:
+                logging.error('No file found in album folder named %s. Quitting script.' % album_list[0])
+                print('No file found in album folder named %s. Quitting script.' % album_list[0])
+                return False
+            album_path = os.path.join('/Volumes', drive_name, record_dict['RID'],album_list[0])
+            return album_path        #the album is well-formed and has files in it. we return the album path
+
+    else:       #No album found. Processing as #files
+
+        #This section makes sure that only one file is in the folder
         file_list = []
         for f in os.listdir(record_path):
             if not f.startswith('.'):
                 file_list.append(f)
-    while len(file_list) > 1:
-        logging.error('%i files found in folder named %s. Make sure only one file is in the folder and press any key to continue. You can also type "skip" to cancel.' % (len(file_list), record_dict['RID']))
-        userInput = input('ERROR: %i files found in folder named %s. Make sure only one file is in the folder and press any key to continue. If you want to upload images you need to type "IMAGES" and press enter. You can also type "skip" to cancel. \n' % (len(file_list), record_dict['RID']))
-        if "image" in userInput.lower():
-            return "IMAGES"
-        if userInput == "skip":
-            return None
-        file_list = []
-        for f in os.listdir(record_path):
-            if not f.startswith('.'):
-                file_list.append(f)
+        while len(file_list) == 0:
+            logging.error('No file found in folder named %s. Please add a file to the folder and press any key to continue. You can also type "skip" to cancel.' % record_dict['RID'])
+            userInput = input('ERROR: No file found in folder named %s. Please add a file to the folder and press any key to continue. You can also type "skip" to cancel. \n' % record_dict['RID'])
+            if userInput == "skip":
+                return None
+            file_list = []
+            for f in os.listdir(record_path):
+                if not f.startswith('.'):
+                    file_list.append(f)
+        while len(file_list) > 1:
+            logging.error('%i files found in folder named %s. Make sure only one file is in the folder and press any key to continue. You can also type "skip" to cancel.' % (len(file_list), record_dict['RID']))
+            userInput = input('ERROR: %i files found in folder named %s. Make sure only one file is in the folder and press any key to continue. If you want to upload images you need to type "IMAGES" and press enter. You can also type "skip" to cancel. \n' % (len(file_list), record_dict['RID']))
+            if "image" in userInput.lower():
+                return "IMAGES"
+            if userInput == "skip":
+                return None
+            file_list = []
+            for f in os.listdir(record_path):
+                if not f.startswith('.'):
+                    file_list.append(f)
 
-    #This sections makes sure that there are no single or double quotes in the file name
+        #This sections makes sure that there are no single or double quotes in the file name
 
-    while "\'" in file_list[0] or "\"" in file_list[0] or "`" in file_list[0]:
-        logging.error('The selected file has double quotes, single quotes, apostrophes, or ticks. Please remove these illegal characters befor continuing. You can also type "skip" to cancel.')
-        userInput = input('ERROR: The selected file has double quotes, single quotes, apostrophes, or ticks. Please remove these illegal characters befor continuing. You can also type "skip" to cancel. \n')
-        if userInput == "skip":
-            return None
-        file_list = []
-        for f in os.listdir(record_path):
-            if not f.startswith('.'):
-                file_list.append(f)
+        while "\'" in file_list[0] or "\"" in file_list[0] or "`" in file_list[0]:
+            logging.error('The selected file has double quotes, single quotes, apostrophes, or ticks. Please remove these illegal characters befor continuing. You can also type "skip" to cancel.')
+            userInput = input('ERROR: The selected file has double quotes, single quotes, apostrophes, or ticks. Please remove these illegal characters befor continuing. You can also type "skip" to cancel. \n')
+            if userInput == "skip":
+                return None
+            file_list = []
+            for f in os.listdir(record_path):
+                if not f.startswith('.'):
+                    file_list.append(f)
 
-    return os.path.join('/Volumes', drive_name, record_dict['RID'], file_list[0])
+        return os.path.join('/Volumes', drive_name, record_dict['RID'], file_list[0])
 
 def updateAirtableField(record_id, update_dict, RID, Table):
     airtable = Airtable(config.BASE_ID, Table, config.API_KEY)
@@ -352,9 +403,12 @@ def createRecordFolder(record_number):
             logging.error('Error creating folder')
             return False
     else:
-        logging.error('Folder Already Exists. Exiting Script')
-        print("Script exited because of an error. See log for details")
-        return False
+        logging.warning('Folder already exists. If you would like to continue with the contents of the existing folder type "y", "yes", or "continue" and hit ENTER. Type anything else or hit ENTER to quit the script')
+        userInput = input('Folder already exists. If you would like to continue with the contents of the existing folder type "y", "yes", or "continue" and hit ENTER. Type anything else or hit ENTER to quit the script\n\n')
+        if userInput.lower() == 'y' or userInput.lower() == 'yes' or userInput.lower() == 'continue':
+            return True
+        else:
+            return False
 
 
 def findRecordToAdd():
