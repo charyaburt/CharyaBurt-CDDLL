@@ -15,6 +15,13 @@ from datetime import datetime   # This lades the datetime module, used for getti
 from pprint import pprint
 from airtable import Airtable
 
+#List of Dependencies:
+#ffmpeg
+#mediainfo
+#imagemagick (mogrify)
+#config.py
+
+
 
 def main():
 
@@ -67,7 +74,7 @@ def main():
     #logging.critical('This is a critical message')
 
 
-#Need to test for dependencies here. Config.py as well as libraries
+#Config.py variables
 
     base_key=config.BASE_ID         #This stuff comes from the config.py file. Very important!
     api_key=config.API_KEY
@@ -105,7 +112,7 @@ def main():
             quit()
         elif os.path.isdir(verified_input):        #process as an album (determined by verifyUserAddedFile())
             input_album_path = verified_input
-            image_list = verifyImageFiles(record_dict, input_album_path)
+            image_list = verifyAlbum(record_dict, input_album_path)
             if len(image_list) > 0:
                 for image_path in image_list:
                     file_id = processRecord(image_path, record_dict)
@@ -205,18 +212,25 @@ def getMediaInfo(filePath):
     media_info = subprocess.Popen( cmd, stdout=subprocess.PIPE ).communicate()[0]
     return media_info
 
-def verifyImageFiles(record_dict, input_album_path):
+def verifyAlbum(record_dict, input_album_path):
     #Verifies that the image files in the folder conform to proper specifications
     #returns the path to the file if all is good, returns None otherwise
     #This first section makes sure that only one file is in the folder
     drive_name = config.DRIVE_NAME
     file_list = []
+    album_type = None
 
     for f in os.listdir(input_album_path):
         if not f.startswith('.'):
             pres_mediainfo_text = getMediaInfo(os.path.join(input_album_path,f))
             if "track type=\"Image\"" in pres_mediainfo_text.decode():
                 file_list.append(os.path.join(input_album_path,f))
+                album_type = "Image"
+            elif "track type=\"Audio\"" in pres_mediainfo_text.decode():
+                file_list.append(os.path.join(input_album_path,f))
+                album_type = "Audio"
+            else:
+                album_type = None
 
     #This sections makes sure that there are no single or double quotes in the file name
 
@@ -224,7 +238,8 @@ def verifyImageFiles(record_dict, input_album_path):
 
     while file_list == []:
         logging.error('No images found in folder %s. please check the files, and press Enter to try again. You can also type "skip" to cancel.' % record_dict['RID'])
-        userInput = input('ERROR: No images found in folder %s. please check the files and press Enter to try again. You can also type "skip" to cancel. \n' % record_dict['RID'])
+        userInput = input('ERROR: No images found in folder %s. please check the files and press Enter to try again. You can also type "skip" to cancel. \n\n' % record_dict['RID'])
+        print("\n")
         if userInput == "skip":
             return None
         for f in os.listdir(input_album_path):
@@ -238,7 +253,8 @@ def verifyImageFiles(record_dict, input_album_path):
     while any("\'" in s for s in file_list):
         bad_char = True
         logging.error('A file has single quotes. Please remove these illegal characters before continuing. You can also type "skip" to cancel.')
-        userInput = input('ERROR: A file has single quotes. Please remove these illegal characters before continuing. You can also type "skip" to cancel. \n')
+        userInput = input('ERROR: A file has single quotes. Please remove these illegal characters before continuing. You can also type "skip" to cancel. \n\n')
+        print("\n")
         if userInput == "skip":
             return None
         file_list = []
@@ -251,7 +267,8 @@ def verifyImageFiles(record_dict, input_album_path):
     while any("\"" in s for s in file_list):
         bad_char = True
         logging.error('A file has double quotes. Please remove these illegal characters before continuing. You can also type "skip" to cancel.')
-        userInput = input('ERROR: A file has double quotes. Please remove these illegal characters before continuing. You can also type "skip" to cancel. \n')
+        userInput = input('ERROR: A file has double quotes. Please remove these illegal characters before continuing. You can also type "skip" to cancel. \n\n')
+        print("\n")
         if userInput == "skip":
             return None
         file_list = []
@@ -264,7 +281,8 @@ def verifyImageFiles(record_dict, input_album_path):
     while any("`" in s for s in file_list):
         bad_char = True
         logging.error('A file has a backtick in it. Please remove these illegal characters before continuing. You can also type "skip" to cancel.')
-        userInput = input('ERROR: A file has a backtick in it. Please remove these illegal characters before continuing. You can also type "skip" to cancel. \n')
+        userInput = input('ERROR: A file has a backtick in it. Please remove these illegal characters before continuing. You can also type "skip" to cancel. \n\n')
+        print("\n")
         if userInput == "skip":
             return None
         file_list = []
@@ -274,6 +292,12 @@ def verifyImageFiles(record_dict, input_album_path):
                 if "track type=\"Image\"" in pres_mediainfo_text.decode():
                     file_list.append(os.path.join(input_album_path,f))
 
+    #If there are images in the folder we need to create preview thumbnails
+    if album_type == "Image":
+        userInput = input('An image album was detected. Press ENTER to create preview thumbnails for each file. type "no" end press enter to skip creating preview thumbnails. \n\n')
+        print("\n")
+        if userInput.lower() != "no":
+            createImagePreviews(input_album_path)
 
     return file_list
 
@@ -283,7 +307,8 @@ def verifyUserAddedFile(record_dict):
     drive_name = config.DRIVE_NAME
     record_path = os.path.join('/Volumes', drive_name, record_dict['RID'])
     logging.info('Please add in the file or folder (album) you would like processing into the folder named %s. Once you have done so you may press enter to continue. You can also type "skip" to cancel.' % record_dict['RID'])
-    userInput = input('Please add in the file or folder (album) you would like processing into the folder named %s. Once you have done so you may press enter to continue. You can also type "skip" to cancel. \n' % record_dict['RID'])
+    userInput = input('Please add in the file or folder (album) you would like processing into the folder named %s. Once you have done so you may press enter to continue. You can also type "skip" to cancel. \n\n' % record_dict['RID'])
+    print("\n")
     if userInput == "skip":
         return None
 
@@ -299,7 +324,8 @@ def verifyUserAddedFile(record_dict):
 
         while len(album_list) > 1:
             logging.error('%i albums found in folder named %s. Make sure only one album is in the folder and press any key to continue. You can also type "skip" to cancel.' % (len(album_list), record_dict['RID']))
-            userInput = input('ERROR: %i albums found in folder named %s. Make sure only one album is in the folder and press any key to continue. If you want to upload images you need to type "IMAGES" and press enter. You can also type "skip" to cancel. \n' % (len(album_list), record_dict['RID']))
+            userInput = input('ERROR: %i albums found in folder named %s. Make sure only one album is in the folder and press any key to continue. If you want to upload images you need to type "IMAGES" and press enter. You can also type "skip" to cancel. \n\n' % (len(album_list), record_dict['RID']))
+            print("\n")
             if userInput == "skip":
                 return None
             album_list = []
@@ -311,7 +337,8 @@ def verifyUserAddedFile(record_dict):
 
         while "\'" in album_list[0] or "\"" in album_list[0] or "`" in album_list[0]:
             logging.error('The selected album has double quotes, single quotes, apostrophes, or ticks. Please remove these illegal characters befor continuing. You can also type "skip" to cancel.')
-            userInput = input('ERROR: The selected album has double quotes, single quotes, apostrophes, or ticks. Please remove these illegal characters befor continuing. You can also type "skip" to cancel. \n')
+            userInput = input('ERROR: The selected album has double quotes, single quotes, apostrophes, or ticks. Please remove these illegal characters befor continuing. You can also type "skip" to cancel. \n\n')
+            print("\n")
             if userInput == "skip":
                 return None
             album_list = []
@@ -333,6 +360,7 @@ def verifyUserAddedFile(record_dict):
                 print('No file found in album folder named %s. Quitting script.' % album_list[0])
                 return False
             album_path = os.path.join('/Volumes', drive_name, record_dict['RID'],album_list[0])
+
             return album_path        #the album is well-formed and has files in it. we return the album path
 
     else:       #No album found. Processing as #files
@@ -344,7 +372,8 @@ def verifyUserAddedFile(record_dict):
                 file_list.append(f)
         while len(file_list) == 0:
             logging.error('No file found in folder named %s. Please add a file to the folder and press any key to continue. You can also type "skip" to cancel.' % record_dict['RID'])
-            userInput = input('ERROR: No file found in folder named %s. Please add a file to the folder and press any key to continue. You can also type "skip" to cancel. \n' % record_dict['RID'])
+            userInput = input('ERROR: No file found in folder named %s. Please add a file to the folder and press any key to continue. You can also type "skip" to cancel. \n\n' % record_dict['RID'])
+            print("\n")
             if userInput == "skip":
                 return None
             file_list = []
@@ -353,7 +382,8 @@ def verifyUserAddedFile(record_dict):
                     file_list.append(f)
         while len(file_list) > 1:
             logging.error('%i files found in folder named %s. Make sure only one file is in the folder and press any key to continue. You can also type "skip" to cancel.' % (len(file_list), record_dict['RID']))
-            userInput = input('ERROR: %i files found in folder named %s. Make sure only one file is in the folder and press any key to continue. If you want to upload images you need to type "IMAGES" and press enter. You can also type "skip" to cancel. \n' % (len(file_list), record_dict['RID']))
+            userInput = input('ERROR: %i files found in folder named %s. Make sure only one file is in the folder and press any key to continue. If you want to upload images you need to type "IMAGES" and press enter. You can also type "skip" to cancel. \n\n' % (len(file_list), record_dict['RID']))
+            print("\n")
             if "image" in userInput.lower():
                 return "IMAGES"
             if userInput == "skip":
@@ -367,15 +397,43 @@ def verifyUserAddedFile(record_dict):
 
         while "\'" in file_list[0] or "\"" in file_list[0] or "`" in file_list[0]:
             logging.error('The selected file has double quotes, single quotes, apostrophes, or ticks. Please remove these illegal characters befor continuing. You can also type "skip" to cancel.')
-            userInput = input('ERROR: The selected file has double quotes, single quotes, apostrophes, or ticks. Please remove these illegal characters befor continuing. You can also type "skip" to cancel. \n')
+            userInput = input('ERROR: The selected file has double quotes, single quotes, apostrophes, or ticks. Please remove these illegal characters befor continuing. You can also type "skip" to cancel. \n\n')
             if userInput == "skip":
                 return None
+            print("\n")
             file_list = []
             for f in os.listdir(record_path):
                 if not f.startswith('.'):
                     file_list.append(f)
 
         return os.path.join('/Volumes', drive_name, record_dict['RID'], file_list[0])
+
+def createImagePreviews(album_path):
+    record_path = os.path.dirname(album_path)
+    album_name = os.path.basename(album_path)
+    preview_name = album_name + "_previews"
+    preview_path = os.path.join(record_path, preview_name)
+
+    if not os.path.exists(preview_path):
+        try:
+            os.makedirs(preview_path)
+        except:
+            logging.error('Error creating folder for preview thumbnails for record %s' % os.path.basename(record_path))
+            return False
+
+    #little section here to remove hidden files. This should be safe but I want to add a failsafe or something
+    logging.info("Removing Hidden Files")
+    if album_path.count('/') < 4:
+        logging.warning("The album is not in the right place, skipping deleting hidden files")
+    else:
+        [os.remove(os.path.join(album_path,f)) for f in os.listdir(album_path) if f.startswith('.')]
+        logging.info("Finished Removing Hidden Files")
+
+    album_path_star = album_path  + "/*"
+    cmd = [ config.MOGRIFY_PATH, '-format', 'gif', '-path', preview_path, '-thumbnail', '200x200', album_path_star ]
+    mogrify_output = subprocess.Popen( cmd, stdout=subprocess.PIPE ).communicate()[0]
+    #print(mogrify_output)
+    quit()
 
 def updateAirtableField(record_id, update_dict, RID, Table):
     airtable = Airtable(config.BASE_ID, Table, config.API_KEY)
@@ -405,6 +463,7 @@ def createRecordFolder(record_number):
     else:
         logging.warning('Folder already exists. If you would like to continue with the contents of the existing folder type "y", "yes", or "continue" and hit ENTER. Type anything else or hit ENTER to quit the script')
         userInput = input('Folder already exists. If you would like to continue with the contents of the existing folder type "y", "yes", or "continue" and hit ENTER. Type anything else or hit ENTER to quit the script\n\n')
+        print("\n")
         if userInput.lower() == 'y' or userInput.lower() == 'yes' or userInput.lower() == 'continue':
             return True
         else:
