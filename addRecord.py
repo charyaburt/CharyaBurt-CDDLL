@@ -30,6 +30,8 @@ def main():
     parser.add_argument('-v', '--verbose', action='count', default=0,help="Defines verbose level for standard out (stdout). v = warning, vv = info, vvv = debug")
     parser.add_argument('-d', '--Debug',dest='d',action='store_true',default=False,help="turns on Debug mode, which send all DEBUG level (and below) messages to the log. By default logging is set to INFO level")
     parser.add_argument('-b', '--Batch',dest='b',action='store_true',default=False,help="turns on Batch mode, which runs the script in a loop until all new records have been added")
+    parser.add_argument('-sa', '--Skip-Audit',dest='sa',action='store_true',default=False,help="Skip Audit mode. In this mode the script will run even if extra folders are on the drive. Use this carefully!")
+    parser.add_argument('-aap', '--Album-Auto-Pilot',dest='aap',action='store_true',default=False,help="Album Auto Pilot mode. This will process albums without asking the user for any input unless it finds a problem")
     #parser.add_argument('-r', '--Record',dest='r',action='store',default=None,help="Set the record ID you want to add to the archive")
     #parser.add_argument('-f', '--File',dest='f',action='store',default=None,help="Sets the filepath of the file you want to add to the archive")
     args = parser.parse_args()
@@ -79,13 +81,15 @@ def main():
     base_key=config.BASE_ID         #This stuff comes from the config.py file. Very important!
     api_key=config.API_KEY
 
+
+    if not args.sa: #skip drive audio if run with -sa flag
     #Perform a record-level audit of the drive. Quit upon failure
-    #if not driveAudit():
-    #    quit()
+        if not driveAudit():
+            quit()
 
     #Performs a record-level audit of the airtable. Quit upon failure
-    #if not airtableAudit():
-    #    quit()
+        if not airtableAudit():
+            quit()
 
     #Creates list of records to be processed
     record_dict_list = findRecordToAdd()
@@ -99,20 +103,20 @@ def main():
     if args.b == True:      #if running in batch mode log it
         logging.info("Running in batch mode!")
     for record_dict in record_dict_list:                #interate through records flagged for update
-        if not createRecordFolder(record_dict['RID']):  #create folder for new record (or use existing if user accepts)
+        if not createRecordFolder(record_dict['RID'],args):  #create folder for new record (or use existing if user accepts)
             if post_process_list == []:                 #if nothing else has been processed yet just quit the script.
                 logging.info('Quitting Script')
                 quit()
             else:                                        #if we're in batch mode and other rercords have been processed, exit the loop
                 logging.info('Quitting the file processing section, moving onto checksum processing')
                 break
-        verified_input = verifyUserAddedFile(record_dict)    #this portion verifies that file is correct and returns the filepath
+        verified_input = verifyUserAddedFile(record_dict,args)    #this portion verifies that file is correct and returns the filepath
         if not verified_input:
             logging.error("There was an error retreiving the file path for the file in folder %s. Please try again" % record_dict_list[0]['RID'])
             quit()
         elif os.path.isdir(verified_input):        #process as an album (determined by verifyUserAddedFile())
             input_album_path = verified_input
-            image_list = verifyAlbum(record_dict, input_album_path)
+            image_list = verifyAlbum(record_dict, input_album_path, args)
             if len(image_list) > 0:
                 for image_path in image_list:
                     file_id = processRecord(image_path, record_dict)
@@ -212,7 +216,7 @@ def getMediaInfo(filePath):
     media_info = subprocess.Popen( cmd, stdout=subprocess.PIPE ).communicate()[0]
     return media_info
 
-def verifyAlbum(record_dict, input_album_path):
+def verifyAlbum(record_dict, input_album_path, args):
     #Verifies that the image files in the folder conform to proper specifications
     #returns the path to the file if all is good, returns None otherwise
     #This first section makes sure that only one file is in the folder
@@ -294,23 +298,35 @@ def verifyAlbum(record_dict, input_album_path):
 
     #If there are images in the folder we need to create preview thumbnails
     if album_type == "Image":
-        userInput = input('An image album was detected. Press ENTER to create preview thumbnails for each file. type "no" end press enter to skip creating preview thumbnails. \n\n')
-        print("\n")
-        if userInput.lower() != "no":
-            createImagePreviews(input_album_path)
+        if args.aap:
+            logging.info("Processing Album folder in %s in auto-pilot mode" % record_dict['RID'])
+        else:
+            userInput = input('An image album was detected. Press ENTER to create preview thumbnails for each file. type "no" end press enter to skip creating preview thumbnails. \n\n')
+            print("\n")
+            if userInput.lower() != "no":
+                createImagePreviews(input_album_path)
 
     return file_list
 
-def verifyUserAddedFile(record_dict):
+def verifyUserAddedFile(record_dict,args):
     #Verifies that the file added by the user conforms to proper specifications
     #returns the path to the file if all is good, returns None otherwise
     drive_name = config.DRIVE_NAME
     record_path = os.path.join('/Volumes', drive_name, record_dict['RID'])
-    logging.info('Please add in the file or folder (album) you would like processing into the folder named %s. Once you have done so you may press enter to continue. You can also type "skip" to cancel.' % record_dict['RID'])
-    userInput = input('Please add in the file or folder (album) you would like processing into the folder named %s. Once you have done so you may press enter to continue. You can also type "skip" to cancel. \n\n' % record_dict['RID'])
-    print("\n")
-    if userInput == "skip":
-        return None
+
+    #quickly get a count of how many folders are in the record
+    folder_count = 0
+    for folders in os.listdir(record_path):
+        folder_count += 1  # increment counter
+
+    if args.aap and (folder_count > 0):
+        logging.info("Procesing Record Folder %s in auto-pilot mode!" % record_dict['RID'])
+    else:
+        logging.info('Please add in the file or folder (album) you would like processing into the folder named %s. Once you have done so you may press enter to continue. You can also type "skip" to cancel.' % record_dict['RID'])
+        userInput = input('Please add in the file or folder (album) you would like processing into the folder named %s. Once you have done so you may press enter to continue. You can also type "skip" to cancel. \n\n' % record_dict['RID'])
+        print("\n")
+        if userInput == "skip":
+            return None
 
     #This section sees if there is an album or multiple albums
     album_list = []
@@ -444,7 +460,7 @@ def updateAirtableField(record_id, update_dict, RID, Table):
         logging.error('Could not updated field in table %s \'%s\' for record %s ' % (Table, str(list(update_dict.keys())[0]), RID))
         logging.error('%s' % e)
 
-def createRecordFolder(record_number):
+def createRecordFolder(record_number,args):
     #Creates a folder on the drive for the record being processed
     logging.info('Creating folder for record: %s.' % record_number)
     drive_name = config.DRIVE_NAME
@@ -461,13 +477,16 @@ def createRecordFolder(record_number):
             logging.error('Error creating folder')
             return False
     else:
-        logging.warning('Folder already exists. If you would like to continue with the contents of the existing folder type "y", "yes", or "continue" and hit ENTER. Type anything else or hit ENTER to quit the script')
-        userInput = input('Folder already exists. If you would like to continue with the contents of the existing folder type "y", "yes", or "continue" and hit ENTER. Type anything else or hit ENTER to quit the script\n\n')
-        print("\n")
-        if userInput.lower() == 'y' or userInput.lower() == 'yes' or userInput.lower() == 'continue':
+        if args.aap:    #if we're in album autopilot mode we can skip asking the user for confirmation
             return True
         else:
-            return False
+            logging.warning('Folder already exists. If you would like to continue with the contents of the existing folder type "y", "yes", or "continue" and hit ENTER. Type anything else or hit ENTER to quit the script')
+            userInput = input('Folder already exists. If you would like to continue with the contents of the existing folder type "y", "yes", or "continue" and hit ENTER. Type anything else or hit ENTER to quit the script\n\n')
+            print("\n")
+            if userInput.lower() == 'y' or userInput.lower() == 'yes' or userInput.lower() == 'continue':
+                return True
+            else:
+                return False
 
 
 def findRecordToAdd():
