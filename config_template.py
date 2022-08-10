@@ -35,6 +35,7 @@ COPY_VERSION = "Access Copy Version"
 #USE_FOR_ACCESS = "Use for Access"  #no longer needed
 PARENT_ID = "Part of Record"
 FULL_FILE_NAME = "Full File Name"
+FILE_COUNT = "Folder File Count"
 
 #Various Hardcoded Values
 MAX_SIZE = 5000000000
