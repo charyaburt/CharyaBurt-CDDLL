@@ -578,7 +578,7 @@ def findRecordToAdd():
             RID = record['fields'][config.RECORD_NUMBER]
             try:
                 file_process_status = record['fields'][config.FILE_PROCESS_STATUS]
-                if file_process_status == 'Intaking Local Data File':
+                if file_process_status == config.FILE_INTAKE_FLAG:
                     record_id = record['id']
                     record_dict = {"RID": RID, "record_id": record_id}
                     record_dict_list.append(record_dict)
