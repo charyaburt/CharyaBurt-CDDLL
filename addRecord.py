@@ -118,9 +118,7 @@ def main():
             input_album_path = verified_input
             image_list = verifyAlbum(record_dict, input_album_path, args)
             if len(image_list) > 0:
-                for image_path in image_list:
-                    file_id = processRecord(image_path, record_dict)
-                    post_process_list.append({"file_id": file_id, "post_file_path": image_path, "post_RID": record_dict['RID']})
+                file_id = processAlbum(record_dict['record_id'],input_album_path, record_dict)
         else:
             pres_file_path = verified_input
             file_id = processRecord(pres_file_path, record_dict)
@@ -136,6 +134,35 @@ def main():
     logging.critical('========Script Complete========')
 
 ## End of main function
+
+def processAlbum(record_id, album_path, record_dict_entry):
+
+    parent_id_array = [record_id] #for some reason this needs to be an array
+
+    file_count = 0
+    for f in os.listdir(album_path):
+        if not f.startswith('.'):
+            file_count += 1
+
+    album_create_dict = {config.PARENT_ID : parent_id_array, config.FILE_COUNT : "None",config.FILENAME : "None", config.FULL_FILE_NAME : "None", config.DURATION : "None", config.FILE_SIZE_STRING : "None", config.FILE_SIZE : "", config.FILE_FORMAT : "Album", config.VIDEO_CODEC : "None", config.VIDEO_BIT_DEPTH : "None", config.VIDEO_SCAN_TYPE : "None", config.VIDEO_FRAME_RATE : "None", config.VIDEO_FRAME_SIZE : "None", config.VIDEO_ASPECT_RATIO : "None",  config.AUDIO_SAMPLING_RATE : "None", config.AUDIO_CODEC : "None", config.COPY_VERSION : "Master Copy"}
+
+    album_create_dict[config.FILE_SIZE] = os.path.getsize(album_path)
+    album_create_dict[config.FILENAME] = os.path.basename(album_path)
+    album_create_dict[config.FULL_FILE_NAME] = os.path.basename(album_path)
+    album_create_dict[config.FILE_FORMAT] = "Album"
+    album_create_dict[config.FILE_COUNT] = str(file_count)
+
+
+
+    file_record = createAirtableFileRecord(album_create_dict)
+    if file_record != False:
+        logging.info("Finished creating airtable file entries for %s." % record_dict_entry['RID'])
+        print("Finished creating airtable file entries for %s." % record_dict_entry['RID'])
+        updateAirtableField(record_dict_entry['record_id'],{config.FILE_PROCESS_STATUS: None},record_dict_entry['RID'], "Records")   #sets FILE_PROCESS_STATUS to blank because we're done!
+    else:
+        logging.error("Error creating airtable file entries for %s." % record_dict_entry['RID'])
+        print("Error creating airtable file entries for %s. See log for details" % record_dict_entry['RID'])
+    return file_record["id"]
 
 def processRecord(pres_file_path, record_dict_entry):
     #returns the record id, which we need later for updating the checksum
@@ -298,13 +325,10 @@ def verifyAlbum(record_dict, input_album_path, args):
 
     #If there are images in the folder we need to create preview thumbnails
     if album_type == "Image":
-        if args.aap:
-            logging.info("Processing Album folder in %s in auto-pilot mode" % record_dict['RID'])
-        else:
-            userInput = input('An image album was detected. Press ENTER to create preview thumbnails for each file. type "no" end press enter to skip creating preview thumbnails. \n\n')
-            print("\n")
-            if userInput.lower() != "no":
-                createImagePreviews(input_album_path)
+        logging.info('An image album was detected. Creating preview of the first file in the album.')
+        createImagePreview(input_album_path)
+    elif album_type == "Audio":
+        createAudioPreview(input_album_path)
 
     return file_list
 
@@ -424,32 +448,86 @@ def verifyUserAddedFile(record_dict,args):
 
         return os.path.join('/Volumes', drive_name, record_dict['RID'], file_list[0])
 
-def createImagePreviews(album_path):
-    record_path = os.path.dirname(album_path)
-    album_name = os.path.basename(album_path)
-    preview_name = album_name + "_previews"
-    preview_path = os.path.join(record_path, preview_name)
+def createAudioPreview(input_path):
 
-    if not os.path.exists(preview_path):
-        try:
-            os.makedirs(preview_path)
-        except:
-            logging.error('Error creating folder for preview thumbnails for record %s' % os.path.basename(record_path))
-            return False
+    if os.path.isdir(input_path):
+        record_path = os.path.dirname(input_path)
+        album_name = os.path.basename(input_path)
+        preview_name = album_name + "_preview.mp3"
+        preview_path = os.path.join(record_path, preview_name)
+        for f in os.listdir(input_path):
+            if not f.startswith('.'):
+                file_path = os.path.join(input_path,f)
+    elif os.path.isfile(input_path):
+        record_path = os.path.dirname(input_path)
+        file_name = os.path.basename(input_path)
+        preview_name = file_name + "_preview.mp3"
+        preview_path = os.path.join(record_path, preview_name)
+        file_path = input_path
+
+    cmd = [ config.FFMPEG_PATH, '-hide_banner', '-loglevel', 'panic', '-i', file_path, '-c:a', 'libmp3lame', '-b:a', '128k', '-write_xing', '0', '-ac', '2', '-t', '60',  preview_path ]
+    convert_output = subprocess.Popen( cmd, stdout=subprocess.PIPE ).communicate()[0]
+
+def createImagePreview(input_path):
+
+    if os.path.isdir(input_path):
+        record_path = os.path.dirname(input_path)
+        album_name = os.path.basename(input_path)
+        preview_name = album_name + "_preview.jpg"
+        preview_path = os.path.join(record_path, preview_name)
+        for f in os.listdir(input_path):
+            if not f.startswith('.'):
+                file_path = os.path.join(input_path,f)
+    elif os.path.isfile(input_path):
+        record_path = os.path.dirname(input_path)
+        file_name = os.path.basename(input_path)
+        preview_name = file_name + "_preview.jpg"
+        preview_path = os.path.join(record_path, preview_name)
+        file_path = input_path
+
+    cmd = [ config.CONVERT_PATH, file_path, '-thumbnail', '200x200', preview_path ]
+    convert_output = subprocess.Popen( cmd, stdout=subprocess.PIPE ).communicate()[0]
+
+def createVideoPreview(input_path):
+
+    record_path = os.path.dirname(input_path)
+    file_name = os.path.basename(input_path)
+    preview_name = file_name + "_preview.jpg"
+    preview_path = os.path.join(record_path, preview_name)
+    file_path = input_path
+
+    #ffprobe_cmd = [ config.FFPROBE_PATH, '-v', 'error', '-show_entries', 'format=duration', '-of', 'default=noprint_wrappers=1:nokey=1', file_path ]
+    #ffprobe_output = subprocess.Popen( ffprobe_cmd, stdout=subprocess.PIPE ).communicate()[0]
+    #half_duration = ffprobe_output.decode().strip().split('.')[0]
+    ffmpeg_string = config.FFMPEG_PATH + " -hide_banner -loglevel panic -ss 00:01:00 -i '" + file_path + "' -vf 'scale=320:320:force_original_aspect_ratio=decrease' -vframes 1 '" + preview_path + "'"
+    cmd = [ffmpeg_string]
+    ffmpeg_out = subprocess.Popen(cmd, stdout=subprocess.PIPE, shell=True).communicate()[0]
+
+#Old version of this, convets the entire folder. they just want one file though
+#def createImagePreviews(album_path):
+#    record_path = os.path.dirname(album_path)
+#    album_name = os.path.basename(album_path)
+#    preview_name = album_name + "_previews"
+#    preview_path = os.path.join(record_path, preview_name)
+
+#    if not os.path.exists(preview_path):
+#        try:
+#            os.makedirs(preview_path)
+#        except:
+#            logging.error('Error creating folder for preview thumbnails for record %s' % os.path.basename(record_path))
+#            return False
 
     #little section here to remove hidden files. This should be safe but I want to add a failsafe or something
-    logging.info("Removing Hidden Files")
-    if album_path.count('/') < 4:
-        logging.warning("The album is not in the right place, skipping deleting hidden files")
-    else:
-        [os.remove(os.path.join(album_path,f)) for f in os.listdir(album_path) if f.startswith('.')]
-        logging.info("Finished Removing Hidden Files")
+#    logging.info("Removing Hidden Files")
+#    if album_path.count('/') < 4:
+#        logging.warning("The album is not in the right place, skipping deleting hidden files")
+#    else:
+#        [os.remove(os.path.join(album_path,f)) for f in os.listdir(album_path) if f.startswith('.')]
+#        logging.info("Finished Removing Hidden Files")
 
-    album_path_star = album_path  + "/*"
-    cmd = [ config.MOGRIFY_PATH, '-format', 'gif', '-path', preview_path, '-thumbnail', '200x200', album_path_star ]
-    mogrify_output = subprocess.Popen( cmd, stdout=subprocess.PIPE ).communicate()[0]
-    #print(mogrify_output)
-    quit()
+#    album_path_star = album_path  + "/*"
+#    cmd = [ config.MOGRIFY_PATH, '-format', 'gif', '-path', preview_path, '-thumbnail', '200x200', album_path_star ]
+#    mogrify_output = subprocess.Popen( cmd, stdout=subprocess.PIPE ).communicate()[0]
 
 def updateAirtableField(record_id, update_dict, RID, Table):
     airtable = Airtable(config.BASE_ID, Table, config.API_KEY)
@@ -665,6 +743,7 @@ def parseMediaInfo(filePath, media_info_text, RID, parent_id):
                 mi_Image_Text = (media_info_text.split("<track type=\"Image\">"))[1].split("</track>")[0]
                 logging.info('Image file detected. The file %s will be processed as an image only file' %  airtable_create_dict[config.FILENAME])
                 file_type = "Image"
+                createImagePreview(filePath)
                 airtable_create_dict[config.VIDEO_CODEC] = "None"
                 airtable_create_dict[config.DURATION] = "None"
                 airtable_create_dict[config.VIDEO_BIT_DEPTH] = "None"
@@ -676,6 +755,7 @@ def parseMediaInfo(filePath, media_info_text, RID, parent_id):
             except:
                 logging.warning('Could not parse video track for file %s. If this file is supposed to have video it may be corrupted. The file will be processed as an audio only file' %  airtable_create_dict[config.FILENAME])
                 file_type = "Audio"
+                createAudioPreview(filePath)
                 airtable_create_dict[config.VIDEO_CODEC] = "None"
                 airtable_create_dict[config.VIDEO_BIT_DEPTH] = "None"
                 airtable_create_dict[config.VIDEO_FRAME_SIZE] = "None"
@@ -690,6 +770,9 @@ def parseMediaInfo(filePath, media_info_text, RID, parent_id):
 
     except Exception as e:
         logging.error("MEDIAINFO ERROR: Could not parse tracks for " + airtable_create_dict[config.FILENAME])
+
+    if file_type == "Video" or file_type == "Image":
+        createVideoPreview(filePath)
 
     # General Stuff
 
@@ -785,7 +868,7 @@ def createAirtableFileRecord(pres_airtable_create_dict):
         airtable = Airtable(config.BASE_ID, "Files", config.API_KEY)
         return airtable.insert(pres_airtable_create_dict)
     except Exception as e:
-        logging.error("Could not create an airtable file entry for file %s " % (pres_airtable_create_dict[config.FILENAME]))
+        logging.error("Could not create an airtable file entry for file/album %s " % (pres_airtable_create_dict[config.FILENAME]))
         print(e)
         return False
 
