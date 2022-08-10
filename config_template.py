@@ -48,6 +48,7 @@ VIMEO_DEFAULT_DESCRIPTION = ""
 
 # Dependency Paths
 FFMPEG_PATH = "/usr/local/bin/ffmpeg"
+FFPROBE_PATH = "/usr/local/bin/ffprobe"
 MEDIAINFO_PATH = "/usr/local/bin/mediainfo"
 PYTHON_PATH = "/usr/local/bin/python3"
 DEPENDENCY_PATH = "/usr/local/bin/"
