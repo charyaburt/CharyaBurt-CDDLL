@@ -470,23 +470,26 @@ def createAudioPreview(input_path):
 
 def createImagePreview(input_path):
 
-    if os.path.isdir(input_path):
-        record_path = os.path.dirname(input_path)
-        album_name = os.path.basename(input_path)
-        preview_name = album_name + "_preview.jpg"
-        preview_path = os.path.join(record_path, preview_name)
-        for f in os.listdir(input_path):
-            if not f.startswith('.'):
-                file_path = os.path.join(input_path,f)
-    elif os.path.isfile(input_path):
-        record_path = os.path.dirname(input_path)
-        file_name = os.path.basename(input_path)
-        preview_name = file_name + "_preview.jpg"
-        preview_path = os.path.join(record_path, preview_name)
-        file_path = input_path
+    record_number = os.path.basename(os.path.abspath(os.path.join(input_path, os.pardir)))
+    preview_album_path = os.path.join(config.TEMP_PREVIEW_PATH, record_number)
+    os.mkdir(preview_album_path)
 
-    cmd = [ config.CONVERT_PATH, file_path, '-thumbnail', '200x200', preview_path ]
-    convert_output = subprocess.Popen( cmd, stdout=subprocess.PIPE ).communicate()[0]
+    if os.path.isdir(input_path):
+        for original_file_name in os.listdir(input_path):
+            if not original_file_name.startswith('.'):
+                original_file_path = os.path.join(input_path, original_file_name)
+                preview_file_name = original_file_name + "_preview.jpg"
+                preview_file_path = os.path.join(preview_album_path, preview_file_name)
+                cmd = [ config.CONVERT_PATH, original_file_path, '-thumbnail', '200x200', preview_file_path ]
+                convert_output = subprocess.Popen( cmd, stdout=subprocess.PIPE ).communicate()[0]
+
+    elif os.path.isfile(input_path):
+        original_file_path = input_path
+        original_file_name = os.path.basename(input_path)
+        preview_file_name = original_file_name + "_preview.jpg"
+        preview_file_path = os.path.join(preview_album_path, preview_file_name)
+        cmd = [ config.CONVERT_PATH, original_file_path, '-thumbnail', '200x200', preview_file_path ]
+        convert_output = subprocess.Popen( cmd, stdout=subprocess.PIPE ).communicate()[0]
 
 def createVideoPreview(input_path):
 

@@ -1,6 +1,7 @@
 # General Config Info
 DRIVE_NAME = ""   #The name of the hard drive the archive is on. This will change if you plug in a backup drive
 BACKUP_DRIVE_NAME = "" #The name of the backup drive
+TEMP_PREVIEW_PATH = "" #The path to the folder that will temporarily hold preview files
 
 # Airtable Credentials and Config
 BASE_ID = ""
