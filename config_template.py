@@ -1,6 +1,7 @@
 # General Config Info
 DRIVE_NAME = ""   #The name of the hard drive the archive is on. This will change if you plug in a backup drive
 BACKUP_DRIVE_NAME = "" #The name of the backup drive
+TEMP_PREVIEW_PATH = "" #The path to the folder that will temporarily hold preview files
 
 # Airtable Credentials and Config
 BASE_ID = ""
@@ -15,6 +16,12 @@ RECORD_NUMBER_LOOKUP = "Record Number"
 FULL_FILE_NAME = "Full File Name"
 CHECKSUM = "Checksum"
 FILE_PROCESS_STATUS = "File Processing Status"
+FILE_INTAKE_FLAG = "Intaking Local Data File" #This flag is for local file intake.
+FILE_UPLOAD_FLAG = "Uploading Online Version" #This flag is for online upload.
+FILE_DEACCESS_FLAG = "DEACCESSIONING ALL DATA" #This is the File Processing Status flag that marks a record for deaccession. 
+RECORD_STATUS = "Status"
+RECORD_DEACCESS_FLAG = "Deaccessioned Record" #This is the Record Status flag that marks a record for deaccession.
+#Both deaccession flags must be in place for the deaccessioning program to proceed.
 
 #Airtable File Metadata Fields
 FILENAME = "File Name"

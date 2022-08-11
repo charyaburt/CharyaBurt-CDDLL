@@ -450,56 +450,87 @@ def verifyUserAddedFile(record_dict,args):
 
 def createAudioPreview(input_path):
 
+    record_number = os.path.basename(os.path.abspath(os.path.join(input_path, os.pardir)))
+    drive_name = config.DRIVE_NAME
+    preview_album_path = os.path.join('/Volumes', drive_name, '_Previews', record_number)
+
+    if not os.path.exists(preview_album_path):
+        try: 
+            os.mkdir(preview_album_path)
+        except:
+            logging.error('Error creating folder for preview thumbnails for record ' + record_number)
+            return False
+
     if os.path.isdir(input_path):
-        record_path = os.path.dirname(input_path)
-        album_name = os.path.basename(input_path)
-        preview_name = album_name + "_preview.mp3"
-        preview_path = os.path.join(record_path, preview_name)
-        for f in os.listdir(input_path):
-            if not f.startswith('.'):
-                file_path = os.path.join(input_path,f)
+        for file_name in os.listdir(input_path):
+            if not file_name.startswith('.'):
+                preview_name = file_name + "_preview.mp3"
+                preview_path = os.path.join(preview_album_path, preview_name)
+                file_path = os.path.join(input_path, file_name)
+                cmd = [ config.FFMPEG_PATH, '-hide_banner', '-loglevel', 'panic', '-i', file_path, '-c:a', 'libmp3lame', '-b:a', '128k', '-write_xing', '0', '-ac', '2', '-t', '60',  preview_path ]
+                convert_output = subprocess.Popen( cmd, stdout=subprocess.PIPE ).communicate()[0]
+
     elif os.path.isfile(input_path):
-        record_path = os.path.dirname(input_path)
         file_name = os.path.basename(input_path)
         preview_name = file_name + "_preview.mp3"
-        preview_path = os.path.join(record_path, preview_name)
+        preview_path = os.path.join(preview_album_path, preview_name)
         file_path = input_path
-
-    cmd = [ config.FFMPEG_PATH, '-hide_banner', '-loglevel', 'panic', '-i', file_path, '-c:a', 'libmp3lame', '-b:a', '128k', '-write_xing', '0', '-ac', '2', '-t', '60',  preview_path ]
-    convert_output = subprocess.Popen( cmd, stdout=subprocess.PIPE ).communicate()[0]
+        cmd = [ config.FFMPEG_PATH, '-hide_banner', '-loglevel', 'panic', '-i', file_path, '-c:a', 'libmp3lame', '-b:a', '128k', '-write_xing', '0', '-ac', '2', '-t', '60',  preview_path ]
+        convert_output = subprocess.Popen( cmd, stdout=subprocess.PIPE ).communicate()[0]
 
 def createImagePreview(input_path):
 
+    record_number = os.path.basename(os.path.abspath(os.path.join(input_path, os.pardir)))
+    drive_name = config.DRIVE_NAME
+    preview_album_path = os.path.join('/Volumes', drive_name, '_Previews', record_number)
+
+    if not os.path.exists(preview_album_path):
+        try: 
+            os.mkdir(preview_album_path)
+        except:
+            logging.error('Error creating folder for preview thumbnails for record ' + record_number)
+            return False
+
     if os.path.isdir(input_path):
-        record_path = os.path.dirname(input_path)
-        album_name = os.path.basename(input_path)
-        preview_name = album_name + "_preview.jpg"
-        preview_path = os.path.join(record_path, preview_name)
-        for f in os.listdir(input_path):
-            if not f.startswith('.'):
-                file_path = os.path.join(input_path,f)
+        for file_name in os.listdir(input_path):
+            if not file_name.startswith('.'):
+                preview_name = file_name + "_preview.jpg"
+                preview_path = os.path.join(preview_album_path, preview_name)
+                file_path = os.path.join(input_path, file_name)
+                cmd = [ config.CONVERT_PATH, file_path, '-thumbnail', '200x200', preview_path ]
+                convert_output = subprocess.Popen( cmd, stdout=subprocess.PIPE ).communicate()[0]
+
     elif os.path.isfile(input_path):
-        record_path = os.path.dirname(input_path)
         file_name = os.path.basename(input_path)
         preview_name = file_name + "_preview.jpg"
-        preview_path = os.path.join(record_path, preview_name)
+        preview_path = os.path.join(preview_album_path, preview_name)
         file_path = input_path
-
-    cmd = [ config.CONVERT_PATH, file_path, '-thumbnail', '200x200', preview_path ]
-    convert_output = subprocess.Popen( cmd, stdout=subprocess.PIPE ).communicate()[0]
+        cmd = [ config.CONVERT_PATH, file_path, '-thumbnail', '200x200', preview_path ]
+        convert_output = subprocess.Popen( cmd, stdout=subprocess.PIPE ).communicate()[0]
 
 def createVideoPreview(input_path):
+
+    record_number = os.path.basename(os.path.abspath(os.path.join(input_path, os.pardir)))
+    drive_name = config.DRIVE_NAME
+    preview_album_path = os.path.join('/Volumes', drive_name, '_Previews', record_number)
+
+    if not os.path.exists(preview_album_path):
+        try: 
+            os.mkdir(preview_album_path)
+        except:
+            logging.error('Error creating folder for preview thumbnails for record ' + record_number)
+            return False
 
     record_path = os.path.dirname(input_path)
     file_name = os.path.basename(input_path)
     preview_name = file_name + "_preview.jpg"
-    preview_path = os.path.join(record_path, preview_name)
+    preview_path = os.path.join(preview_album_path, preview_name)
     file_path = input_path
 
     #ffprobe_cmd = [ config.FFPROBE_PATH, '-v', 'error', '-show_entries', 'format=duration', '-of', 'default=noprint_wrappers=1:nokey=1', file_path ]
     #ffprobe_output = subprocess.Popen( ffprobe_cmd, stdout=subprocess.PIPE ).communicate()[0]
     #half_duration = ffprobe_output.decode().strip().split('.')[0]
-    ffmpeg_string = config.FFMPEG_PATH + " -hide_banner -loglevel panic -ss 00:01:00 -i '" + file_path + "' -vf 'scale=320:320:force_original_aspect_ratio=decrease' -vframes 1 '" + preview_path + "'"
+    ffmpeg_string = config.FFMPEG_PATH + " -hide_banner -loglevel panic -ss 00:00:10 -i '" + file_path + "' -vf 'scale=320:320:force_original_aspect_ratio=decrease' -vframes 1 '" + preview_path + "'"
     cmd = [ffmpeg_string]
     ffmpeg_out = subprocess.Popen(cmd, stdout=subprocess.PIPE, shell=True).communicate()[0]
 
@@ -578,7 +609,7 @@ def findRecordToAdd():
             RID = record['fields'][config.RECORD_NUMBER]
             try:
                 file_process_status = record['fields'][config.FILE_PROCESS_STATUS]
-                if file_process_status == 'Intaking Local Data File':
+                if file_process_status == config.FILE_INTAKE_FLAG:
                     record_id = record['id']
                     record_dict = {"RID": RID, "record_id": record_id}
                     record_dict_list.append(record_dict)
