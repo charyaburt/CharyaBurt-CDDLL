@@ -452,10 +452,18 @@ def createAudioPreview(input_path):
 
     record_number = os.path.basename(os.path.abspath(os.path.join(input_path, os.pardir)))
     drive_name = config.DRIVE_NAME
+    preview_path = os.path.join('/Volumes', drive_name, '_Previews')
     preview_album_path = os.path.join('/Volumes', drive_name, '_Previews', record_number)
 
+    if not os.path.exists(preview_path):
+        try:
+            os.mkdir(preview_path)
+        except:
+            logging.error('Error creating preview root folder')
+            return False
+
     if not os.path.exists(preview_album_path):
-        try: 
+        try:
             os.mkdir(preview_album_path)
         except:
             logging.error('Error creating folder for preview thumbnails for record ' + record_number)
@@ -467,7 +475,7 @@ def createAudioPreview(input_path):
                 preview_name = file_name + "_preview.mp3"
                 preview_path = os.path.join(preview_album_path, preview_name)
                 file_path = os.path.join(input_path, file_name)
-                cmd = [ config.FFMPEG_PATH, '-hide_banner', '-loglevel', 'panic', '-i', file_path, '-c:a', 'libmp3lame', '-b:a', '128k', '-write_xing', '0', '-ac', '2', '-t', '60',  preview_path ]
+                cmd = [ config.FFMPEG_PATH, '-hide_banner', '-loglevel', 'panic', '-i', file_path, '-c:a', 'libmp3lame', '-b:a', '128k', '-write_xing', '0', '-ac', '2', '-t', '60', '-y',  preview_path ]
                 convert_output = subprocess.Popen( cmd, stdout=subprocess.PIPE ).communicate()[0]
 
     elif os.path.isfile(input_path):
@@ -475,17 +483,25 @@ def createAudioPreview(input_path):
         preview_name = file_name + "_preview.mp3"
         preview_path = os.path.join(preview_album_path, preview_name)
         file_path = input_path
-        cmd = [ config.FFMPEG_PATH, '-hide_banner', '-loglevel', 'panic', '-i', file_path, '-c:a', 'libmp3lame', '-b:a', '128k', '-write_xing', '0', '-ac', '2', '-t', '60',  preview_path ]
+        cmd = [ config.FFMPEG_PATH, '-hide_banner', '-loglevel', 'panic', '-i', file_path, '-c:a', 'libmp3lame', '-b:a', '128k', '-write_xing', '0', '-ac', '2', '-t', '60', '-y',  preview_path ]
         convert_output = subprocess.Popen( cmd, stdout=subprocess.PIPE ).communicate()[0]
 
 def createImagePreview(input_path):
 
     record_number = os.path.basename(os.path.abspath(os.path.join(input_path, os.pardir)))
     drive_name = config.DRIVE_NAME
+    preview_path = os.path.join('/Volumes', drive_name, '_Previews')
     preview_album_path = os.path.join('/Volumes', drive_name, '_Previews', record_number)
 
+    if not os.path.exists(preview_path):
+        try:
+            os.mkdir(preview_path)
+        except:
+            logging.error('Error creating preview root folder')
+            return False
+
     if not os.path.exists(preview_album_path):
-        try: 
+        try:
             os.mkdir(preview_album_path)
         except:
             logging.error('Error creating folder for preview thumbnails for record ' + record_number)
@@ -512,10 +528,18 @@ def createVideoPreview(input_path):
 
     record_number = os.path.basename(os.path.abspath(os.path.join(input_path, os.pardir)))
     drive_name = config.DRIVE_NAME
+    preview_path = os.path.join('/Volumes', drive_name, '_Previews')
     preview_album_path = os.path.join('/Volumes', drive_name, '_Previews', record_number)
 
+    if not os.path.exists(preview_path):
+        try:
+            os.mkdir(preview_path)
+        except:
+            logging.error('Error creating preview root folder')
+            return False
+
     if not os.path.exists(preview_album_path):
-        try: 
+        try:
             os.mkdir(preview_album_path)
         except:
             logging.error('Error creating folder for preview thumbnails for record ' + record_number)
@@ -530,7 +554,7 @@ def createVideoPreview(input_path):
     #ffprobe_cmd = [ config.FFPROBE_PATH, '-v', 'error', '-show_entries', 'format=duration', '-of', 'default=noprint_wrappers=1:nokey=1', file_path ]
     #ffprobe_output = subprocess.Popen( ffprobe_cmd, stdout=subprocess.PIPE ).communicate()[0]
     #half_duration = ffprobe_output.decode().strip().split('.')[0]
-    ffmpeg_string = config.FFMPEG_PATH + " -hide_banner -loglevel panic -ss 00:00:10 -i '" + file_path + "' -vf 'scale=320:320:force_original_aspect_ratio=decrease' -vframes 1 '" + preview_path + "'"
+    ffmpeg_string = config.FFMPEG_PATH + " -hide_banner -loglevel panic -ss 00:00:10 -i '" + file_path + "' -vf 'scale=320:320:force_original_aspect_ratio=decrease' -vframes 1 -y '" + preview_path + "'"
     cmd = [ffmpeg_string]
     ffmpeg_out = subprocess.Popen(cmd, stdout=subprocess.PIPE, shell=True).communicate()[0]
 
@@ -761,50 +785,64 @@ def parseMediaInfo(filePath, media_info_text, RID, parent_id):
     media_info_text = media_info_text.decode()
     logging.info("Parsing mediainfo for file: %s" % airtable_create_dict[config.FILENAME])
     file_type = None
-
+    file_has_general = False
+    file_has_video = False
+    file_has_image = False
+    file_has_audio = False
 
     try:
         mi_General_Text = (media_info_text.split("<track type=\"General\">"))[1].split("</track>")[0]
+        file_has_general = True
+    except:
+        logging.error('The file %s is not a properly formed media file. Please check that this file is correct' %  airtable_create_dict[config.FILENAME])
+    try:
+        mi_Video_Text = (media_info_text.split("<track type=\"Video\">"))[1].split("</track>")[0]
+        file_has_video = True
+    except:
+        file_has_video = False
+    try:
+        mi_Audio_Text = (media_info_text.split("<track type=\"Audio\">"))[1].split("</track>")[0]
+        file_has_audio = True
+    except:
+        file_has_audio = False
+    try:
+        mi_Image_Text = (media_info_text.split("<track type=\"Image\">"))[1].split("</track>")[0]
+        file_has_image = True
+    except:
+        file_has_image = False
 
-        try:
-            mi_Video_Text = (media_info_text.split("<track type=\"Video\">"))[1].split("</track>")[0]
-            file_type = "Video"
-        except:
-            try:
-                mi_Image_Text = (media_info_text.split("<track type=\"Image\">"))[1].split("</track>")[0]
-                logging.info('Image file detected. The file %s will be processed as an image only file' %  airtable_create_dict[config.FILENAME])
-                file_type = "Image"
-                createImagePreview(filePath)
-                airtable_create_dict[config.VIDEO_CODEC] = "None"
-                airtable_create_dict[config.DURATION] = "None"
-                airtable_create_dict[config.VIDEO_BIT_DEPTH] = "None"
-                airtable_create_dict[config.VIDEO_SCAN_TYPE] = "None"
-                airtable_create_dict[config.VIDEO_FRAME_RATE] = "None"
-                airtable_create_dict[config.VIDEO_ASPECT_RATIO] = "None"
-                airtable_create_dict[config.AUDIO_CODEC] = "None"
-                airtable_create_dict[config.AUDIO_SAMPLING_RATE] = "None"
-            except:
-                logging.warning('Could not parse video track for file %s. If this file is supposed to have video it may be corrupted. The file will be processed as an audio only file' %  airtable_create_dict[config.FILENAME])
-                file_type = "Audio"
-                createAudioPreview(filePath)
-                airtable_create_dict[config.VIDEO_CODEC] = "None"
-                airtable_create_dict[config.VIDEO_BIT_DEPTH] = "None"
-                airtable_create_dict[config.VIDEO_FRAME_SIZE] = "None"
-        if file_type != "Image":
-            try:
-                mi_Audio_Text = (media_info_text.split("<track type=\"Audio\">"))[1].split("</track>")[0]
-            except:
-                logging.warning('Could not parse audio track for file %s. If this file is supposed to have audio it may be corrupted. This will be processed as a Video Only file' %  airtable_create_dict[config.FILENAME])
-                file_type = "Silent"
-                airtable_create_dict[config.AUDIO_CODEC] = "None"
-                airtable_create_dict[config.AUDIO_SAMPLING_RATE] = "None"
-
-    except Exception as e:
-        logging.error("MEDIAINFO ERROR: Could not parse tracks for " + airtable_create_dict[config.FILENAME])
-
-    if file_type == "Video" or file_type == "Image":
+    if file_has_image: #Process as image file
+        logging.info('Image file detected. The file %s will be processed as an image only file' %  airtable_create_dict[config.FILENAME])
+        file_type = "Image"
+        createImagePreview(filePath)
+        airtable_create_dict[config.VIDEO_CODEC] = "None"
+        airtable_create_dict[config.DURATION] = "None"
+        airtable_create_dict[config.VIDEO_BIT_DEPTH] = "None"
+        airtable_create_dict[config.VIDEO_SCAN_TYPE] = "None"
+        airtable_create_dict[config.VIDEO_FRAME_RATE] = "None"
+        airtable_create_dict[config.VIDEO_ASPECT_RATIO] = "None"
+        airtable_create_dict[config.AUDIO_CODEC] = "None"
+        airtable_create_dict[config.AUDIO_SAMPLING_RATE] = "None"
+    if file_has_video and file_has_audio: #Process as video and audio file
+        file_type = "Video"
         createVideoPreview(filePath)
+    elif file_has_video: #Process as video only
+        file_type = "Silent_Video"
+        airtable_create_dict[config.AUDIO_CODEC] = "None"
+        airtable_create_dict[config.AUDIO_SAMPLING_RATE] = "None"
+        createVideoPreview(filePath)
+    elif file_has_audio: #Process as audio only
+        logging.info('Audio file detected. The file %s will be processed as an image only file' %  airtable_create_dict[config.FILENAME])
+        file_type = "Audio"
+        createAudioPreview(filePath)
+        airtable_create_dict[config.VIDEO_CODEC] = "None"
+        airtable_create_dict[config.VIDEO_BIT_DEPTH] = "None"
+        airtable_create_dict[config.VIDEO_FRAME_SIZE] = "None"
+        airtable_create_dict[config.VIDEO_SCAN_TYPE] = "None"
+        airtable_create_dict[config.VIDEO_FRAME_RATE] = "None"
+        airtable_create_dict[config.VIDEO_ASPECT_RATIO] = "None"
 
+    # Get the rest of the mediainfo metadata
     # General Stuff
 
     if file_type != "Image":
@@ -812,6 +850,7 @@ def parseMediaInfo(filePath, media_info_text, RID, parent_id):
             airtable_create_dict[config.DURATION] = (mi_General_Text.split("<Duration_String3>"))[1].split("</Duration_String3>")[0]
         except:
             logging.error("MEDIAINFO ERROR: Could not parse Duration for " + airtable_create_dict[config.FILENAME])
+            airtable_create_dict[config.DURATION] = "Error"
     try:
         airtable_create_dict[config.FILE_FORMAT] = (mi_General_Text.split("<Format_String>"))[1].split("</Format_String>")[0]
     except:
@@ -825,23 +864,28 @@ def parseMediaInfo(filePath, media_info_text, RID, parent_id):
     except:
         logging.error("MEDIAINFO ERROR: Could not parse File Size for " + airtable_create_dict[config.FILENAME])
 
-        # Video Stuff
+    # Video Stuff
 
-    if not airtable_create_dict[config.VIDEO_CODEC] == "None":
+    if file_type == "Video" or file_type == "Silent_Video":
         try:
             airtable_create_dict[config.VIDEO_CODEC] = (mi_Video_Text.split("<CodecID>"))[1].split("</CodecID>")[0]
         except:
-            logging.error("MEDIAINFO ERROR: Could not parse Video Track Encoding for " + airtable_create_dict[config.FILENAME])
+            try:
+                airtable_create_dict[config.VIDEO_CODEC] = (mi_Video_Text.split("<Format>"))[1].split("</Format>")[0]
+            except:
+                logging.error("MEDIAINFO ERROR: Could not parse Video Track Encoding for " + airtable_create_dict[config.FILENAME])
         try:
             airtable_create_dict[config.VIDEO_BIT_DEPTH] = (mi_Video_Text.split("<BitDepth>"))[1].split("</BitDepth>")[0]
         except:
             logging.error("MEDIAINFO ERROR: Could not parse Video Bit Depth for " + airtable_create_dict[config.FILENAME])
+            airtable_create_dict[config.VIDEO_BIT_DEPTH] = "None"
         try:
             airtable_create_dict[config.VIDEO_SCAN_TYPE] = (mi_Video_Text.split("<ScanType_String>"))[1].split("</ScanType_String>")[0]
         except:
             logging.error("MEDIAINFO ERROR: Could not parse Scan Type for " + airtable_create_dict[config.FILENAME])
         try:
             airtable_create_dict[config.VIDEO_FRAME_RATE] = (mi_Video_Text.split("<FrameRate>"))[1].split("</FrameRate>")[0]
+            airtable_create_dict[config.VIDEO_BIT_DEPTH] = "None"
         except:
             logging.error("MEDIAINFO ERROR: Could not parse Frame Rate for " + airtable_create_dict[config.FILENAME])
         try:
@@ -860,8 +904,8 @@ def parseMediaInfo(filePath, media_info_text, RID, parent_id):
         except:
             print("MEDIAINFO ERROR: Could not parse Display Aspect Ratio for " + airtable_create_dict[config.FILENAME])
 
-        # Audio Stuff
-    if not airtable_create_dict[config.AUDIO_CODEC] == "None":
+    # Audio Stuff
+    if file_type == "Video" or file_type == "Audio":
         try:
             airtable_create_dict[config.AUDIO_SAMPLING_RATE] = (mi_Audio_Text.split("<SamplingRate>"))[1].split("</SamplingRate>")[0]
         except:
@@ -874,7 +918,7 @@ def parseMediaInfo(filePath, media_info_text, RID, parent_id):
             except:
                 logging.error("MEDIAINFO ERROR: Could not parse Audio Track Encoding for " + airtable_create_dict[config.FILENAME])
 
-    #image Stuff
+    #Image Stuff
     if file_type == "Image":
         try:
             frame_width = (mi_Image_Text.split("<Width>"))[1].split("</Width>")[0]
