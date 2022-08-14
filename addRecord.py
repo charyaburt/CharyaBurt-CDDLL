@@ -453,7 +453,7 @@ def createAudioPreview(input_path):
     record_number = os.path.basename(os.path.abspath(os.path.join(input_path, os.pardir)))
     drive_name = config.DRIVE_NAME
     preview_path = os.path.join('/Volumes', drive_name, '_Previews')
-    preview_album_path = os.path.join('/Volumes', drive_name, '_Previews', record_number)
+    preview_album_path = os.path.join('/Volumes', drive_name, '_Previews', record_number + '_preview')
 
     if not os.path.exists(preview_path):
         try:
@@ -491,7 +491,7 @@ def createImagePreview(input_path):
     record_number = os.path.basename(os.path.abspath(os.path.join(input_path, os.pardir)))
     drive_name = config.DRIVE_NAME
     preview_path = os.path.join('/Volumes', drive_name, '_Previews')
-    preview_album_path = os.path.join('/Volumes', drive_name, '_Previews', record_number)
+    preview_album_path = os.path.join('/Volumes', drive_name, '_Previews', record_number + '_preview')
 
     if not os.path.exists(preview_path):
         try:
@@ -529,7 +529,7 @@ def createVideoPreview(input_path):
     record_number = os.path.basename(os.path.abspath(os.path.join(input_path, os.pardir)))
     drive_name = config.DRIVE_NAME
     preview_path = os.path.join('/Volumes', drive_name, '_Previews')
-    preview_album_path = os.path.join('/Volumes', drive_name, '_Previews', record_number)
+    preview_album_path = os.path.join('/Volumes', drive_name, '_Previews', record_number + '_preview')
 
     if not os.path.exists(preview_path):
         try:
