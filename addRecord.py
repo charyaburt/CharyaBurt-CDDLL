@@ -672,10 +672,10 @@ def driveAudit():
     for page in pages:
         for record in page:
             try:
-                in_library = record['fields'][config.IN_LIBRARY]
+                record_status = record['fields'][config.RECORD_STATUS]
             except Exception as e:
-                in_library = "Not Found"
-            if in_library == "Yes":     #only process records that are in the library
+                record_status = "None"
+            if record_status != "Deaccessioned Record":     #only process records that are not labled as deaccessioned
                 RID = record['fields'][config.RECORD_NUMBER]
                 path = os.path.join('/Volumes', drive_name, RID)    #will need to fix this to make it cross platform eventually
                 if not os.path.isdir(path):
@@ -699,7 +699,6 @@ def airtableAudit():
     drive_name = config.DRIVE_NAME
     logging.info('Performing Record level Airtable audit checking Airtable against Drive titled: %s.' % drive_name)
     in_airtable_and_in_library = 0
-    in_airtable_not_in_library = 0
     missing_from_airtable_count = 0
 
     record_dict = {}
@@ -708,10 +707,11 @@ def airtableAudit():
         for record in page:
             RID = record['fields'][config.RECORD_NUMBER]
             try:
-                in_library = record['fields'][config.IN_LIBRARY]
+                record_status = record['fields'][config.RECORD_STATUS]
             except Exception as e:
-                in_library = "No"
-            record_dict.update({RID: in_library})
+                record_status = "None"
+            if record_status != "Deaccessioned Record":
+                record_dict.update({RID: in_library})
 
     drive_path = os.path.join('/Volumes', drive_name)
     for item in os.listdir(drive_path):
