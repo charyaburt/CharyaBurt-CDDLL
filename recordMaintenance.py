@@ -23,7 +23,7 @@ def main():
     parser = argparse.ArgumentParser(description="This is a simple testing script for Airtable / Python stuff with logging")
     parser.add_argument('-v', '--verbose', action='count', default=0,help="Defines verbose level for standard out (stdout). v = warning, vv = info, vvv = debug")
     parser.add_argument('-d', '--Debug',dest='d',action='store_true',default=False,help="turns on Debug mode, which send all DEBUG level (and below) messages to the log. By default logging is set to INFO level")
-    #parser.add_argument('-gc', '--Get-Checksums',dest='gc',action='store_true',default=False,help="Runs the checksum harvesting subcprocess. This should really only be done once")
+    parser.add_argument('-gc', '--Get-Checksums',dest='gc',action='store_true',default=False,help="Runs the checksum harvesting subcprocess. This should really only be done once")
     parser.add_argument('-vc', '--Validate-Checksums',dest='vc',action='store_true',default=False,help="Runs the checksum validation subcprocess. This should be run on a regular basis")
     #parser.add_argument('-dv', '--Download-Vimeo',dest='dv',action='store_true',default=False,help="Runs the Vimeo Download subcprocess. This likely won't ever actually need to be run if the archive is being properly maintained")
     #parser.add_argument('-uv', '--Upload-Vimeo',dest='uv',nargs='?',type=int,default=0,const=5,help="Runs the Vimeo Upload subcprocess. By default this will upload the first 5 files it finds that need to be uploaded to Vimeo. If you put a number after the -uv flag it will upload that number of files that it finds")
@@ -104,10 +104,9 @@ def main():
     if args.fa:
         fileAudit()
 
-    #Harvest checksums
-    #Currently not working / Deprecated
-    #if args.gc:
-    #    getChecksums()
+    #Harvest checksums for any non-album records missing a checksum
+    if args.gc:
+        getChecksums()
 
     #Validate checksums
     if args.vc:
@@ -122,26 +121,28 @@ def main():
     #if args.f:
     #    findRecord(args.f, drive_name)
 
+    #needs to be moved to a vimeo maintenance script
     #Perform Download Vimeo subprocess
-    if args.dv:
-        downloadVimeo(airtable, drive_name)
+    #if args.dv:
+    #    downloadVimeo(airtable, drive_name)
 
+    #needs to be moved to a vimeo maintenance script
     #Perform Upload Vimeo subprocess
-    if args.uv > 0:
+#    if args.uv > 0:
 
-        v = vimeo.VimeoClient(
-        token=config.YOUR_ACCESS_TOKEN,
-        key=config.YOUR_CLIENT_ID,
-        secret=config.YOUR_CLIENT_SECRET
-        )
+#        v = vimeo.VimeoClient(
+#        token=config.YOUR_ACCESS_TOKEN,
+#        key=config.YOUR_CLIENT_ID,
+#        secret=config.YOUR_CLIENT_SECRET
+#        )
 
         ## Make the request to the server for the "/me" endpoint.
-        about_me = v.get('/me')
+#        about_me = v.get('/me')
 
         ## Make sure we got back a successful response.
-        assert about_me.status_code == 200
+#        assert about_me.status_code == 200
 
-        uploadVimeo(airtable, v, drive_name, args.uv)
+#        uploadVimeo(airtable, v, drive_name, args.uv)
         # Setup Vimeo Credentials for API_KEY
 
     logging.critical('========Script Complete========')
@@ -527,7 +528,6 @@ def autoDeaccession(airtable, drive_name):
     logging.info('Auto deaccession complete. %i records succesfully deaccessioned, %i Airtable records updated, %i errors encountered.' % (deaccession_success, update_counter, deaccession_errors))
     return
 
-#We get checksums during intake now, but this needs to be re-written to get checksums in case he checksums are lost? Maybe
 def getChecksums():
     #This section harvests file checksums and puts them in Airtable's Checksum field
     #For now it will only get the first filename, and warns if there is more than one file in the folder
@@ -545,10 +545,16 @@ def getChecksums():
     for page in pages:
         for at_file in page:
             try:
-                in_library = at_file['fields'][config.IN_LIBRARY_LOOKUP][0]
+                record_status = at_file['fields'][config.RECORD_STATUS_LOOKUP][0]
             except Exception as e:
-                in_library = "Not Found"
-            if in_library == 'Yes':     #only process records that are in the library
+                record_status = "none"
+            try:
+                file_format = at_file['fields'][config.FILE_FORMAT]
+            except Exception as e:
+                file_format = "none"
+            if file_format == "Album":    #we can skip this whole process for Albums, they don't have checksums
+                continue
+            if record_status != config.RECORD_DEACCESS_FLAG:     #only process records that are in the library
                 file_record_id = at_file['id']
                 RID = at_file['fields'][config.RECORD_NUMBER_LOOKUP][0]
                 try:                                        #checks to see if record has an entry in the File Name field. This will only process empty file names, so as not to overwrite
@@ -566,7 +572,7 @@ def getChecksums():
                 file_dict_list.append(file_dict)
 
     if len(file_dict_list) == 0:
-        logging.info('All files in Airtable have checksums. No checksums will be updated. If you would like to regenerate checksums please remove the data in the "[Data] Checksum" field in Airtable and run this subprocess again.')
+        logging.info('All files in Airtable have checksums. No checksums will be updated. If you would like to regenerate checksums please remove the data in the "%s" field in Airtable and run this subprocess again.' % config.CHECKSUM)
     else:
         file_dict_list_sorted = sorted(file_dict_list, key=lambda d: d['RID'])     #sorts the list so the user can see the big numbers go up!
         for file_dict_entry in file_dict_list_sorted:
