@@ -18,9 +18,11 @@ CHECKSUM = "Checksum"
 FILE_PROCESS_STATUS = "File Processing Status"
 FILE_INTAKE_FLAG = "Intaking Local Data File" #This flag is for local file intake.
 FILE_UPLOAD_FLAG = "Uploading Online Version" #This flag is for online upload.
-FILE_DEACCESS_FLAG = "DEACCESSIONING ALL DATA" #This is the File Processing Status flag that marks a record for deaccession. 
+FILE_DEACCESS_FLAG = "DEACCESSIONING ALL DATA" #This is the File Processing Status flag that marks a record for deaccession.
 RECORD_STATUS = "Status"
 RECORD_DEACCESS_FLAG = "Deaccessioned Record" #This is the Record Status flag that marks a record for deaccession.
+RECORD_STATUS_LOOKUP = "Status (from Part of Record)"
+
 #Both deaccession flags must be in place for the deaccessioning program to proceed.
 
 #Airtable File Metadata Fields
