@@ -23,14 +23,13 @@ def main():
     parser = argparse.ArgumentParser(description="This is a simple testing script for Airtable / Python stuff with logging")
     parser.add_argument('-v', '--verbose', action='count', default=0,help="Defines verbose level for standard out (stdout). v = warning, vv = info, vvv = debug")
     parser.add_argument('-d', '--Debug',dest='d',action='store_true',default=False,help="turns on Debug mode, which send all DEBUG level (and below) messages to the log. By default logging is set to INFO level")
-    parser.add_argument('-gf', '--Get-Filenames',dest='gf',action='store_true',default=False,help="Runs the filename harvesting subprocess. This should really only be done once")
-    parser.add_argument('-gc', '--Get-Checksums',dest='gc',action='store_true',default=False,help="Runs the checksum harvesting subcprocess. This should really only be done once")
+    #parser.add_argument('-gc', '--Get-Checksums',dest='gc',action='store_true',default=False,help="Runs the checksum harvesting subcprocess. This should really only be done once")
     parser.add_argument('-vc', '--Validate-Checksums',dest='vc',action='store_true',default=False,help="Runs the checksum validation subcprocess. This should be run on a regular basis")
-    parser.add_argument('-dv', '--Download-Vimeo',dest='dv',action='store_true',default=False,help="Runs the Vimeo Download subcprocess. This likely won't ever actually need to be run if the archive is being properly maintained")
-    parser.add_argument('-uv', '--Upload-Vimeo',dest='uv',nargs='?',type=int,default=0,const=5,help="Runs the Vimeo Upload subcprocess. By default this will upload the first 5 files it finds that need to be uploaded to Vimeo. If you put a number after the -uv flag it will upload that number of files that it finds")
+    #parser.add_argument('-dv', '--Download-Vimeo',dest='dv',action='store_true',default=False,help="Runs the Vimeo Download subcprocess. This likely won't ever actually need to be run if the archive is being properly maintained")
+    #parser.add_argument('-uv', '--Upload-Vimeo',dest='uv',nargs='?',type=int,default=0,const=5,help="Runs the Vimeo Upload subcprocess. By default this will upload the first 5 files it finds that need to be uploaded to Vimeo. If you put a number after the -uv flag it will upload that number of files that it finds")
     parser.add_argument('-fa', '--File-Audit',dest='fa',action='store_true',default=False,help="Runs a file-level audit subcprocess. This is more detailed than the auto-audio, which only checks that the Unique ID folders exist. This checks that files exist as well")
     parser.add_argument('-ad', '--Auto-Deaccession',dest='ad',action='store_true',default=False,help="Runs the auto-deaccession subcprocess. This moves all records marked \"Not in Library\" to a _Trash folder. This should be run on a regular basis")
-    parser.add_argument('-f', '--Find',dest='f',action='store',help="Runs the find subcprocess. This returns the path of whatever record is searched for")
+    #parser.add_argument('-f', '--Find',dest='f',action='store',help="Runs the find subcprocess. This returns the path of whatever record is searched for")
     args = parser.parse_args()
 
     if args.d:
@@ -85,24 +84,30 @@ def main():
     #airtable = Airtable(base_key, table_name, api_key)
 
     #Perform a drive audit. Quit upon failure
-    if not driveAudit():
-        quit()
+    drive_audit = driveAudit()
 
     #perform a file-level audit.
-    if not airtableAudit():
-        quit()
+    airtable_audit = airtableAudit()
+
+    #quit if either the airtable audio or drive audio return False
+    if drive_audit and airtable_audit:
+        pass
+    else:
+        if not drive_audit:
+            logging.warning('Drive audit failed. Please fix this before continuing.')
+        if not airtable_audit:
+            logging.warning('Airtable audit failed. Please fix this before continuing.')
+        logging.critical('========Script Complete========')
+        #quit()
 
     #perform a file-level audit.
     if args.fa:
         fileAudit()
 
-    #Harvest filenames
-    if args.gf:
-        getFilenames(airtable, drive_name)
-
     #Harvest checksums
-    if args.gc:
-        getChecksums()
+    #Currently not working / Deprecated
+    #if args.gc:
+    #    getChecksums()
 
     #Validate checksums
     if args.vc:
@@ -113,8 +118,9 @@ def main():
         autoDeaccession(airtable, drive_name)
 
     #Perform find subcprocess
-    if args.f:
-        findRecord(args.f, drive_name)
+    #Depracated
+    #if args.f:
+    #    findRecord(args.f, drive_name)
 
     #Perform Download Vimeo subprocess
     if args.dv:
@@ -174,44 +180,28 @@ def driveAudit():
     logging.info('Performing record level drive audit. Checking Drive against Airtable, using Drive titled: %s' % drive_name)
     missing_from_drive_count = 0
     correct_on_drive_count = 0
-#    not_added_record_count = 0
     warning_count = 0
+    no_status = 0
     for page in pages:
         for record in page:
             try:
-                in_library = record['fields'][config.IN_LIBRARY]
+                record_status = record['fields'][config.RECORD_STATUS]
             except Exception as e:
-                in_library = "Not Found"
-            if in_library == "Yes":     #only process records that are in the library
+                record_status = "None"  #it is worth noting and telling the user if a file doesn't have a status
+            if record_status != config.RECORD_DEACCESS_FLAG:     #only process records that are in the library
                 RID = record['fields'][config.RECORD_NUMBER]
                 path = os.path.join('/Volumes', drive_name, RID)    #will need to fix this to make it cross platform eventually
                 if not os.path.isdir(path):
-#                    if on_drive == "Yes":     # only mark is missing if it's supposed to be on the drive
-                    logging.error('Could not find record %s' % RID)
+                    logging.error('Could not find folder for record %s on drive named %s' % (RID, drive_name))
                     missing_from_drive_count += 1
-#                    if on_drive == "No":     #an exception for records not labeled as "On Drive" yet, which will likely not occur once the intial setup is complete
-#                        logging.warning('The following record has not been properly added to the drive yet: %s' % UID)
-#                        not_added_record_count += 1
                 else:
                     correct_on_drive_count += 1
+                if record_status == "None":
+                    no_status += 1
+                    logging.warning('Record %s has no status. Please enter a status for this record.' % RID)
 
-#                try:
-#                    at_file_name = record['fields']['File Name']
-#                except Exception as e:
-#                    at_file_name = "Not Found"
-#                try:
-#                    at_checksum = record['fields']['Checksum']
-#                except Exception as e:
-#                    at_checksum = "Not Found"
-#                if at_file_name == "Not Found" and at_checksum == "Not Found":
-#                    logging.warning('Record %s has no file name or checksum values in Airtable. Run the -gf then -gc subprocesses to harvest this metadata' % UID)
-#                    warning_count += 1
-#                elif at_file_name == "Not Found":
-#                    logging.warning('Record %s has no file name value in Airtable. Run -gf subprocess to harvest file names' % UID)
-#                    warning_count += 1
-#                elif at_checksum == "Not Found":
-#                    logging.warning('Record %s has no checksum value in Airtable. Run -gc subprocess to harvest checksums' % UID)
-#                    warning_count += 1
+    if no_status > 1:
+        logging.warning('Record level drive audit has identified %i record(s) without a status. Please fix this before continuing.' % no_status)
     if missing_from_drive_count > 0:
         print('ERROR: Record level drive audit has found %i missing record(s). Please consult the log and fix this problem before continuing. %i record(s) were succesfully located' % (missing_from_drive_count, correct_on_drive_count))
         logging.error('Record level drive audit has identified %i missing record(s). Please fix this before continuing.' % missing_from_drive_count)
@@ -219,7 +209,6 @@ def driveAudit():
 #        if not_added_record_count > 0:
 #            logging.warning('There are records in the Airtable that have not yet been added onto the drive. This should be addressed as soon as possible')
 #            warning_count += 1
-        logging.critical('========Script Complete========')
         return False
     else:
 #        if not_added_record_count > 0:3
@@ -247,10 +236,10 @@ def airtableAudit():
         for record in page:
             RID = record['fields'][config.RECORD_NUMBER]
             try:
-                in_library = record['fields'][config.IN_LIBRARY]
+                record_status = record['fields'][config.RECORD_STATUS]
             except Exception as e:
-                in_library = "No"
-            record_dict.update({RID: in_library})
+                record_status = "None"
+            record_dict.update({RID: record_status})
 
     drive_path = os.path.join('/Volumes', drive_name)
     for item in os.listdir(drive_path):
@@ -258,12 +247,12 @@ def airtableAudit():
             if item.startswith("CB"):
                 found_in_airtable = False       # initiate found boolean as false
                 if item in record_dict:
-                    if record_dict.get(item) == "Yes":
-                        in_airtable_and_in_library += 1
-                        #logging.debug('Record %s was found in Airtable' % item)
-                    else:
+                    if record_dict.get(item) == config.RECORD_DEACCESS_FLAG:
                         in_airtable_not_in_library += 1
                         logging.error('Record %s was found in Airtable but was labeled "Not In Library" despite being on the drive' % item)
+                    else:
+                        in_airtable_and_in_library += 1
+                        #logging.debug('Record %s was found in Airtable' % item)
                 else:
                     logging.error('Could not find record %s on the Airtable' % item)
                     missing_from_airtable_count += 1
@@ -369,10 +358,10 @@ def fileAudit():
     for page in pages:
         for file in page:
             try:
-                in_library = file['fields'][config.IN_LIBRARY_LOOKUP][0]
+                record_status = file['fields'][config.RECORD_STATUS_LOOKUP][0]
             except Exception as e:
-                in_library = "Not Found"
-            if in_library == 'Yes':     #only process records that are in the library
+                record_status = "none"
+            if record_status != config.RECORD_DEACCESS_FLAG:     #only process records that are in the library
                 file_record_id = file['id']
                 RID = file['fields'][config.RECORD_NUMBER_LOOKUP][0]
                 try:                                        #checks to see if record has an entry in the File Name field. This will only process empty file names, so as not to overwrite
@@ -382,6 +371,8 @@ def fileAudit():
                     error_count += 1
                 file_path = os.path.join('/Volumes', drive_name, RID, airtable_filename)    #will need to fix this to make it cross platform eventually
                 if os.path.isfile(file_path):
+                    file_found_counter += 1
+                elif os.path.isdir(file_path):
                     file_found_counter += 1
                 else:
                     logging.error('Filename Mismatch for record %s, file %s. Please fix this before continuing' % (RID, airtable_filename))
@@ -410,67 +401,6 @@ def fileAudit():
     logging.info('File-level audit complete, %i errors found.' % error_count)
     return
 
-# This function is depractated until I can figure out the best way to handle it. i would need to create a file record if the record doesn't already exist, which is a bit of trouble
-#block commenting it out for now, will get around to replacing later.
-"""
-def getFilenames(airtable, drive_name):
-    #This section harvests file names and puts them in Airtable's File Name field
-    #For now it will only get the first filename, and warns if there is more than one file in the folder
-    print('Harvesting File names and updating airtable')
-    logging.info('Harvesting File names and updating airtable')
-    update_counter = 0
-    pages = airtable.get_iter()
-    for page in pages:
-        for record in page:
-            try:
-                in_library = record['fields']['In Library']
-            except Exception as e:
-                in_library = "Not Found"
-            if in_library == "Yes":     #only process records that are in the library
-                record_id = record['id']
-                UID = record['fields']['Unique ID']
-                try:                                        #checks to see if record has an entry in the File Name field. This will only process empty file names, so as not to overwrite
-                    airtable_filename = record['fields']['File Name']
-                    continue
-                except Exception as e:
-                    logging.info('Updating filename for record %s' % UID)
-                try:                                        #Need to have an try/except here because airtable errors if the field is empty. This is in case there is no Group
-                    group = record['fields']['Group']
-                except Exception as e:
-                    group = ""
-                if group == "":                             #In case there is no Group, we don't want an extra slash
-                    path = os.path.join('/Volumes', drive_name, UID)    #will need to fix this to make it cross platform eventually
-                else:
-                    path = os.path.join('/Volumes', drive_name, group, UID)    #will need to fix this to make it cross platform eventually
-                files_list = []
-                try:
-                    for f in os.listdir(path):
-                        if os.path.isfile(os.path.join(path, f)):
-                            if not f.startswith('.'):     #avoid hidden files
-                                files_list.append(f)
-                except Exception as e:
-                    logging.error('No folder found for %s' % UID)
-                files_list.sort()                      #sort the list so it'll always pick the first file.
-                if len(files_list) > 1:
-                    logging.warning('Multiple files found in ' + UID + ', using ' + files_list[0])
-                    update_dict = {'File Name': files_list[0]}
-                elif len(files_list) == 0:
-                    logging.error('No files found in %s' % UID)
-                    update_dict = {'File Name': 'NO FILE FOUND'}
-                else:
-                    update_dict = {'File Name': files_list[0]}
-
-                #THIS IS THE IMPORTANT BIT WHERE WE UPDATE THE TABLE!
-                try:
-                    airtable.update(record_id, update_dict)
-                    logging.info('Succesfully updated filename for record %s ' % UID)
-                    update_counter += 1
-                except Exception as e:
-                    logging.error('Could not update filename for record %s' % UID)
-    logging.info('Finished updating filenames for %i records' % update_counter)
-    return
-"""
-
 def validateChecksums():
     #this has been succesfull updated
     #This section validates file checksums and updates the "last validated date" field
@@ -488,10 +418,16 @@ def validateChecksums():
     for page in pages:
         for at_file in page:
             try:
-                in_library = at_file['fields'][config.IN_LIBRARY_LOOKUP][0]
+                record_status = at_file['fields'][config.RECORD_STATUS_LOOKUP][0]
             except Exception as e:
-                in_library = "Not Found"
-            if in_library == 'Yes':     #only process records that are in the library
+                record_status = "none"
+            try:
+                file_format = at_file['fields'][config.FILE_FORMAT]
+            except Exception as e:
+                file_format = "none"
+            if file_format == "Album":    #we can skip this whole process for Albums, they don't have checksums
+                continue
+            if record_status != config.RECORD_DEACCESS_FLAG:     #only process records that are in the library and aren't albums
                 file_record_id = at_file['id']
                 RID = at_file['fields'][config.RECORD_NUMBER_LOOKUP][0]
                 try:                                        #checks to see if record has an entry in the File Name field. This will only process empty file names, so as not to overwrite
@@ -502,7 +438,7 @@ def validateChecksums():
                 try:                                        #checks to see if record has an entry in the checksum field. This will only process records with existing checksums
                     airtable_checksum = at_file['fields'][config.CHECKSUM]
                 except Exception as e:
-                    logging.warning('No Checksum found for record %s file %s. Skipping validation. Please run checksum creation subprocess to ensure records are up to date.' % (RID, airtable_filename))
+                    logging.warning('No Checksum found for record %s. Skipping validation. Please run checksum creation subprocess to ensure records are up to date.' % (RID))
                     continue
                 file_path = os.path.join('/Volumes', drive_name, RID, airtable_filename)    #will need to fix this to make it cross platform eventually
                 file_dict = {"RID": RID, "file_record_id": file_record_id, "airtable_checksum": airtable_checksum, "file_path": file_path}
@@ -519,11 +455,11 @@ def validateChecksums():
         file_checksum = generateHash(file_dict_entry["file_path"]) #this is where we actually get the checksum
         if file_checksum == file_dict_entry["airtable_checksum"]:
             logging.info('Checksum validation succesful for record %s' % file_dict_entry["RID"])
-            update_dict = {'[Data] Checksum Valid': 'Yes', '[Data] Last Checksum Validated Date': datetime.today().strftime('%Y-%m-%d')}
+            update_dict = {config.CHECKSUM_VALID: 'Yes', config.CHECKSUM_VALID_DATE: datetime.today().strftime('%Y-%m-%d')}
             checksum_validate_counter += 1
         else:
             logging.error('Checksum validation failed for record %s' % file_dict_entry["RID"])
-            update_dict = {'[Data] Checksum Valid': 'No', '[Data] Last Checksum Validated Date': datetime.today().strftime('%Y-%m-%d')}
+            update_dict = {config.CHECKSUM_VALID: 'No', config.CHECKSUM_VALID_DATE: datetime.today().strftime('%Y-%m-%d')}
             checksum_error_counter += 1
 
         #THIS IS THE IMPORTANT BIT WHERE WE UPDATE THE TABLE!
@@ -532,6 +468,7 @@ def validateChecksums():
             logging.info('Succesfully updated checksum validation date for record %s ' % file_dict_entry["RID"])
             update_counter += 1
         except Exception as e:
+            print(e)
             logging.error('Could not update checksum validation for record %s' % file_dict_entry["RID"])
             checksum_error_counter += 1
 
@@ -590,7 +527,7 @@ def autoDeaccession(airtable, drive_name):
     logging.info('Auto deaccession complete. %i records succesfully deaccessioned, %i Airtable records updated, %i errors encountered.' % (deaccession_success, update_counter, deaccession_errors))
     return
 
-
+#We get checksums during intake now, but this needs to be re-written to get checksums in case he checksums are lost? Maybe
 def getChecksums():
     #This section harvests file checksums and puts them in Airtable's Checksum field
     #For now it will only get the first filename, and warns if there is more than one file in the folder
@@ -623,7 +560,7 @@ def getChecksums():
                     airtable_checksum = at_file['fields'][config.CHECKSUM]
                     continue
                 except Exception as e:
-                    logging.info('No Checksum found for record %s file %s. Checksum will be harvested.' % (RID, airtable_filename))
+                    logging.info('No Checksum found for record %s . Checksum will be harvested.' % (RID))
                 file_path = os.path.join('/Volumes', drive_name, RID, airtable_filename)    #will need to fix this to make it cross platform eventually
                 file_dict = {"RID": RID, "file_record_id": file_record_id, "file_path": file_path}
                 file_dict_list.append(file_dict)
@@ -658,29 +595,30 @@ def getChecksums():
         logging.info('Checksum harvest complete. %i checksums generated, %i Airtable records updated, %i warnings encountered, %i errors encountered.' % (checksum_counter, update_counter, warning_counter, error_counter))
     return
 
-def findRecord(UID, drive_name):
+#This is not really necessary anymore because all record folders are at the root level
+#def findRecord(UID, drive_name):
     # Performs the find subprocess. Returns the full path of the record folder.
     # It will first look for the file in a group, if it can't find it in a group it looks as the root level
     # If it can't find it anywhere it throws an error
 
-    p = pathlib.Path('/Volumes/' + drive_name).glob('**/' + UID)
-    files = [x for x in p if x.is_dir()]
-    nontrash_Records = []   #making a list of records not in the trash can
-    for file in files:
-        if '_Trash' not in str(file):
-            nontrash_Records.append(file)
-    if len(nontrash_Records) == 1:
-        #print(str(files[0]))                                            #commented out standard output
-        logging.info('Record %s found at: %s' % (UID, str(nontrash_Records[0])))
-    elif len(nontrash_Records) == 0:
-        #print('ERROR: Record %s not found' % (UID))                     #commented out standard output
-        logging.error('Record %s not found' % (UID))
-    elif len(nontrash_Records) > 1:
+#    p = pathlib.Path('/Volumes/' + drive_name).glob('**/' + UID)
+#    files = [x for x in p if x.is_dir()]
+#    nontrash_Records = []   #making a list of records not in the trash can
+#    for file in files:
+#        if '_Trash' not in str(file):
+#            nontrash_Records.append(file)
+#    if len(nontrash_Records) == 1:
+#        #print(str(files[0]))                                            #commented out standard output
+#        logging.info('Record %s found at: %s' % (UID, str(nontrash_Records[0])))
+#    elif len(nontrash_Records) == 0:
+#        #print('ERROR: Record %s not found' % (UID))                     #commented out standard output
+#        logging.error('Record %s not found' % (UID))
+#    elif len(nontrash_Records) > 1:
         #print('ERROR: Multiple versions of record %s found at the following locations:' % (UID))    #commented out standard output
-        logging.error('Multiple versions of %s found at the following locations:' % (UID))
-        for file in nontrash_Records:
+#        logging.error('Multiple versions of %s found at the following locations:' % (UID))
+#        for file in nontrash_Records:
             #print('%s' % (str(file)))                                   #commented out standard output
-            logging.error('%s' % (str(file)))
+#            logging.error('%s' % (str(file)))
 
 def uploadVimeo(airtable, v, drive_name, quantity):
     # Uploads videos from airtable records to vimeo
