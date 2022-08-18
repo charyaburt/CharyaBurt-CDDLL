@@ -45,6 +45,8 @@ COPY_VERSION = "Access Copy Version"
 PARENT_ID = "Part of Record"
 FULL_FILE_NAME = "Full File Name"
 FILE_COUNT = "Folder File Count"
+CHECKSUM_VALID = "Checksum Valid"
+CHECKSUM_VALID_DATE = "Checksum Validated Date"
 
 #Various Hardcoded Values
 MAX_SIZE = 5000000000
