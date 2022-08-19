@@ -70,38 +70,31 @@ def main():
 
 #Need to test for dependencies here. Config.py as well as libraries
 
-    # Setup Airtable Credentials for API
-
-    #base_key=config.BASE_ID         #This stuff comes from the config.py file. Very important!
-    #api_key=config.API_KEY
     drive_name=config.DRIVE_NAME
-    #table_name = config.TABLE_NAME #don't need this anymore. there's more tables so we need to ask for the info better.
-
-    #airtable = Airtable(base_key, table_name, api_key)
 
     #similar to record maintenance, the airtable and drive must pass audits before any vimeo maintenance can occur
 
     #Perform a drive audit. Quit upon failure
-    drive_audit = driveAudit()
+#    drive_audit = driveAudit()
 
     #perform an airtable audit.
-    airtable_audit = airtableAudit()
+#    airtable_audit = airtableAudit()
 
     #perform a file-level audit.
-    file_audit = fileAudit()
+#    file_audit = fileAudit()
 
     #quit if either the airtable audio or drive audio return False
-    if drive_audit and airtable_audit and file_audit:
-        pass
-    else:
-        if not drive_audit:
-            logging.error('Drive audit failed. Please fix this before continuing.')
-        if not airtable_audit:
-            logging.error('Airtable audit failed. Please fix this before continuing.')
-        if not file_audio:
-            logging.error('File audit failed. Please fix this before continuing.')
-        logging.critical('========Script Complete========')
-        quit()
+#    if drive_audit and airtable_audit and file_audit:
+#        pass
+#    else:
+#        if not drive_audit:
+#            logging.error('Drive audit failed. Please fix this before continuing.')
+#        if not airtable_audit:
+#            logging.error('Airtable audit failed. Please fix this before continuing.')
+#        if not file_audit:
+#            logging.error('File audit failed. Please fix this before continuing.')
+#        logging.critical('========Script Complete========')
+#        quit()
 
 
     #Perform Download Vimeo subprocess
@@ -110,27 +103,136 @@ def main():
 
     #needs to be moved to a vimeo maintenance script
     #Perform Upload Vimeo subprocess
-#    if args.uv > 0:
+    if args.uv > 0:
 
-#        v = vimeo.VimeoClient(
-#        token=config.YOUR_ACCESS_TOKEN,
-#        key=config.YOUR_CLIENT_ID,
-#        secret=config.YOUR_CLIENT_SECRET
-#        )
+        v = connectToVimeo(config.YOUR_ACCESS_TOKEN, config.YOUR_CLIENT_ID, config.YOUR_CLIENT_SECRET)
 
-        ## Make the request to the server for the "/me" endpoint.
-#        about_me = v.get('/me')
+        if v == False:
+            quit()
 
-        ## Make sure we got back a successful response.
-#        assert about_me.status_code == 200
+        upload_files_dict_list = uploadVimeoSubprocesses(v, drive_name, args.uv)
+        counter_dict = {'upload_counter' : 0, 'error_counter' : 0, 'update_counter': 0}
 
-#        uploadVimeoSubprocesses(airtable, v, drive_name, args.uv)
-        # Setup Vimeo Credentials for API_KEY
+        for upload_files_dict in upload_files_dict_list:
+            mediainfo_text = getMediaInfo(upload_files_dict['file_path'])
+            mediainfo_dict = parseMediaInfo(upload_files_dict['file_path'], mediainfo_text, upload_files_dict['name'],upload_files_dict['record_id'])
+            reason_list = checkForAccessFile(mediainfo_dict)    #get a list of reasons for why we need an access copy (if we do)
+            if not reason_list:
+                logging.info("No access copy needed. Starting Vimeo upload")
+                upload_path = upload_files_dict['file_path']
+            else:
+                upload_path = createAccessFile(upload_files_dict['file_path'], mediainfo_dict, reason_list, upload_files_dict['record_id'])
+            vimeoDict = createVimeoDict(upload_files_dict)
+            counter_dict = uploadFileToVimeo(v, vimeoDict, upload_path, upload_files_dict['record_id'],counter_dict)
+
+        logging.info('Vimeo uploading complete. %i file uploaded, %i airtable records updated, %i errors' % (counter_dict['upload_counter'], counter_dict['update_counter'], counter_dict['error_counter']))
+
+
+
 
     logging.critical('========Script Complete========')
 
 ## End of main function
 
+#pres_mediainfo_dict = parseMediaInfo(pres_file_path, pres_mediainfo_text, record_dict_entry['RID'], record_dict_entry['record_id'])
+
+def createVimeoDict(upload_files_dict):
+    # THIS IS WHERE WE CREATE THE DICTIONARY THAT WILL UPLOAD THE FILES TO VIMEO
+    if upload_files_dict['airtable_vimeo_access'] == "Public":
+        vimeoDict = {'name': upload_files_dict['name'], 'description': upload_files_dict['description'], 'privacy':{'view' : 'anybody'}}
+    elif upload_files_dict['airtable_vimeo_access'] == "Only Me":
+        vimeoDict = {'name': upload_files_dict['name'], 'description': upload_files_dict['description'], 'privacy':{'view' : 'nobody'}}
+    elif upload_files_dict['airtable_vimeo_access'] == "Private":
+        vimeoDict = {'name': upload_files_dict['name'], 'description': upload_files_dict['description'], 'privacy':{'view' : 'password'}, 'password': upload_files_dict['password']}
+    else:       # if for some reason there's not a permission listed, we'll make it have the default password: Charya#1dance
+        vimeoDict = {'name': upload_files_dict['name'], 'description': upload_files_dict['description'], 'privacy':{'view' : 'password'}, 'password': 'Charya#1dance'}
+
+    return vimeoDict
+
+def checkForAccessFile(mediainfo_dict):
+    reason_list = []
+    if "Interlaced" in mediainfo_dict[config.VIDEO_SCAN_TYPE]: #needs access file if it's interlaced
+        reason_list.append("Interlaced")
+    if int(mediainfo_dict[config.FILE_SIZE]) > config.MAX_SIZE: #needs access file if it's too big
+        reason_list.append("Large")
+    if mediainfo_dict['file_type'] == "Audio": #needs to have an access file made becuase it's just audio
+        reason_list.append("No Video")
+    return reason_list
+
+def createAccessFile(filePath, mediainfo_dict, reason_list, RID):
+    #creates access file. returns access file path
+    fileNameExtension = filePath.split(".")[-1]
+    accessFilePath = filePath.split("." + fileNameExtension)[0] + "_access.mp4"
+    if mediainfo_dict[config.VIDEO_ASPECT_RATIO] == "None":
+        aspect_string = ""
+    else:
+        aspect_string = "-aspect " + mediainfo_dict[config.VIDEO_ASPECT_RATIO]
+
+    ffmpeg_base = config.FFMPEG_PATH + " -hide_banner -loglevel panic -i "
+    ffmpeg_middle = ""
+    if "No Video" in reason_list:
+        logging.info('File in record %s, named %s has no video, creating a video version for access file.' % (RID, mediainfo_dict[config.FILENAME]))
+        ffmpeg_middle = "-filter_complex '[0:a]showwaves=s=640x480,format=yuv420p[vid]' -map '[vid]' -map 0:a -codec:v libx264 -crf 25 -preset fast -codec:a aac -strict -2 -b:a 192k -y"
+    elif "Interlaced" in reason_list and "Large" in reason_list:
+        logging.info('File in record %s, named %s is Interlaced and over 5GB. Making a smaller Progressive access file' % (RID, mediainfo_dict[config.FILENAME]))
+        ffmpeg_middle = "-c:v libx264 -pix_fmt yuv420p -movflags faststart -crf 18 -vf yadif -s 640x480 %s -y" % aspect_string
+    elif "Interlaced" in reason_list:
+        logging.info('File in record %s, named %s is Interlaced. Making a Progressive access file' % (RID, mediainfo_dict[config.FILENAME]))
+        ffmpeg_middle = "-c:v libx264 -pix_fmt yuv420p -movflags faststart -crf 18 -vf yadif -y"
+    elif "Large" in reason_list:
+        logging.info('File in record %s, named %s is larger than max limit (%i Bytes). Making a smaller access file' % (RID, (mediainfo_dict[config.FILENAME]), config.MAX_SIZE))
+        ffmpeg_middle = "-c:v libx264 -pix_fmt yuv420p -movflags faststart -crf 18 -s 640x480 %s -y" % aspect_string
+
+
+    ffmpeg_string = "%s '%s' %s '%s'" %(ffmpeg_base, filePath, ffmpeg_middle, accessFilePath)
+    logging.info("Running FFmpeg command: %s" % ffmpeg_string)
+    cmd = [ffmpeg_string]
+    ffmpeg_out = subprocess.Popen(cmd, stdout=subprocess.PIPE, shell=True).communicate()[0]
+    logging.info("Finished Running FFmpeg command")
+    return accessFilePath
+    #ffmpeg -i input.mp4 -filter_complex "[0:a]showwaves=s=1280x720,format=yuv420p[vid]" -map "[vid]" -map 0:a -codec:v libx264 -crf 18 -preset fast -codec:a aac -strict -2 -b:a 192k output.mp4
+
+
+def uploadFileToVimeo(v, vimeoDict, file_path, RID, counter_dict):
+    try:
+        logging.info('Uploading file: %s to Vimeo' % file_path)
+        video_uri = v.upload(file_path,data=vimeoDict)
+        logging.info('Upload complete' % file_path)
+        vimeo_link = 'https://vimeo.com/' + video_uri.split('/')[-1]
+        update_dict = {config.ACCESS_LINK : vimeo_link}
+        counter_dict['upload_counter'] += 1
+    except Exception as e:
+        logging.error('Could not upload file to Vimeo for record %s.' % RID)
+        logging.error(e)
+        counter_dict['error_counter'] += 1
+        return counter_dict
+    #THIS IS THE IMPORTANT BIT WHERE WE UPDATE THE TABLE!
+    try:
+        airtable = Airtable(config.BASE_ID, 'Records', config.API_KEY)
+        airtable.update(record_id, update_dict)
+        logging.info('Succesfully added Vimeo link for record %s ' % RID)
+        counter_dict['update_counter'] += 1
+    except Exception as e:
+        logging.error('Could not added Vimeo link for record %s' % RID)
+        logging.error('%s' % e)
+        counter_dict['error_counter'] += 1
+
+    return counter_dict
+
+def connectToVimeo(c_token, c_key, c_secret):
+    v = vimeo.VimeoClient(token=c_token, key=c_key, secret=c_secret)
+
+    ## Make the request to the server for the "/me" endpoint.
+    about_me = v.get('/me')
+
+    ## Make sure we got back a successful response.
+    try:
+        assert about_me.status_code == 200
+    except Exception as e:
+        logging.error('Quitting script. Cannot connect to Vimeo: %s' % e)
+        return False
+
+    return v
 
 def getAirtablePages(table_name):
     #takes table name, returns pages.
@@ -278,10 +380,10 @@ def fileAudit():
                 #            files_list.append(f)
                 #files_list.sort()                      #sort the list so it'll always pick the first file. I think we can get rid of this
                 #if len(files_list) > 1 and len(airtable_access_filename) == 0:
-                #    logging.warning('Multiple files found in ' + UID + ' but no access copy listed in Airtable, using ' + files_list[0])
+                #    logging.warning('Multiple files found in ' + RID + ' but no access copy listed in Airtable, using ' + files_list[0])
                 #    if airtable_filename != files_list[0]:
                 #        missing_file_counter += 1
-                #        logging.error('Filename Mismatch for record %s. Please fix this before continuing' % UID)
+                #        logging.error('Filename Mismatch for record %s. Please fix this before continuing' % RID)
                 #if len(files_list) == 0:
                 #    logging.error('No files found in %s' % RID)
                 #    missing_file_counter += 1
@@ -302,7 +404,7 @@ def downloadVimeo(airtable, drive_name):
     pages = airtable.get_iter()
     for page in pages:
         for record in page:
-            UID = record['fields']['Unique ID']
+            RID = record['fields']['Unique ID']
             try:
                 in_library = record['fields']['In Library']
             except Exception as e:
@@ -317,7 +419,7 @@ def downloadVimeo(airtable, drive_name):
                         vimeoLink = record['fields']['Vimeo Link']     #check to see if vimeo link exists
                     except Exception as e:
                         vimeoLink = "No Link"
-                        logging.warning('Record ' + UID + ' Marked as In Library and Not On Drive, but no Vimeo Link found. Skipping')
+                        logging.warning('Record ' + RID + ' Marked as In Library and Not On Drive, but no Vimeo Link found. Skipping')
                         warning_counter += 1
                         continue
                     try:
@@ -328,35 +430,35 @@ def downloadVimeo(airtable, drive_name):
                     try:                                        #checks to see if record has an entry in the File Name field. This will only process empty file names, so as not to overwrite
                         airtable_filename = record['fields']['File Name']
                     except Exception as e:
-                        logging.info('Downloading file from Vimeo: %s' % UID)
+                        logging.info('Downloading file from Vimeo: %s' % RID)
                     try:                                        #Need to have an try/except here because airtable errors if the field is empty. This is in case there is no Group
                         group = record['fields']['Group']
                     except Exception as e:
                         group = ""
                     if group == "":                             #In case there is no Group, we don't want an extra slash
-                        path = os.path.join('/Volumes', drive_name, UID)    #will need to fix this to make it cross platform eventually
+                        path = os.path.join('/Volumes', drive_name, RID)    #will need to fix this to make it cross platform eventually
                     else:
-                        path = os.path.join('/Volumes', drive_name, group, UID)    #will need to fix this to make it cross platform eventually
+                        path = os.path.join('/Volumes', drive_name, group, RID)    #will need to fix this to make it cross platform eventually
                     if not os.path.isdir(path):     #see if record path exists, if not make it
                         os.makedirs(path, exist_ok=False)
-                        logging.info('Folder for %s created', UID)
+                        logging.info('Folder for %s created', RID)
                     ydl_command = "youtube-dl -f best -o '" + path + "/%(title)s.%(ext)s' --video-password '" + vimeoPassword + "' " + vimeoLink
                     return_code = subprocess.call(ydl_command, shell=True)
                     if return_code == 0: #success
-                        logging.info('Succesfully downloaded file from Vimeo: %s' % UID)
+                        logging.info('Succesfully downloaded file from Vimeo: %s' % RID)
                         update_dict = {'On Drive': "Yes"}
                         try:
                             airtable.update(record_id, update_dict)
-                            logging.info('Succesfully updated On Drive to Yes for record %s ' % UID)
+                            logging.info('Succesfully updated On Drive to Yes for record %s ' % RID)
                             success_counter += 1
                         except Exception as e:
-                            logging.warning('Could not update On Drive field for record %s. Please do this manually!' % UID)
+                            logging.warning('Could not update On Drive field for record %s. Please do this manually!' % RID)
                             warning_counter += 1
                     elif return_code == 1: #fail
-                        logging.info('Failed to download file from Vimeo: %s' % UID)
+                        logging.info('Failed to download file from Vimeo: %s' % RID)
                         error_counter += 1
                     else:                   #idk if this is possible, but putting it in here anyway just in case
-                        logging.warning('Something strange happened when trying to download the file from Vimeo: %s' % UID)
+                        logging.warning('Something strange happened when trying to download the file from Vimeo: %s' % RID)
                         warning_counter += 1
                     #print(ydl_command) #GOTTA TEST THIS
                 else:   #ignore if record is already  "On Drive"
@@ -367,10 +469,8 @@ def downloadVimeo(airtable, drive_name):
     logging.info('Vimeo download complete, %i files downloaded, %i warnings encountered, %i errors found.' % (success_counter, warning_counter, error_counter))
     return
 
-def uploadFileToVimeo(filePath, vimeoDict):
-    pass
 
-def uploadVimeoSubprocesses(airtable, v, drive_name, quantity):
+def uploadVimeoSubprocesses(v, drive_name, quantity):
     # Uploads videos from airtable records to vimeo
     # Uses the description, title, location, and dancers to fill out the vimeo details
     # You cannot choose a file to upload, the script will simply start uploading them in order as it finds records with "Yes" as Uplaod to Vimeo but not Vimeo Link
@@ -378,13 +478,14 @@ def uploadVimeoSubprocesses(airtable, v, drive_name, quantity):
     #MEDIA_TYPE = "Media Type"
     #ONLINE_PLATFORM = "Online Platform"
     drive_name = config.DRIVE_NAME
-    print('Uploading files to Vimeo')
-    logging.info('Uploading files to Vimeo')
+    logging.info('Preparing videos to upload')
     update_counter = 0
     upload_counter = 0
     warning_counter = 0
     error_counter = 0
+    upload_files_dict_list = []
     pages = getAirtablePages("Records")
+    airtable_files = Airtable(config.BASE_ID, 'Files', config.API_KEY)
     for page in pages:
         for record in page:
             if upload_counter == quantity:
@@ -395,93 +496,146 @@ def uploadVimeoSubprocesses(airtable, v, drive_name, quantity):
                 record_status = "None"
             if record_status != config.RECORD_DEACCESS_FLAG:     #only process records that are in the library
                 record_id = record['id']
-                UID = record['fields']['Unique ID']
+                RID = record['fields'][config.RECORD_NUMBER]
+                try:
+                    media_type = record['fields'][config.MEDIA_TYPE]
+                except Exception as e:
+                    media_type = "none"
                 try:                                        #checks to see if record has an entry in the Checksum field. This will only process files with no checksum already, so as not to overwrite
                     airtable_vimeo_link = record['fields'][config.ACCESS_LINK]
                     continue
                 except Exception as e:
-                    logging.info('Uploading file to Vimeo for record %s' % UID)
+                    #logging.info('Uploading file to Vimeo for record %s' % RID)
+                    pass    #in this case the exception is actually good. if the vimeo link is empty we need to upload to vimeo!
                 try:            #first, see if an access copy filename exists. If it does we're gonna use this instead.
                     airtable_filename_list = record['fields'][config.FILES_IN_RECORD]
                     if len(airtable_filename_list) > 1: #checks to see if more than one file is associated with the record. if so it warns the user and skips the record
-                        logging.warning('Found more than one video file assocaited with record for %s. This should not be the case, please fix this.' % UID)
+                        logging.warning('Found more than one video file assocaited with record for %s. This should not be the case, please fix this.' % RID)
+                        warning_counter =+ 1
                         continue
                     else:
-                        airtable_filename = airtable_filename_list[0]
+                        airtable_filename_id = airtable_filename_list[0]
+                        airtable_filename = airtable_files.get(airtable_filename_id)['fields'][config.FULL_FILE_NAME]
                 except Exception as e:
-                    logging.warning('No associated with record for %s. Skipping for now, please fix this record.' % UID)
-                    warning_counter =+ 1
+                    if "Album" not in media_type:
+                        logging.warning('No file associated with record for %s. Skipping for now, please fix this record.' % RID)
+                        warning_counter =+ 1
                     continue
 
-                file_path = os.path.join('/Volumes', drive_name, UID, airtable_filename)    #will need to fix this to make it cross platform eventually
+                #we need to exlude albums and images from the list
+                if media_type == "Video" or media_type == "Audio":
+                    pass
+                else:
+                    continue
+
+                file_path = os.path.join('/Volumes', drive_name, RID, airtable_filename)    #will need to fix this to make it cross platform eventually
 
                 # This section harvests info from airtable to populate the vimeo record
                 try:
-                    airtable_vimeo_access = record['fields']['Vimeo Accessiblity']
+                    airtable_vimeo_access = record['fields'][config.ACCESS_PERMISSION]
                 except:
                     airtable_vimeo_access = "Private"
                 try:
-                    airtable_title = record['fields']['Title']
+                    airtable_title = record['fields'][config.RECORD_TITLE]
                 except:
                     airtable_title = ""
                 try:
-                    airtable_description = record['fields'][config.INFO_CARD]
+                    full_description = record['fields'][config.INFO_CARD]   #if the info card is empty we skip the record, because otherwise the description will be empty
                 except:
-                    airtable_description = ""
+                    logging.warning('Info card for record %s if empty. Skipping record.' % RID)
+                    continue
                 try:
-                    airtable_vimeo_password = record['fields']['Vimeo Password']
+                    airtable_vimeo_password = record['fields'][config.ACCESS_PASSWORD]
                 except:
                     if airtable_vimeo_access == "Private":
                         airtable_vimeo_password = "Charya#1dance"
                     else:
                         airtable_vimeo_password = ""
-                try:
-                    airtable_date = record['fields']['Date']
-                except:
-                    airtable_date = ""
 
-                if airtable_description == "" and airtable_date == "":
-                    full_description = config.VIMEO_DEFAULT_DESCRIPTION
-                elif airtable_description == "":
-                    full_description = "Date Created: " + airtable_date + "\n\n" + config.VIMEO_DEFAULT_DESCRIPTION
-                elif airtable_date == "":
-                    full_description = airtable_description + "\n\n" + config.VIMEO_DEFAULT_DESCRIPTION
-                else:
-                    full_description = airtable_description + "\n\nDate Created: " + airtable_date + "\n\n" + config.VIMEO_DEFAULT_DESCRIPTION
-                # THIS IS WHERE WE'LL UPLOAD THE FILE TO VIMEO
-                try:
-                    if airtable_vimeo_access == "Public":
-                        vimeoDict = {'name': airtable_title, 'description': full_description, 'privacy':{'view' : 'anybody'}}
-                    elif airtable_vimeo_access == "Only Me":
-                        vimeoDict = {'name': airtable_title, 'description': full_description, 'privacy':{'view' : 'nobody'}}
-                    elif airtable_vimeo_access == "Private":
-                        vimeoDict = {'name': airtable_title, 'description': full_description, 'privacy':{'view' : 'password'}, 'password': airtable_vimeo_password}
-                    else:
-                        vimeoDict = {'name': airtable_title, 'description': full_description, 'privacy':{'view' : 'nobody'}}
-                    #logging.info('Uploading file: %s' % file_path)
-                    video_uri = v.upload(file_path,data=vimeoDict)
-                    vimeo_link = 'https://vimeo.com/' + video_uri.split('/')[-1]
-                    update_dict = {'Vimeo Link': vimeo_link}
-                    upload_counter += 1
-                except Exception as e:
-                    logging.error('Could not upload file to Vimeo for record %s.' % UID)
-                    logging.error(e)
-                    #logging.error(vimeoDict)
-                    error_counter += 1
-                    continue
 
-                #THIS IS THE IMPORTANT BIT WHERE WE UPDATE THE TABLE!
+                upload_files_dict = {'record_id' : RID, 'file_path': file_path, 'airtable_vimeo_access' : airtable_vimeo_access, 'name': airtable_title, 'description': full_description, 'password' : airtable_vimeo_password}
+                #Append vimeoDict to the end of the list of dicts. We'll then run through the dict later to upload
+                upload_files_dict_list.append(upload_files_dict)
+                upload_counter += 1
 
-                try:
-                    airtable.update(record_id, update_dict)
-                    logging.info('Succesfully added Vimeo link for record %s ' % UID)
-                    update_counter += 1
-                    pages = airtable.get_iter() # Need to do this in order to refresh the token, which breaks after a certain period of time
-                except Exception as e:
-                    logging.error('Could not added Vimeo link for record %s' % UID)
-                    logging.error('%s' % e)
-    logging.info('Vimeo Upload. %i files uploaded, %i Airtable records updated, %i warnings encountered, %i errors encountered.' % (upload_counter, update_counter, warning_counter, error_counter))
-    return
+    logging.info('Completed preparing files for upload to Vimeo. %i warnings encountered' % (warning_counter))
+    return upload_files_dict_list
+
+def getMediaInfo(filePath):
+    cmd = [ config.MEDIAINFO_PATH, '-f', '--Output=XML', filePath ]
+    media_info = subprocess.Popen( cmd, stdout=subprocess.PIPE ).communicate()[0]
+    return media_info
+
+def parseMediaInfo(filePath, media_info_text, fileName, RID):
+    # The following line initializes the dict.
+    mediainfo_dict = {config.FILENAME: fileName, config.FILE_SIZE : "", config.VIDEO_SCAN_TYPE : "", config.VIDEO_CODEC : "", config.VIDEO_ASPECT_RATIO : "", 'file_type' : ""}
+    media_info_text = media_info_text.decode()
+    logging.info("Parsing mediainfo for record %s, file: %s" % (RID, mediainfo_dict[config.FILENAME]))
+    file_type = None
+    file_has_general = False
+    file_has_video = False
+    file_has_audio = False
+
+    try:
+        mi_General_Text = (media_info_text.split("<track type=\"General\">"))[1].split("</track>")[0]
+        file_has_general = True
+    except:
+        logging.error('The file %s is not a properly formed media file. Please check that this file is correct' %  mediainfo_dict[config.FILENAME])
+    try:
+        mi_Video_Text = (media_info_text.split("<track type=\"Video\">"))[1].split("</track>")[0]
+        file_has_video = True
+    except:
+        file_has_video = False
+    try:
+        mi_Audio_Text = (media_info_text.split("<track type=\"Audio\">"))[1].split("</track>")[0]
+        file_has_audio = True
+    except:
+        file_has_audio = False
+    try:
+        mi_Image_Text = (media_info_text.split("<track type=\"Image\">"))[1].split("</track>")[0]
+        file_has_image = True
+    except:
+        file_has_image = False
+
+    if file_has_video and file_has_audio: #Process as video and audio file
+        mediainfo_dict['file_type'] = "Video"
+    elif file_has_video: #Process as video only
+        mediainfo_dict['file_type'] = "Silent_Video"
+    elif file_has_audio: #Process as audio only
+        mediainfo_dict['file_type'] = "Audio"
+
+    # Get the rest of the mediainfo metadata
+    # General Stuff
+
+    try:
+        mediainfo_dict[config.FILE_SIZE] = int((mi_General_Text.split("<FileSize>"))[1].split("</FileSize>")[0])
+    except:
+        logging.error("MEDIAINFO ERROR: Could not parse File Size for " + mediainfo_dict[config.FILENAME])
+
+    # Video Stuff
+
+    if mediainfo_dict['file_type'] == "Video" or mediainfo_dict['file_type'] == "Silent_Video":
+        try:
+            mediainfo_dict[config.VIDEO_CODEC] = (mi_Video_Text.split("<CodecID>"))[1].split("</CodecID>")[0]
+        except:
+            try:
+                mediainfo_dict[config.VIDEO_CODEC] = (mi_Video_Text.split("<Format>"))[1].split("</Format>")[0]
+            except:
+                mediainfo_dict[config.VIDEO_CODEC] = "None"
+        try:
+            mediainfo_dict[config.VIDEO_SCAN_TYPE] = (mi_Video_Text.split("<ScanType_String>"))[1].split("</ScanType_String>")[0]
+        except:
+            mediainfo_dict[config.VIDEO_ASPECT_RATIO] = "None"
+        try:
+            mediainfo_dict[config.VIDEO_ASPECT_RATIO] = (mi_Video_Text.split("<DisplayAspectRatio_String>"))[1].split("</DisplayAspectRatio_String>")[0]
+        except:
+            mediainfo_dict[config.VIDEO_ASPECT_RATIO] = "None"
+
+    else:
+        mediainfo_dict[config.VIDEO_CODEC] = "None"
+
+
+    return mediainfo_dict
 
 
 # Standard boilerplate to call the main() function to begin
