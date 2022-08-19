@@ -22,6 +22,10 @@ FILE_DEACCESS_FLAG = "DEACCESSIONING ALL DATA" #This is the File Processing Stat
 RECORD_STATUS = "Status"
 RECORD_DEACCESS_FLAG = "Deaccessioned Record" #This is the Record Status flag that marks a record for deaccession.
 RECORD_STATUS_LOOKUP = "Status (from Part of Record)"
+MEDIA_TYPE = "Media Type"
+ONLINE_PLATFORM = "Online Platform"
+FILES_IN_RECORD = "Files In Record"
+ACCESS_LINK = "Access Link"
 
 #Both deaccession flags must be in place for the deaccessioning program to proceed.
 
@@ -47,6 +51,7 @@ FULL_FILE_NAME = "Full File Name"
 FILE_COUNT = "Folder File Count"
 CHECKSUM_VALID = "Checksum Valid"
 CHECKSUM_VALID_DATE = "Checksum Validated Date"
+FILE_COUNT = "Folder File Count"
 
 #Various Hardcoded Values
 MAX_SIZE = 5000000000
