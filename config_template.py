@@ -30,6 +30,7 @@ ACCESS_PLATFORM_ID = "Platform ID"
 ACCESS_PASSWORD = "Access Password"
 ACCESS_PERMISSION = "Online Accessibility"
 RECORD_TITLE = "Record Title ENG"
+MEDIA_TYPE = "Media Type"
 
 
 #Both deaccession flags must be in place for the deaccessioning program to proceed.
