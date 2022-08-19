@@ -25,11 +25,7 @@ def main():
     parser.add_argument('-d', '--Debug',dest='d',action='store_true',default=False,help="turns on Debug mode, which send all DEBUG level (and below) messages to the log. By default logging is set to INFO level")
     parser.add_argument('-gc', '--Get-Checksums',dest='gc',action='store_true',default=False,help="Runs the checksum harvesting subcprocess. This should really only be done once")
     parser.add_argument('-vc', '--Validate-Checksums',dest='vc',action='store_true',default=False,help="Runs the checksum validation subcprocess. This should be run on a regular basis")
-    #parser.add_argument('-dv', '--Download-Vimeo',dest='dv',action='store_true',default=False,help="Runs the Vimeo Download subcprocess. This likely won't ever actually need to be run if the archive is being properly maintained")
-    #parser.add_argument('-uv', '--Upload-Vimeo',dest='uv',nargs='?',type=int,default=0,const=5,help="Runs the Vimeo Upload subcprocess. By default this will upload the first 5 files it finds that need to be uploaded to Vimeo. If you put a number after the -uv flag it will upload that number of files that it finds")
-    parser.add_argument('-fa', '--File-Audit',dest='fa',action='store_true',default=False,help="Runs a file-level audit subcprocess. This is more detailed than the auto-audio, which only checks that the Unique ID folders exist. This checks that files exist as well")
     parser.add_argument('-ad', '--Auto-Deaccession',dest='ad',action='store_true',default=False,help="Runs the auto-deaccession subcprocess. This moves all records marked \"Not in Library\" to a _Trash folder. This should be run on a regular basis")
-    #parser.add_argument('-f', '--Find',dest='f',action='store',help="Runs the find subcprocess. This returns the path of whatever record is searched for")
     args = parser.parse_args()
 
     if args.d:
@@ -86,23 +82,25 @@ def main():
     #Perform a drive audit. Quit upon failure
     drive_audit = driveAudit()
 
-    #perform a file-level audit.
+    #perform an airtable audit.
     airtable_audit = airtableAudit()
 
+    #perform a file-level audit.
+    file_audit = fileAudit()
+
     #quit if either the airtable audio or drive audio return False
-    if drive_audit and airtable_audit:
+    if drive_audit and airtable_audit and file_audit:
         pass
     else:
         if not drive_audit:
-            logging.warning('Drive audit failed. Please fix this before continuing.')
+            logging.error('Drive audit failed. Please fix this before continuing.')
         if not airtable_audit:
-            logging.warning('Airtable audit failed. Please fix this before continuing.')
+            logging.error('Airtable audit failed. Please fix this before continuing.')
+        if not file_audit:
+            logging.error('File audit failed. Please fix this before continuing.')
         logging.critical('========Script Complete========')
-        #quit()
+        quit()
 
-    #perform a file-level audit.
-    if args.fa:
-        fileAudit()
 
     #Harvest checksums for any non-album records missing a checksum
     if args.gc:
@@ -200,6 +198,8 @@ def driveAudit():
                 if record_status == "None":
                     no_status += 1
                     logging.warning('Record %s has no status. Please enter a status for this record.' % RID)
+            else:
+                logging.error('Deaccessioned record %s was found on drive %s' % (RID, drive_name))
 
     if no_status > 1:
         logging.warning('Record level drive audit has identified %i record(s) without a status. Please fix this before continuing.' % no_status)
@@ -363,8 +363,18 @@ def fileAudit():
             except Exception as e:
                 record_status = "none"
             if record_status != config.RECORD_DEACCESS_FLAG:     #only process records that are in the library
-                file_record_id = file['id']
                 RID = file['fields'][config.RECORD_NUMBER_LOOKUP][0]
+                try:
+                    file_format = file['fields'][config.FILE_FORMAT]
+                except Exception as e:
+                    file_format = "none"
+                if file_format == "Album":
+                    try:
+                        album_file_count = int(file['fields'][config.FILE_COUNT])
+                    except Exception as e:
+                        album_file_count = 0
+                        logging.warning('Error retreiving file count for album %s from airtable. Please fix this record and continue' % RID)
+                file_record_id = file['id']
                 try:                                        #checks to see if record has an entry in the File Name field. This will only process empty file names, so as not to overwrite
                     airtable_filename = file['fields'][config.FULL_FILE_NAME]
                 except Exception as e:
@@ -373,8 +383,15 @@ def fileAudit():
                 file_path = os.path.join('/Volumes', drive_name, RID, airtable_filename)    #will need to fix this to make it cross platform eventually
                 if os.path.isfile(file_path):
                     file_found_counter += 1
-                elif os.path.isdir(file_path):
-                    file_found_counter += 1
+                elif os.path.isdir(file_path) and file_format == "Album":
+                    temp_count = 0
+                    for f in os.listdir(file_path):
+                        if not f.startswith('.'):
+                            temp_count += 1
+                    if album_file_count ==  temp_count:
+                        file_found_counter += 1
+                    else:
+                        logging.warning('The number of files on the drive in the folder named %s does not match Airtable. Please fix this record and continue' % RID)
                 else:
                     logging.error('Filename Mismatch for record %s, file %s. Please fix this before continuing' % (RID, airtable_filename))
                     missing_file_counter += 1
@@ -399,8 +416,12 @@ def fileAudit():
                 #        missing_file_counter += 1
                 #        logging.error('Filename Mismatch for record %s. Please fix this before continuing' % RID)
 
-    logging.info('File-level audit complete, %i errors found.' % error_count)
-    return
+    if error_count > 0:
+        logging.error('File-level audit complete, %i errors found.' % error_count)
+        return False
+    else:
+        logging.info('File-level audit complete, 0 errors found.')
+        return True
 
 def validateChecksums():
     #this has been succesfull updated
