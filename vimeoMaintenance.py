@@ -132,21 +132,6 @@ def main():
 ## End of main function
 
 
-def generateHash(inputFile, blocksize=65536):
-    '''
-    using a buffer, hash the file
-    '''
-    md5 = hashlib.md5()
-
-    with open(inputFile, 'rb') as f:
-        while True:
-            data = f.read(blocksize)
-            if not data:
-                break
-            md5.update(data)
-
-    return md5.hexdigest()
-
 def getAirtablePages(table_name):
     #takes table name, returns pages.
     #BASE_ID and API_KEY come from config.py file.
