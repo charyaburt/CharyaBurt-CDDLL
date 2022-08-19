@@ -238,7 +238,60 @@ def airtableAudit():
         logging.info('Record level Airtable audit complete with errors, %i record(s) were succesfully located' % in_airtable_and_in_library)
         return False
 
+def fileAudit():
+    drive_name = config.DRIVE_NAME
+    print('Performing a file-level audit')
+    logging.info('Performing a file-level audit')
+    missing_file_counter = 0
+    file_found_counter = 0
+    error_count = 0
+    pages = getAirtablePages("Files")
 
+    for page in pages:
+        for file in page:
+            try:
+                record_status = file['fields'][config.RECORD_STATUS_LOOKUP][0]
+            except Exception as e:
+                record_status = "none"
+            if record_status != config.RECORD_DEACCESS_FLAG:     #only process records that are in the library
+                file_record_id = file['id']
+                RID = file['fields'][config.RECORD_NUMBER_LOOKUP][0]
+                try:                                        #checks to see if record has an entry in the File Name field. This will only process empty file names, so as not to overwrite
+                    airtable_filename = file['fields'][config.FULL_FILE_NAME]
+                except Exception as e:
+                    logging.error('Error retreiving file name for record %s. Please fix this record and continue' % RID)
+                    error_count += 1
+                file_path = os.path.join('/Volumes', drive_name, RID, airtable_filename)    #will need to fix this to make it cross platform eventually
+                if os.path.isfile(file_path):
+                    file_found_counter += 1
+                elif os.path.isdir(file_path):
+                    file_found_counter += 1
+                else:
+                    logging.error('Filename Mismatch for record %s, file %s. Please fix this before continuing' % (RID, airtable_filename))
+                    missing_file_counter += 1
+                    error_count += 1
+
+                #files_list = []
+                #for f in os.listdir(path):
+                #    if os.path.isfile(os.path.join(path, f)):
+                #        if not f.startswith('.'):     #avoid hidden files
+                #            files_list.append(f)
+                #files_list.sort()                      #sort the list so it'll always pick the first file. I think we can get rid of this
+                #if len(files_list) > 1 and len(airtable_access_filename) == 0:
+                #    logging.warning('Multiple files found in ' + UID + ' but no access copy listed in Airtable, using ' + files_list[0])
+                #    if airtable_filename != files_list[0]:
+                #        missing_file_counter += 1
+                #        logging.error('Filename Mismatch for record %s. Please fix this before continuing' % UID)
+                #if len(files_list) == 0:
+                #    logging.error('No files found in %s' % RID)
+                #    missing_file_counter += 1
+                #else:
+                #    if airtable_filename != files_list[0]:
+                #        missing_file_counter += 1
+                #        logging.error('Filename Mismatch for record %s. Please fix this before continuing' % RID)
+
+    logging.info('File-level audit complete, %i errors found.' % error_count)
+    return
 
 def downloadVimeo(airtable, drive_name):
     print('Performing the Download Vimeo subprocess')
@@ -314,61 +367,6 @@ def downloadVimeo(airtable, drive_name):
     logging.info('Vimeo download complete, %i files downloaded, %i warnings encountered, %i errors found.' % (success_counter, warning_counter, error_counter))
     return
 
-def fileAudit():
-    drive_name = config.DRIVE_NAME
-    print('Performing a file-level audit')
-    logging.info('Performing a file-level audit')
-    missing_file_counter = 0
-    file_found_counter = 0
-    error_count = 0
-    pages = getAirtablePages("Files")
-
-    for page in pages:
-        for file in page:
-            try:
-                record_status = file['fields'][config.RECORD_STATUS_LOOKUP][0]
-            except Exception as e:
-                record_status = "none"
-            if record_status != config.RECORD_DEACCESS_FLAG:     #only process records that are in the library
-                file_record_id = file['id']
-                RID = file['fields'][config.RECORD_NUMBER_LOOKUP][0]
-                try:                                        #checks to see if record has an entry in the File Name field. This will only process empty file names, so as not to overwrite
-                    airtable_filename = file['fields'][config.FULL_FILE_NAME]
-                except Exception as e:
-                    logging.error('Error retreiving file name for record %s. Please fix this record and continue' % RID)
-                    error_count += 1
-                file_path = os.path.join('/Volumes', drive_name, RID, airtable_filename)    #will need to fix this to make it cross platform eventually
-                if os.path.isfile(file_path):
-                    file_found_counter += 1
-                elif os.path.isdir(file_path):
-                    file_found_counter += 1
-                else:
-                    logging.error('Filename Mismatch for record %s, file %s. Please fix this before continuing' % (RID, airtable_filename))
-                    missing_file_counter += 1
-                    error_count += 1
-
-                #files_list = []
-                #for f in os.listdir(path):
-                #    if os.path.isfile(os.path.join(path, f)):
-                #        if not f.startswith('.'):     #avoid hidden files
-                #            files_list.append(f)
-                #files_list.sort()                      #sort the list so it'll always pick the first file. I think we can get rid of this
-                #if len(files_list) > 1 and len(airtable_access_filename) == 0:
-                #    logging.warning('Multiple files found in ' + UID + ' but no access copy listed in Airtable, using ' + files_list[0])
-                #    if airtable_filename != files_list[0]:
-                #        missing_file_counter += 1
-                #        logging.error('Filename Mismatch for record %s. Please fix this before continuing' % UID)
-                #if len(files_list) == 0:
-                #    logging.error('No files found in %s' % RID)
-                #    missing_file_counter += 1
-                #else:
-                #    if airtable_filename != files_list[0]:
-                #        missing_file_counter += 1
-                #        logging.error('Filename Mismatch for record %s. Please fix this before continuing' % RID)
-
-    logging.info('File-level audit complete, %i errors found.' % error_count)
-    return
-
 def uploadFileToVimeo(filePath, vimeoDict):
     pass
 
@@ -427,7 +425,7 @@ def uploadVimeoSubprocesses(airtable, v, drive_name, quantity):
                 except:
                     airtable_title = ""
                 try:
-                    airtable_description = record['fields']['Description']
+                    airtable_description = record['fields'][config.INFO_CARD]
                 except:
                     airtable_description = ""
                 try:
