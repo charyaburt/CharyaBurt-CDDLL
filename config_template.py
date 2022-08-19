@@ -26,6 +26,7 @@ MEDIA_TYPE = "Media Type"
 ONLINE_PLATFORM = "Online Platform"
 FILES_IN_RECORD = "Files In Record"
 ACCESS_LINK = "Access Link"
+INFO_CARD = "Info Card"
 
 #Both deaccession flags must be in place for the deaccessioning program to proceed.
 
