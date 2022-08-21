@@ -1,14 +1,31 @@
 # General Config Info
 DRIVE_NAME = ""   #The name of the hard drive the archive is on. This will change if you plug in a backup drive
 BACKUP_DRIVE_NAME = "" #The name of the backup drive
-TEMP_PREVIEW_PATH = "" #The path to the folder that will temporarily hold preview files
 
 # Airtable Credentials and Config
 BASE_ID = ""
 API_KEY = ""
-#TABLE_NAME = ""    # this isn't quite necessary anymore
+
+# Vimeo Credentials
+YOUR_ACCESS_TOKEN = ""
+YOUR_CLIENT_ID = ""
+YOUR_CLIENT_SECRET = ""
+VIMEO_DEFAULT_DESCRIPTION = ""
+
+# Dependency Paths
+FFMPEG_PATH = "/usr/local/bin/ffmpeg"
+FFPROBE_PATH = "/usr/local/bin/ffprobe"
+MEDIAINFO_PATH = "/usr/local/bin/mediainfo"
+PYTHON_PATH = "/usr/local/bin/python3"
+DEPENDENCY_PATH = "/usr/local/bin/"
+MOGRIFY_PATH = "/usr/local/bin/mogrify"
+CONVERT_PATH = "/usr/local/bin/convert"
+
+#Various Hardcoded Values
+MAX_SIZE = 5000000000
 
 # Airtable Field References
+## Records Table
 IN_LIBRARY = "(Deprecated) In Library"
 IN_LIBRARY_LOOKUP = "(Deprecated) In Library"
 RECORD_NUMBER = "Record Number"
@@ -32,10 +49,7 @@ ACCESS_PERMISSION = "Online Accessibility"
 RECORD_TITLE = "Record Title ENG"
 MEDIA_TYPE = "Media Type"
 
-
-#Both deaccession flags must be in place for the deaccessioning program to proceed.
-
-#Airtable File Metadata Fields
+## Files Table
 FILENAME = "File Name"
 DURATION = "Duration"
 RECORD_NUMBER_LOOKUP = "Record Number"
@@ -59,21 +73,3 @@ FILE_COUNT = "Folder File Count"
 CHECKSUM_VALID = "Checksum Valid"
 CHECKSUM_VALID_DATE = "Checksum Validated Date"
 FILE_COUNT = "Folder File Count"
-
-#Various Hardcoded Values
-MAX_SIZE = 5000000000
-
-# Vimeo Credentials
-YOUR_ACCESS_TOKEN = ""
-YOUR_CLIENT_ID = ""
-YOUR_CLIENT_SECRET = ""
-VIMEO_DEFAULT_DESCRIPTION = ""
-
-# Dependency Paths
-FFMPEG_PATH = "/usr/local/bin/ffmpeg"
-FFPROBE_PATH = "/usr/local/bin/ffprobe"
-MEDIAINFO_PATH = "/usr/local/bin/mediainfo"
-PYTHON_PATH = "/usr/local/bin/python3"
-DEPENDENCY_PATH = "/usr/local/bin/"
-MOGRIFY_PATH = "/usr/local/bin/mogrify"
-CONVERT_PATH = "/usr/local/bin/convert"
