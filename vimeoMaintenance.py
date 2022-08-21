@@ -23,6 +23,7 @@ def main():
     parser = argparse.ArgumentParser(description="This is a simple testing script for Airtable / Python stuff with logging")
     parser.add_argument('-v', '--verbose', action='count', default=0,help="Defines verbose level for standard out (stdout). v = warning, vv = info, vvv = debug")
     parser.add_argument('-d', '--Debug',dest='d',action='store_true',default=False,help="turns on Debug mode, which send all DEBUG level (and below) messages to the log. By default logging is set to INFO level")
+    parser.add_argument('-sa', '--Skip-Audit',dest='sa',action='store_true',default=False,help="Skips drive, airtable, and file audit at beginning of script")
     #parser.add_argument('-dv', '--Download-Vimeo',dest='dv',action='store_true',default=False,help="Runs the Vimeo Download subcprocess. This likely won't ever actually need to be run if the archive is being properly maintained")
     parser.add_argument('-sv', '--Sync-Vimeo',dest='sv',action='store_true',default=False,help="Runs the Sync Vimeo subcprocess. This syncs all the airtable info (description, password, etc) to the current Vimeo page")
     parser.add_argument('-uv', '--Upload-Vimeo',dest='uv',nargs='?',type=int,default=0,const=5,help="Runs the Vimeo Upload subcprocess. By default this will upload the first 5 files it finds that need to be uploaded to Vimeo. If you put a number after the -uv flag it will upload that number of files that it finds")
@@ -72,29 +73,31 @@ def main():
 
     drive_name=config.DRIVE_NAME
 
-    #similar to record maintenance, the airtable and drive must pass audits before any vimeo maintenance can occur
+    #skip audits if run with -sa flag
+    if not args.sa:
 
-    #Perform a drive audit. Quit upon failure
-#    drive_audit = driveAudit()
+        #similar to record maintenance, the airtable and drive must pass audits before any vimeo maintenance can occur
+        #Perform a drive audit. Quit upon failure
+        drive_audit = driveAudit()
 
-    #perform an airtable audit.
-#    airtable_audit = airtableAudit()
+        #perform an airtable audit.
+        airtable_audit = airtableAudit()
 
-    #perform a file-level audit.
-#    file_audit = fileAudit()
+        #perform a file-level audit.
+        file_audit = fileAudit()
 
-    #quit if either the airtable audio or drive audio return False
-#    if drive_audit and airtable_audit and file_audit:
-#        pass
-#    else:
-#        if not drive_audit:
-#            logging.error('Drive audit failed. Please fix this before continuing.')
-#        if not airtable_audit:
-#            logging.error('Airtable audit failed. Please fix this before continuing.')
-#        if not file_audit:
-#            logging.error('File audit failed. Please fix this before continuing.')
-#        logging.critical('========Script Complete========')
-#        quit()
+        #quit if either the airtable audio or drive audio return False
+        if drive_audit and airtable_audit and file_audit:
+            pass
+        else:
+            if not drive_audit:
+                logging.error('Drive audit failed. Please fix this before continuing.')
+            if not airtable_audit:
+                logging.error('Airtable audit failed. Please fix this before continuing.')
+            if not file_audit:
+                logging.error('File audit failed. Please fix this before continuing.')
+            logging.critical('========Script Complete========')
+            quit()
 
 
     #Perform Download Vimeo subprocess
