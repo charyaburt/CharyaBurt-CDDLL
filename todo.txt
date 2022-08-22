@@ -1,5 +1,7 @@
 fix backup script
 
+create access info card object in airtable, similar to info card but more specifically for access/vimeo descriptions
+
 discuss taxonomy in documentation (what is an album vs a video? why?)
 
 add google drive functionality for albums
