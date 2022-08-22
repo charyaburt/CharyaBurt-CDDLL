@@ -1,5 +1,7 @@
-Create vimeo record updater so we can batch edit vimeo Records
+fix backup script
 
-probably should rewrite vimeo mass uploader since i'm handling airtable records better now and it shouldn't crash
+discuss taxonomy in documentation (what is an album vs a video? why?)
 
-How about this: as long as it's NOT marked "Test Record" "Empty Record" or "Deaccessioned Record", it's considered "In Library". 
+add google drive functionality for albums
+
+future thoughts: handling programs/events? more dance-specific objects?
