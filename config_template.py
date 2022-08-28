@@ -12,6 +12,9 @@ YOUR_CLIENT_ID = ""
 YOUR_CLIENT_SECRET = ""
 VIMEO_DEFAULT_DESCRIPTION = ""
 
+# Google Drive Credentials and config
+GDRIVE_LINK_TEXT = "You may browse previews here, and contact info@charyaburt.com if you would like to access full-size materials. Please include Record Number and purpose of use with your inquiry."
+
 # Dependency Paths
 FFMPEG_PATH = "/usr/local/bin/ffmpeg"
 FFPROBE_PATH = "/usr/local/bin/ffprobe"
@@ -47,6 +50,7 @@ ACCESS_LINK = "Access Link"
 ACCESS_PLATFORM_ID = "Platform ID"
 ACCESS_PASSWORD = "Access Password"
 ACCESS_PERMISSION = "Public Online Availability"
+PRIVATE_GDRIVE_LINK = "Private Google Drive Link"
 RECORD_TITLE = "Record Title ENG"
 MEDIA_TYPE = "Media Type"
 GROUPING = "Folder"
