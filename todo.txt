@@ -1,3 +1,5 @@
+figure out why upload isn't sorting records properly?
+
 fix backup script
 
 discuss taxonomy in documentation (what is an album vs a video? why?)
