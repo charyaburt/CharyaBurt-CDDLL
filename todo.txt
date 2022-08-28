@@ -1,10 +1,5 @@
 fix backup script
 
-<<<<<<< HEAD
-=======
-add google drive uploading via gdrive
-
->>>>>>> ee13bcca1257da9290f915c6c91e6dbd54804811
 discuss taxonomy in documentation (what is an album vs a video? why?)
 
 add google drive functionality for albums
