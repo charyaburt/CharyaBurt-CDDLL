@@ -20,6 +20,7 @@ PYTHON_PATH = "/usr/local/bin/python3"
 DEPENDENCY_PATH = "/usr/local/bin/"
 MOGRIFY_PATH = "/usr/local/bin/mogrify"
 CONVERT_PATH = "/usr/local/bin/convert"
+GDRIVE_PATH = "/usr/local/bin/gdrive"
 
 #Various Hardcoded Values
 MAX_SIZE = 5000000000
@@ -45,7 +46,7 @@ INFO_CARD = "Info Card"
 ACCESS_LINK = "Access Link"
 ACCESS_PLATFORM_ID = "Platform ID"
 ACCESS_PASSWORD = "Access Password"
-ACCESS_PERMISSION = "Online Accessibility"
+ACCESS_PERMISSION = "Public Online Availability"
 RECORD_TITLE = "Record Title ENG"
 MEDIA_TYPE = "Media Type"
 
