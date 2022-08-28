@@ -49,6 +49,7 @@ ACCESS_PASSWORD = "Access Password"
 ACCESS_PERMISSION = "Public Online Availability"
 RECORD_TITLE = "Record Title ENG"
 MEDIA_TYPE = "Media Type"
+GROUPING = "Folder"
 
 ## Files Table
 FILENAME = "File Name"
