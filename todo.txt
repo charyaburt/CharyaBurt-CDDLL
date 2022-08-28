@@ -1,7 +1,16 @@
 fix backup script
 
+<<<<<<< HEAD
+=======
+add google drive uploading via gdrive
+
+>>>>>>> ee13bcca1257da9290f915c6c91e6dbd54804811
 discuss taxonomy in documentation (what is an album vs a video? why?)
 
 add google drive functionality for albums
+
+One thing: for dependency paths, can you also document where we need to manually change the python3 path?
+
+And if you don't mind, you can also mention that from macOS Big Sur (I think) the path seems to be opt/homebrew/bin for all the dependencies.
 
 future thoughts: handling programs/events? more dance-specific objects?
