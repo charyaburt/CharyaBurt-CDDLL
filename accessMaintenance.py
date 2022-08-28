@@ -180,8 +180,72 @@ def createAccessFile(filePath, mediainfo_dict, reason_list, RID):
     return accessFilePath
     #ffmpeg -i input.mp4 -filter_complex "[0:a]showwaves=s=1280x720,format=yuv420p[vid]" -map "[vid]" -map 0:a -codec:v libx264 -crf 18 -preset fast -codec:a aac -strict -2 -b:a 192k output.mp4
 
+def uploadRecordToGdrive(g_dict):
 
-def uploadFileToVimeo(v, vimeoDict, file_path, RID, record_id):
+    upload_counter = 0
+    error_counter = 0
+    update_counter = 0
+
+    #{'record_id' : record_id, 'RID' : RID, 'file_path': file_path, 'airtable_gdrive_access' : airtable_gdrive_access, 'password' : airtable_gdrive_password, 'gdrive_id' : gdrive_id}
+
+    #first we make the directory with the record number ID in google drive
+    #this gives us back the google drive ID
+    try:
+        logging.info('Creating folder named: %s to Google Drive' % g_dict['RID'])
+        mkdir_cmd = [ config.GDRIVE_PATH + " mkdir -p " + g_dict['gdrive_id'] + " " + g_dict['RID'] ]
+        gdrive_mkdir_out = subprocess.Popen(mkdir_cmd, stdout=subprocess.PIPE, shell=True).communicate()[0]
+        gdrive_mkdir_out = gdrive_mkdir_out.decode()
+    except Exception as e:
+        logging.error('Error creating folder named: %s to Google Drive' % g_dict['RID'])
+        logging.error(e)
+        error_counter += 1
+        return counter_dict
+
+    new_folder_id = gdrive_mkdir_out.split(" ")[1] #second word in output will be the id of the new folder
+
+    #Next we upload the file or folder in the record directory to google drive
+    try:
+        logging.info('Uploading files to Google Drive folder: %s' % g_dict['RID'])
+        upload_cmd = [ config.GDRIVE_PATH + " upload -p " +  new_folder_id + " -r '" + g_dict['file_path'] + "'" ]
+        gdrive_upload_out = subprocess.Popen(upload_cmd, stdout=subprocess.PIPE, shell=True).communicate()[0]
+        gdrive_upload_out = gdrive_upload_out.decode()
+        logging.info('Finished uploading files to Google Drive folder: %s' % g_dict['RID'])
+        upload_counter += 1
+    except Exception as e:
+        logging.error('Error Uploading files to Google Drive folder: %s' % g_dict['RID'])
+        logging.error(e)
+        error_counter += 1
+        return counter_dict
+
+    #if that's succesfull then we get info of the uploaded folder to get the url
+    try:
+        info_cmd = [ config.GDRIVE_PATH + " info " +  new_folder_id ]
+        gdrive_info_out = subprocess.Popen(info_cmd, stdout=subprocess.PIPE, shell=True).communicate()[0]
+        gdrive_info_out = gdrive_info_out.decode()
+    except Exception as e:
+        logging.info('Error harvesting Google Drive info from: %s' % g_dict['RID'])
+        logging.error(e)
+        error_counter += 1
+        return counter_dict
+
+    new_folder_view_url = gdrive_info_out.split("ViewUrl: ")[1].rstrip() #second word in output will be the id of the new folder
+    update_dict = {config.ACCESS_LINK : config.GDRIVE_LINK_TEXT, config.PRIVATE_GDRIVE_LINK : new_folder_view_url, config.ACCESS_PLATFORM_ID : new_folder_id, config.ACCESS_PERMISSION : g_dict['airtable_gdrive_access'], config.ACCESS_PASSWORD : ""}
+
+    #lastly we update airtable with the ID and URL. awesome!
+    try:
+        airtable = Airtable(config.BASE_ID, 'Records', config.API_KEY)
+        airtable.update(g_dict['record_id'], update_dict)
+        logging.info('Succesfully added Google Drive link for record %s ' % g_dict['RID'])
+        update_counter += 1
+    except Exception as e:
+        logging.error('Could not added Google Drive link for record %s' % g_dict['RID'])
+        logging.error('%s' % e)
+        error_counter += 1
+
+    counter_dict = {'upload_counter' : upload_counter, 'error_counter' : error_counter, 'update_counter': update_counter}
+    return counter_dict
+
+def uploadFileToVimeo(v, vimeoDict, file_path, RID, record_id, permission, password):
 
     upload_counter = 0
     error_counter = 0
@@ -193,7 +257,7 @@ def uploadFileToVimeo(v, vimeoDict, file_path, RID, record_id):
         logging.info('Upload complete')
         video_data = v.get(video_uri + '?fields=link').json()
         vimeo_link = video_data['link']
-        update_dict = {config.ACCESS_LINK : vimeo_link, config.ACCESS_PLATFORM_ID : video_uri}
+        update_dict = {config.ACCESS_LINK : vimeo_link, config.ACCESS_PLATFORM_ID : video_uri, config.ACCESS_PERMISSION : permission, config.ACCESS_PASSWORD : password}
         upload_counter += 1
         if "_access" in file_path:  #need to delete acccess file after uploading it
             try:
@@ -676,12 +740,65 @@ def uploadAccessSubprocesses(v, quantity):
                     vimeo_upload_counter += 1
                     upload_counter += 1
 
-                else:
+                if online_platform == "Google Drive":
+
+                    try:
+                        airtable_filename_list = record['fields'][config.FILES_IN_RECORD]
+                        if len(airtable_filename_list) > 1: #checks to see if more than one file is associated with the record. if so it warns the user and skips the record
+                            logging.warning('Found more than one video file assocaited with record for %s. This should not be the case, please fix this.' % RID)
+                            warning_counter =+ 1
+                            continue
+                        else:
+                            airtable_filename_id = airtable_filename_list[0]
+                            airtable_filename = airtable_files.get(airtable_filename_id)['fields'][config.FULL_FILE_NAME]
+                    except Exception as e:
+                        if "Album" not in media_type:
+                            logging.warning('No file associated with record for %s. Skipping for now, please fix this record.' % RID)
+                            warning_counter =+ 1
+                        continue
+
+                    file_path = os.path.join('/Volumes', drive_name, RID, airtable_filename)
+                    # This section harvests info from airtable to populate the google drive record
+
+                    try:            #first, see if an access copy filename exists. If it does we're gonna use this instead.
+                        airtable_grouping = record['fields'][config.GROUPING]
+                    except Exception as e:
+                        airtable_grouping = "None"
+
+                    if "Publicity Photos" in airtable_grouping:
+                        gdrive_id = "1O6oLH8CK2AsZoxEYM_TJBNxVan2C74eV"
+                    elif media_type == "Audio Album":
+                        gdrive_id = "1ZiPSIYCBvg2-QdgMq1Z2PxNUDADo1OmJ"
+                    elif media_type == "Photo Album":
+                        gdrive_id = "1dlND-t7-holdnaTggIFnqrUgBaHw2jcn"
+                    elif media_type == "Photo":
+                        gdrive_id = "1dlND-t7-holdnaTggIFnqrUgBaHw2jcn"
+
+                    try:
+                        airtable_gdrive_access = record['fields'][config.ACCESS_PERMISSION]
+                    except:
+                        airtable_gdrive_access = "Private"
+                    try:
+                        airtable_gdrive_password = record['fields'][config.ACCESS_PASSWORD]
+                    except:
+                        if airtable_gdrive_access == "Private":
+                            airtable_gdrive_password = "Charya#1dance"
+                        else:
+                            airtable_gdrive_password = ""
+
+                    gdrive_upload_files_dict = {'record_id' : record_id, 'RID' : RID, 'file_path': file_path, 'airtable_gdrive_access' : airtable_gdrive_access, 'password' : airtable_gdrive_password, 'gdrive_id' : gdrive_id}
+                    gdrive_upload_files_dict_list.append(gdrive_upload_files_dict)
                     gdrive_upload_counter += 1
                     upload_counter += 1
 
     logging.info('Completed preparing %i files for upload to Vimeo and %i files/albums for upload to Google Drive. %i warnings encountered' % (vimeo_upload_counter, gdrive_upload_counter, warning_counter))
 
+    gdrive_upload_files_dict_list_sorted = sorted(gdrive_upload_files_dict_list, key=lambda d: d['RID'])
+
+    for gdrive_upload_files_dict in gdrive_upload_files_dict_list_sorted:
+        counter_dict = uploadRecordToGdrive(gdrive_upload_files_dict)
+
+    logging.info('Gdrive uploading complete. %i file uploaded, %i airtable records updated, %i errors' % (counter_dict['upload_counter'], counter_dict['update_counter'], counter_dict['error_counter']))
 
     vimeo_upload_files_dict_list_sorted = sorted(vimeo_upload_files_dict_list, key=lambda d: d['RID'])
 
@@ -695,10 +812,9 @@ def uploadAccessSubprocesses(v, quantity):
         else:
             upload_path = createAccessFile(vimeo_upload_files_dict['file_path'], mediainfo_dict, reason_list, vimeo_upload_files_dict['RID'])
         vimeoDict = createVimeoDict(vimeo_upload_files_dict)
-        counter_dict = uploadFileToVimeo(v, vimeoDict, upload_path, vimeo_upload_files_dict['RID'], vimeo_upload_files_dict['record_id'])
+        counter_dict = uploadFileToVimeo(v, vimeoDict, upload_path, vimeo_upload_files_dict['RID'], vimeo_upload_files_dict['record_id'], vimeo_upload_files_dict['airtable_vimeo_access'], vimeo_upload_files_dict['password'])
 
     logging.info('Vimeo uploading complete. %i file uploaded, %i airtable records updated, %i errors' % (counter_dict['upload_counter'], counter_dict['update_counter'], counter_dict['error_counter']))
-
 
 
 def getMediaInfo(filePath):
