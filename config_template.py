@@ -14,6 +14,7 @@ VIMEO_DEFAULT_DESCRIPTION = ""
 
 # Google Drive Credentials and config
 GDRIVE_LINK_TEXT = "You may browse previews here, and contact info@charyaburt.com if you would like to access full-size materials. Please include Record Number and purpose of use with your inquiry."
+GDRIVE_ROOT_ID = ""
 
 # Dependency Paths
 FFMPEG_PATH = "/usr/local/bin/ffmpeg"
