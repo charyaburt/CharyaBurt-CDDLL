@@ -24,6 +24,10 @@
 * Vimeo:
   - Install with the following command: `pip3 install PyVimeo`
 
+### Setting up Gdrive
+
+The `gdrive` command line app is used to upload files to the Google Drive access repository. However, there is not way to set up this application with a configuration file (as far as I can tell). Instead, `gdrive` will ask you verify the app before you can use it. At this point I'm unsure if you have to do this every time you restart your computer, or if the connection will stay open (more testing to come), so to be safe you should run the `gdrive_setup.sh` script. This is a super simple script that just runs an info query on the Google Drive ID that is specified in the `config.py` file. If the connection isn't open a browser window will open and ask you to copy in a verfification code visible in the terminal window that opens when you run the script. Again, run this script before uploading an Google Drive files. 
+
 ### API Credentials
 
 You'll need to get API logins and credentials from Airtable and Vimeo.
