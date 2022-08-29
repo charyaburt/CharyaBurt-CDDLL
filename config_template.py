@@ -12,7 +12,7 @@ YOUR_CLIENT_ID = ""
 YOUR_CLIENT_SECRET = ""
 VIMEO_DEFAULT_DESCRIPTION = ""
 
-# Google Drive Credentials and config
+# Google Drive Config
 GDRIVE_LINK_TEXT = "You may browse previews here, and contact info@charyaburt.com if you would like to access full-size materials. Please include Record Number and purpose of use with your inquiry."
 GDRIVE_ROOT_ID = ""
 
