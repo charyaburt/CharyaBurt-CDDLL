@@ -1,4 +1,4 @@
-figure out why upload isn't sorting records properly?
+how do we deal with vimeo's upload limits gracefully? right now random access files might get made and left behind
 
 fix backup script
 
