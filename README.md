@@ -14,6 +14,8 @@
    - Install with the following command: `brew install youtube-dl`
 * FFmpeg
   - Install with the following command:  `brew install ffmpeg`
+* Gdrive
+ - Install with the following command:  `brew install gdrive`
 
 ### Python Libraries
 
@@ -57,6 +59,11 @@ _NOTE_: If you switch out drives during backup cycles make sure you update the `
 - *YOUR_CLIENT_ID*: Get the Vimeo Client ID token from XXXX
 - *YOUR_CLIENT_SECRET*: Get the Vimeo Client Secret token from XXXX
 - *VIMEO_DEFAULT_DESCRIPTION*: You can create a default description that will be appended to the Vimeo description of every file.
+
+#### Google Drive Config
+
+- *GDRIVE_LINK_TEXT*: This is the text that will go into the field named "Access Link" for files on the Google Drive. It's basically a manual redirect because there's not simple way to password protect a google drive file (for now)
+- *GDRIVE_ROOT_ID*: This is the ID of the folder in your Google Drive that all the files will be uploaded to. To get the ID go to the folder you want and copy the string of letters after the last slash in the URL. For example, if the URL is `https://drive.google.com/drive/u/2/folders/a1b2n3m4g5v6j76liksdpe4` then the id is `a1b2n3m4g5v6j76liksdpe4`
 
 #### Dependency Paths
 
