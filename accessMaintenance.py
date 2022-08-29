@@ -259,15 +259,16 @@ def uploadFileToVimeo(v, vimeoDict, file_path, vimeo_upload_files_dict, counter_
     except Exception as e:
         logging.error('Could not upload file to Vimeo for record %s.' % vimeo_upload_files_dict['RID'])
         logging.error(e)
-        if "_access" in file_path:  #need to delete acccess file if there's an error or else we'll have left over access files. 
+        if "_access" in file_path:  #need to delete acccess file if there's an error or else we'll have left over access files.
             try:
                 os.remove(file_path)
                 logging.info('Succesfully deleted access file: %s ' % file_path)
             except Exception as e:
                 logging.error('Error deleting access file: %s ' % file_path)
         counter_dict['error_counter'] += 1
-        if "blah blah blah" in e:       #if vimeo returns an error about reaching upload limits then we need to quit the script. (replace blah blah blah with the error vimeo gives us when the limit is reached)
-            return False                #returning false triggers the script to break the for loop that uploads vimeo files
+        if "Your account doesn't have enough free space to upload this video" in str(e):       #if vimeo returns an error about reaching upload limits then we need to quit the script.
+            counter_dict['status'] = False
+            return counter_dict                #returning with counter_dict status as false triggers the script to break the for loop that uploads vimeo files
 
     #THIS IS THE IMPORTANT BIT WHERE WE UPDATE THE TABLE!
     try:
@@ -794,7 +795,7 @@ def uploadAccessSubprocesses(v, quantity):
     #We process vimeo second
     #but what's missing is a while to properly deal with vimeo's upload limits!
     vimeo_upload_files_dict_list_sorted = sorted(vimeo_upload_files_dict_list, key=lambda d: d['RID'])
-    counter_dict = {'upload_counter' : 0, 'error_counter' : 0, 'update_counter': 0}
+    counter_dict = {'upload_counter' : 0, 'error_counter' : 0, 'update_counter': 0, 'status' : True}
     for vimeo_upload_files_dict in vimeo_upload_files_dict_list_sorted:
         mediainfo_text = getMediaInfo(vimeo_upload_files_dict['file_path'])
         mediainfo_dict = parseMediaInfo(vimeo_upload_files_dict['file_path'], mediainfo_text, vimeo_upload_files_dict['name'],vimeo_upload_files_dict['RID'])
@@ -806,7 +807,7 @@ def uploadAccessSubprocesses(v, quantity):
             upload_path = createAccessFile(vimeo_upload_files_dict['file_path'], mediainfo_dict, reason_list, vimeo_upload_files_dict['RID'])
         vimeoDict = createVimeoDict(vimeo_upload_files_dict)
         counter_dict = uploadFileToVimeo(v, vimeoDict, upload_path, vimeo_upload_files_dict, counter_dict)
-        if counter_dict == False:
+        if not counter_dict['status']:
             logging.error("Fatal Error! Likely the Vimeo upload quota has been reached. You can keep uploading Google Drive files but you'll need to wait a week to upload any Vimeo files.")
             break
 
