@@ -100,4 +100,8 @@ This script is used to sync the Airtable, Drive, and Vimeo together. It can be r
 
 - `-sv` or `--Sync-Vimeo` Runs the Sync Vimeo sub-process. This runs through the entire Airtable and updates the Title and Description of every file on Vimeo. This should be run once a month or so to make sure that the Vimeo pages are sync'd up with the Airtable records
 
-## Performing Regular Maintenance
+## random thoughts that need to be fleshed output
+
+- Vimeo is very strict about weekly upload limits. If you plan to upload a huge archive to vimeo you should pay for a month of the top tier subscription, upload everything during that month, and then downgrade.
+- You should be running record maintenance and access maintenance every month on a schedule
+- If the drive audits and file audits return errors you need to fix these right away. It's probably something minor, but don't let it get out of hand
