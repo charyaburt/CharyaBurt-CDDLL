@@ -1,10 +1,4 @@
-how do we deal with vimeo's upload limits gracefully? right now random access files might get made and left behind
-
-fix backup script
-
 discuss taxonomy in documentation (what is an album vs a video? why?)
-
-add google drive functionality for albums
 
 One thing: for dependency paths, can you also document where we need to manually change the python3 path?
 
