@@ -91,26 +91,13 @@ This script is used to update records and perform the regular maintenance requir
 
 If any of these three audits fail, the script will ask you to fix the problems before you continue. It it possible to skip the audits, but it is HIGHLY recommended that you not do so, since updating an out of sync drive or Airtable can cause more problems in the future.
 
-
-- `-h` or `--help`: This runs the help command, which shows all the available runtime flags. These flags are listed and described in more detail below.
-- `-v` or `--verbose`: Defines verbose level for standard out (stdout). v = WARNING, vv = INFO, vvv = DEBUG. All of this output will always be visible in the log, so this isn't super useful if you're looking at the log all the time, which you should be!
-- `sa` or `--Skip-Audit`: This skips the three audits that happen when the script is run. We HIGHLY RECOMMEND That you never run with this flag. It is means for development and testing purposes only.
-- `-gc` or `--Get-Checksums`: This subprocess will use the `FULL_FILE_NAME` field in the `FILES` table the path to a file. If the `CHECKSUM` field is empty it will then create an MD5 checksum for this file and enter that info into the `CHECKSUM` field.
-- `-vc` or `--Validate-Checksums`: This subprocess will validate checksums. It will skip any records with nothing in the `CHECKSUM` field of the `FILES` table. Upon validation the script will update the `CHECKSUM_VALID` field to "Yes" upon success, and "No" upon failure. It will also update the `CHECKSUM_VALID_DATE` with the current date.
-- `-ad`, `--Auto-Deaccession` Runs the auto-deaccession subcprocess. This moves all records in the `RECORDS` table marked "DEACCESSIONED RECORD" in the `FILE_PROCESS_STATUS` to a _Trash folder. This should be run on a regular basis to ensure that junk files aren't sitting around.
-
-
-### vimeoMaintenance.py
+### accessMaintenance.py
 
 This script is used to sync the Airtable, Drive, and Vimeo together. It can be run with different flags in order to run specific subprocesses. Like the record maintenance script, this script will run a drive, airtable, and file audit before doing anything else. It will not let you upload anything if these audits fail.
 
 
-- `-uv [Quantity]`, or `--Upload-Vimeo [Quantity]` Runs the Vimeo Upload subcprocess. By default this will upload the first 5 files it finds that need to be uploaded to Vimeo. If you put a number after the -uv (quantity) flag it will upload that number of files that it finds
+- `-ua [Quantity]`, or `--Upload-Access [Quantity]` Runs the Access Upload sub-process. By default this will upload the first 5 files it finds that need to be uploaded to their associated Access Platform. If you put a number after the -uv (quantity) flag it will upload that number of files that it finds. The script asks Airtable whether the file belongs on Google Drive or Vimeo and uploads accordingly. For now there's no way to upload only Google Drive or Only Vimeo. The script will essentially go through anything that needs to be uploaded at random and start uploading it.
 
+- `-sv` or `--Sync-Vimeo` Runs the Sync Vimeo sub-process. This runs through the entire Airtable and updates the Title and Description of every file on Vimeo. This should be run once a month or so to make sure that the Vimeo pages are sync'd up with the Airtable records
 
-#### Record Maintenance Hints, Tips, and Best Practices
-
-- Record Maintenance will ALWAYS run a record-level audit when you run it. This is the first thing it does. It will quit if the audit fails. The audit will fail if a record labeled On Library and On Drive is not found on the drive. If the script fails you should immediately figure out what's missing and get it back on the drive, either from a backup or from vimeo using the `-dv` flag.
-- Record Maintenance can be run with multiple fl
-- Record Maintenance will warn you if your records are missing filenames or checksums. It is ok for records to missing this information sometimes, like if the record has just been added or the file was just recently downloaded from vimeo. If you get warnings that these are missing for some records your best bet is to run the script with both the `-gf` and `-gc` flags (in that order).
-- File Audit will look to see if every file listed in airtable can be found on the drive. If it finds multiple files in the drive folder it will be upset, unless you have an access copy name listed in airtable. The idea here is that if you need to make an access copy it will be ok for there to be more than one file in the folder, but you need to make sure you put the access copy filename in airtable. This will ensure that the vimeo uploader picks the correct file.
+## Performing Regular Maintenance
