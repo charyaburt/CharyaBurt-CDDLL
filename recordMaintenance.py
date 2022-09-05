@@ -26,7 +26,7 @@ def main():
     parser.add_argument('-sa', '--Skip-Audit',dest='sa',action='store_true',default=False,help="Skips drive, airtable, and file audit at beginning of script")
     parser.add_argument('-gc', '--Get-Checksums',dest='gc',action='store_true',default=False,help="Runs the checksum harvesting subcprocess. This should really only be done once")
     parser.add_argument('-vc', '--Validate-Checksums',dest='vc',action='store_true',default=False,help="Runs the checksum validation subcprocess. This should be run on a regular basis")
-    parser.add_argument('-ad', '--Auto-Deaccession',dest='ad',action='store_true',default=False,help="Runs the auto-deaccession subcprocess. This moves all records marked \"Not in Library\" to a _Trash folder. This should be run on a regular basis")
+    parser.add_argument('-da', '--Deaccession',dest='da',action='store_true',default=False,help="Runs the Deaccession subcprocess. This moves all records marked \"Not in Library\" to a _Trash folder. This should be run on a regular basis")
     args = parser.parse_args()
 
     if args.d:
@@ -115,8 +115,8 @@ def main():
         validateChecksums()
 
     #Perform audio-deaccession
-    if args.ad:
-        autoDeaccession(airtable, drive_name)
+    if args.da:
+        deaccession()
 
     #Perform find subcprocess
     #Depracated
@@ -501,12 +501,16 @@ def validateChecksums():
     logging.info('Checksum Validation complete. %i records succesfully validated, %i Airtable records updated, %i errors encountered. ' % (checksum_validate_counter, update_counter, checksum_error_counter))
     return
 
-def autoDeaccession(airtable, drive_name):
-    print('Performing auto-deaccession')
-    logging.info('Performing auto-deaccession')
+def deaccession():
+    print('Performing deaccession')
+    logging.info('Performing deaccession')
+    drive_name = config.DRIVE_NAME
+    airtable = Airtable(config.BASE_ID, "Records", config.API_KEY)
+    airtable_files = Airtable(config.BASE_ID, 'Files', config.API_KEY)
     deaccession_errors = 0
     deaccession_success = 0
-    update_counter = 0
+    airtable_files_deleted = 0
+    airtable_errors = 0
     pages = airtable.get_iter()
     trash_path = os.path.join('/Volumes', drive_name, "_Trash")
     if os.path.isdir(trash_path):
@@ -517,40 +521,36 @@ def autoDeaccession(airtable, drive_name):
     for page in pages:
         for record in page:
             try:
-                in_library = record['fields']['In Library']
+                record_status = record['fields'][config.RECORD_STATUS]
             except Exception as e:
-                in_library = "Not Found"
-            if in_library == "Yes":     #only process records that are in the library
-                if record['fields']['In Library'] == "No":      #We want to find files that are marked as not in the library, so we can remove them from the drive
-                    record_id = record['id']
-                    UID = record['fields']['Unique ID']
-                    try:                                        #Need to have an try/except here because airtable errors if the field is empty. This is in case there is no Group
-                        group = record['fields']['Group']
-                    except Exception as e:
-                        group = ""
-                    if group == "":                             #In case there is no Group, we don't want an extra slash
-                        path = os.path.join('/Volumes', drive_name, UID)    #will need to fix this to make it cross platform eventually
-                    else:
-                        path = os.path.join('/Volumes', drive_name, group, UID)    #will need to fix this to make it cross platform eventually
-                    if os.path.isdir(path):
-                        logging.info('Deaccessioning record %s' % UID)
-                        update_dict = {'On Drive': "No"}
+                record_status = "None"
+            if record_status == "Deaccessioned Record":     #look for deaccessioned records
+                record_id = record['id']
+                RID = record['fields'][config.RECORD_NUMBER]
+                path = os.path.join('/Volumes', drive_name, RID)    #will need to fix this to make it cross platform eventually
+                if os.path.isdir(path):
+                    logging.info('Deaccessioning record %s' % RID)
+                    try:
                         shutil.move(path,trash_path)
                         deaccession_success += 1
-                        #THIS IS THE IMPORTANT BIT WHERE WE UPDATE THE TABLE!
-                        try:
-                            airtable.update(record_id, update_dict)
-                            logging.info('Succesfully set On Drive to No for record %s ' % UID)
-                            update_counter += 1
-                        except Exception as e:
-                            logging.error('Could not set On Drive to No for record %s' % UID)
-                            deaccession_errors += 1
-                    else:
-                        logging.error('Could not find record %s. Ensure that file exists in proper location before running auto-deaccession' % UID)
+                        logging.info('Succesfully removed record %s from drive: %s' % (RID, config.DRIVE_NAME))
+                    except Exception as e:
+                        logging.error('Could not remove record %s from drive %s' % (RID, config.DRIVE_NAME))
                         deaccession_errors += 1
+                    airtable_file_id_list = record['fields'][config.FILES_IN_RECORD]
+                    for f_id in airtable_file_id_list:
+                        try:
+                            airtable.delete(f_id)
+                            logging.info('Succesfully removed file records related to %s from Airtable' % RID)
+                            airtable_files_deleted += 1
+                        except:
+                            logging.error('Could not remove file records related to %s from Airtable' % RID)
+                            airtable_errors += 1
+                else:
+                    pass        #if the record isn't found on the drive there's no need to deaccession
 
 
-    logging.info('Auto deaccession complete. %i records succesfully deaccessioned, %i Airtable records updated, %i errors encountered.' % (deaccession_success, update_counter, deaccession_errors))
+    logging.info('Auto deaccession complete. %i records succesfully deaccessioned, %i errors encountered. %i Airtable file records deleted, %i Airtable errors encountered' % (deaccession_success, deaccession_errors, airtable_files_deleted, airtable_errors))
     return
 
 def getChecksums():
