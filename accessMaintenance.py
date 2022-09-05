@@ -651,7 +651,7 @@ def uploadAccessSubprocesses(v, quantity):
     # You cannot choose a file to upload, the script will simply start uploading them in order as it finds records with "Yes" as Uplaod to Vimeo but not Vimeo Link
     # The script will automatically run on 5 files and then quit, but you can define how many files you want it to run on
     drive_name = config.DRIVE_NAME
-    logging.info('Preparing videos to upload')
+    logging.info('Preparing media to upload')
     update_counter = 0
     upload_counter = 0
     vimeo_upload_counter = 0
