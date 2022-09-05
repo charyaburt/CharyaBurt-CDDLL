@@ -80,6 +80,10 @@ def main():
 
     #airtable = Airtable(base_key, table_name, api_key)
 
+    #Perform audio-deaccession This needs to run first to keep everything else up to date
+    if args.da:
+        deaccession()
+
     #skip audits if run with -sa flag
     if not args.sa:
 
@@ -114,9 +118,7 @@ def main():
     if args.vc:
         validateChecksums()
 
-    #Perform audio-deaccession
-    if args.da:
-        deaccession()
+
 
     #Perform find subcprocess
     #Depracated
@@ -187,12 +189,12 @@ def driveAudit():
     no_status = 0
     for page in pages:
         for record in page:
+            RID = record['fields'][config.RECORD_NUMBER]
             try:
                 record_status = record['fields'][config.RECORD_STATUS]
             except Exception as e:
                 record_status = "None"  #it is worth noting and telling the user if a file doesn't have a status
             if record_status != config.RECORD_DEACCESS_FLAG:     #only process records that are in the library
-                RID = record['fields'][config.RECORD_NUMBER]
                 path = os.path.join('/Volumes', drive_name, RID)    #will need to fix this to make it cross platform eventually
                 if not os.path.isdir(path):
                     logging.error('Could not find folder for record %s on drive named %s' % (RID, drive_name))
@@ -203,7 +205,9 @@ def driveAudit():
                     no_status += 1
                     logging.warning('Record %s has no status. Please enter a status for this record.' % RID)
             else:
-                logging.error('Deaccessioned record %s was found on drive %s' % (RID, drive_name))
+                path = os.path.join('/Volumes', drive_name, RID)    #will need to fix this to make it cross platform eventually
+                if os.path.isdir(path):
+                    logging.error('Deaccessioned record %s was found on drive %s' % (RID, drive_name))
 
     if no_status > 1:
         logging.warning('Record level drive audit has identified %i record(s) without a status. Please fix this before continuing.' % no_status)
@@ -265,8 +269,8 @@ def airtableAudit():
         print('ERROR: This script has found %i record(s) on driving missing from the Airtable. Please consult the log and fix this problem before continuing.' % missing_from_airtable_count)
         logging.error('This script identified %i record(s) missing from Airtable. Please fix this before continuing.' % missing_from_airtable_count)
     if in_airtable_not_in_library > 0:
-        print('ERROR: This script has found %i record(s) on the drive marked as "Not In Library" in Airtable. Please consult the log and fix this problem before continuing.' % in_airtable_not_in_library)
-        logging.error('This script identified %i record(s) on the drive marked as "Not In Library" in Airtable. Please fix this before continuing.' % in_airtable_not_in_library)
+        print('ERROR: This script has found %i record(s) on the drive marked as "Deaccessioned Record" in Airtable. Please consult the log and fix this problem before continuing.' % in_airtable_not_in_library)
+        logging.error('This script identified %i record(s) on the drive marked as "Deaccessioned Record" in Airtable. Please fix this before continuing.' % in_airtable_not_in_library)
     if missing_from_airtable_count == 0 and in_airtable_not_in_library == 0:
         print('Record level Airtable audit completed succesfully, no errors found. %i record(s) were succesfully located.' % in_airtable_and_in_library)
         logging.info('Record level Airtable audit completed succesfully, no errors found. %i record(s) were succesfully located.' % in_airtable_and_in_library)
@@ -537,15 +541,18 @@ def deaccession():
                     except Exception as e:
                         logging.error('Could not remove record %s from drive %s' % (RID, config.DRIVE_NAME))
                         deaccession_errors += 1
-                    airtable_file_id_list = record['fields'][config.FILES_IN_RECORD]
-                    for f_id in airtable_file_id_list:
-                        try:
-                            airtable.delete(f_id)
-                            logging.info('Succesfully removed file records related to %s from Airtable' % RID)
-                            airtable_files_deleted += 1
-                        except:
-                            logging.error('Could not remove file records related to %s from Airtable' % RID)
-                            airtable_errors += 1
+                    try:
+                        airtable_file_id_list = record['fields'][config.FILES_IN_RECORD]
+                        for f_id in airtable_file_id_list:
+                            try:
+                                airtable.delete(f_id)
+                                logging.info('Succesfully removed file records related to %s from Airtable' % RID)
+                                airtable_files_deleted += 1
+                            except:
+                                logging.error('Could not remove file records related to %s from Airtable' % RID)
+                                airtable_errors += 1
+                    except:
+                        logging.warning('No Airtable file records related to %s. This is not necessarily a problem' % RID)
                 else:
                     pass        #if the record isn't found on the drive there's no need to deaccession
 
