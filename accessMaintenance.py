@@ -225,7 +225,7 @@ def uploadRecordToGdrive(g_dict, counter_dict):
         return counter_dict
 
     new_folder_view_url = gdrive_info_out.split("ViewUrl: ")[1].rstrip() #second word in output will be the id of the new folder
-    update_dict = {config.ACCESS_LINK : config.GDRIVE_LINK_TEXT, config.PRIVATE_GDRIVE_LINK : new_folder_view_url, config.ACCESS_PLATFORM_ID : new_folder_id, config.ACCESS_PERMISSION : g_dict['airtable_gdrive_access'], config.ACCESS_PASSWORD : ""}
+    update_dict = {config.ACCESS_LINK : config.GDRIVE_LINK_TEXT, config.ACCESS_LINK : new_folder_view_url, config.ACCESS_PLATFORM_ID : new_folder_id, config.ACCESS_PERMISSION : g_dict['airtable_gdrive_access'], config.ACCESS_PASSWORD : ""}
 
     #lastly we update airtable with the ID and URL. awesome!
     try:
