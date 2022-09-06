@@ -1,3 +1,5 @@
+list which fields are used in which scripts
+
 discuss taxonomy in documentation (what is an album vs a video? why?)
 
 One thing: for dependency paths, can you also document where we need to manually change the python3 path?
