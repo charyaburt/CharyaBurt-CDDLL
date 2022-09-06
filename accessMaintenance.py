@@ -564,7 +564,7 @@ def syncVimeo(v):
                 except Exception as e:
                     media_type = "none"
                 try:
-                    online_platform = record['fields'][config.ONLINE_PLATFORM]
+                    online_platform = record['fields'][config.ACCESS_PLATFORM]
                 except Exception as e:
                     online_platform = "none"
                 try:        #checks to see if record has a vimeo link. If not we skip it
@@ -678,7 +678,7 @@ def uploadAccessSubprocesses(v, quantity):
                 except Exception as e:
                     media_type = "none"
                 try:
-                    online_platform = record['fields'][config.ONLINE_PLATFORM]
+                    online_platform = record['fields'][config.ACCESS_PLATFORM]
                 except Exception as e:
                     online_platform = "none"
                 try:                                        #checks to see if record has an entry in the Checksum field. This will only process files with no checksum already, so as not to overwrite
@@ -759,11 +759,6 @@ def uploadAccessSubprocesses(v, quantity):
 
                     file_path = os.path.join('/Volumes', drive_name, RID, airtable_filename)
                     # This section harvests info from airtable to populate the google drive record
-
-                    try:            #first, see if an access copy filename exists. If it does we're gonna use this instead.
-                        airtable_grouping = record['fields'][config.GROUPING]
-                    except Exception as e:
-                        airtable_grouping = "None"
 
                     try:
                         airtable_gdrive_access = record['fields'][config.ACCESS_PERMISSION]
