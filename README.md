@@ -16,6 +16,8 @@
   - Install with the following command:  `brew install ffmpeg`
 * Gdrive
  - Install with the following command:  `brew install gdrive`
+* Imagemagick
+- Install with the following command:  `brew install imagemagick`
 
 ### Python Libraries
 
@@ -26,7 +28,7 @@
 
 ### Setting up Gdrive
 
-The `gdrive` command line app is used to upload files to the Google Drive access repository. However, there is not way to set up this application with a configuration file (as far as I can tell). Instead, `gdrive` will ask you verify the app before you can use it. At this point I'm unsure if you have to do this every time you restart your computer, or if the connection will stay open (more testing to come), so to be safe you should run the `gdrive_setup.sh` script. This is a super simple script that just runs an info query on the Google Drive ID that is specified in the `config.py` file. If the connection isn't open a browser window will open and ask you to copy in a verfification code visible in the terminal window that opens when you run the script. Again, run this script before uploading an Google Drive files. 
+The `gdrive` command line app is used to upload files to the Google Drive access repository. However, there is not way to set up this application with a configuration file (as far as I can tell). Instead, `gdrive` will ask you verify the app before you can use it. At this point I'm unsure if you have to do this every time you restart your computer, or if the connection will stay open (more testing to come), so to be safe you should run the `gdrive_setup.sh` script. This is a super simple script that just runs an info query on the Google Drive ID that is specified in the `config.py` file. If the connection isn't open a browser window will open and ask you to copy in a verfification code visible in the terminal window that opens when you run the script. Again, run this script before uploading an Google Drive files.
 
 ### API Credentials
 
@@ -77,7 +79,7 @@ For example, to find the path of ffmpeg you can run `which ffmpeg` which will re
 
 ####Various Hardcoded Values
 
-For now the only hardcoded value is `MAX_SIZE`, which defines how large a file can be before it will have a downscaled access copy created. This is in order to get around Vimeo's size and upload limits. This field is in bytes, so 5000000000 is equal to 5GB.
+For now the only hardcoded value is `MAX_SIZE`, which defines how large a file can be before it will have a downscaled access copy created. This is in order to get around Vimeo's size and upload limits. This field is in bytes, so 1500000000 is equal to 1.5GB.
 
 #### Airtable Field References
 
@@ -93,16 +95,131 @@ This script is used to update records and perform the regular maintenance requir
 - *Airtable Audit*: This checks every active record on the Airtable and makes sure that it has a corresponding folder on the drive.
 - *File Audit*: This checks every file record related to an active record on the Airtable and makes sure that it appears on the drive in the location that Airtable thinks it should be.
 
+#### Record Maintenance Subprocesses
+
+- *Get Checksums*: This is run by using the `-gc` flag. This will run through Airtable to see if any `File` type records (excluding albums) are missing a checksum. If it finds a missing checksum the checksum will be harvested from the file and put into Airtable. This isn't really necessary anymore because checksums are harvested at the time of ingest, but we decided to keep the script around in case a checksum gets lost or falls out of date.
+- *Validate Checksums*: This is run by using the `-vc` flag. This will validate the Airtable checkum against the file on the drive's checksum for every `File` type record in Airtable. It will throw an error if the checksum fails.
+- *Deaccession*: This is run by using the `-da` flag. This will go through the airtable and find any records marked with the status `Deaccessioned Record`. If a record has this status it will be moved to the `_Trash` folder on the drive, and any associated `File` type records will deleted from the Airtable. This subprocess actually runs before the audits because deaccessioned records need to be handled properly before the audits can be properly passed.
+
 If any of these three audits fail, the script will ask you to fix the problems before you continue. It it possible to skip the audits, but it is HIGHLY recommended that you not do so, since updating an out of sync drive or Airtable can cause more problems in the future.
+
+#### Hardcoded Values Airtable Fields Used
+The following entries from `config.py` are used in this script. you'll need to update the config file if you've made
+
+##### Hardcoded Values:
+
+- `BASE_ID`
+- `API_KEY`
+- `DRIVE_NAME`
+- `VIMEO_DEFAULT_DESCRIPTION`
+
+##### Airtable Field Names:
+- `RECORD_NUMBER`
+- `RECORD_STATUS`
+- `RECORD_STATUS_LOOKUP`
+- `FILE_FORMAT`
+- `FILE_COUNT`
+- `FULL_FILE_NAME`
+- `CHECKSUM`
+- `CHECKSUM_VALID`
+- `CHECKSUM_VALID_DATE`
+- `FILES_IN_RECORD`
+
+##### Airtable Data Entries:
+- `RECORD_DEACCESS_FLAG`
 
 ### accessMaintenance.py
 
 This script is used to sync the Airtable, Drive, and Vimeo together. It can be run with different flags in order to run specific subprocesses. Like the record maintenance script, this script will run a drive, airtable, and file audit before doing anything else. It will not let you upload anything if these audits fail.
 
+#### Access Maintenance Subprocesses
 
 - `-ua [Quantity]`, or `--Upload-Access [Quantity]` Runs the Access Upload sub-process. By default this will upload the first 5 files it finds that need to be uploaded to their associated Access Platform. If you put a number after the -uv (quantity) flag it will upload that number of files that it finds. The script asks Airtable whether the file belongs on Google Drive or Vimeo and uploads accordingly. For now there's no way to upload only Google Drive or Only Vimeo. The script will essentially go through anything that needs to be uploaded at random and start uploading it.
 
 - `-sv` or `--Sync-Vimeo` Runs the Sync Vimeo sub-process. This runs through the entire Airtable and updates the Title and Description of every file on Vimeo. This should be run once a month or so to make sure that the Vimeo pages are sync'd up with the Airtable records
+
+#### Hardcoded Values Airtable Fields Used
+The following entries from `config.py` are used in this script. you'll need to update the config file if you've made
+
+##### Hardcoded Values:
+- `DRIVE_NAME`
+- `YOUR_ACCESS_TOKEN`
+- `YOUR_CLIENT_ID`
+- `YOUR_CLIENT_SECRET`
+- `BASE_ID`
+- `API_KEY`
+- `DRIVE_NAME`
+- `MAX_SIZE`
+- `MEDIAINFO_PATH`
+- `FFMPEG_PATH`
+
+##### Airtable Field Names:
+- `RECORD_STATUS`
+- `RECORD_DEACCESS_FLAG`
+- `RECORD_NUMBER`
+- `RECORD_STATUS_LOOKUP`
+- `RECORD_NUMBER_LOOKUP`
+- `FILENAME`
+- `FILE_SIZE`
+- `VIDEO_CODEC`
+- `VIDEO_ASPECT_RATIO`
+- `VIDEO_SCAN_TYPE`
+- `ACCESS_PLATFORM_ID`
+- `ACCESS_PERMISSION`
+- `ACCESS_PASSWORD`
+- `ACCESS_LINK`
+- `GDRIVE_PATH`
+- `GDRIVE_ROOT_ID`
+- `GDRIVE_LINK_TEXT`
+- `FULL_FILE_NAME`
+- `MEDIA_TYPE`
+- `ACCESS_PLATFORM`
+- `ACCESS_LINK`
+- `ACCESS_PERMISSION`
+- `ACCESS_PASSWORD`
+- `RECORD_TITLE`
+- `INFO_CARD`
+- `FILES_IN_RECORD`
+
+### addRecord.py
+
+#### Hardcoded Values Airtable Fields Used
+
+##### Hardcoded Values:
+- `BASE_ID`
+- `API_KEY`
+- `DRIVE_NAME`
+- `MAX_SIZE`
+- `FFMPEG_PATH`
+- `CONVERT_PATH`
+- `MEDIAINFO_PATH`
+
+##### Airtable Field Names:
+- `RECORD_NUMBER`
+- `RECORD_STATUS`
+- `RECORD_NUMBER`
+- `FILE_PROCESS_STATUS`
+- `CHECKSUM`
+- `PARENT_ID`
+- `FILE_COUNT`
+- `FILENAME`
+- `FULL_FILE_NAME`
+- `DURATION`
+- `FILE_SIZE_STRING`
+- `FILE_SIZE`
+- `FILE_FORMAT`
+- `VIDEO_CODEC`
+- `VIDEO_BIT_DEPTH`
+- `VIDEO_SCAN_TYPE`
+- `VIDEO_FRAME_RATE`
+- `VIDEO_FRAME_SIZE`
+- `VIDEO_ASPECT_RATIO`
+- `AUDIO_SAMPLING_RATE`
+- `AUDIO_CODEC`
+- `COPY_VERSION`
+
+#### Airtable Data Entries:
+- `FILE_INTAKE_FLAG`
 
 ## random thoughts that need to be fleshed output
 
