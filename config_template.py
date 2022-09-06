@@ -25,7 +25,7 @@ CONVERT_PATH = "/usr/local/bin/convert"
 GDRIVE_PATH = "/usr/local/bin/gdrive"
 
 #Various Hardcoded Values
-MAX_SIZE = 5000000000
+MAX_SIZE = 1500000000
 
 # Airtable Field References
 ## Records Table
