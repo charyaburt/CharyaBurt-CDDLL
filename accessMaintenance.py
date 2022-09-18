@@ -545,6 +545,7 @@ def syncVimeo(v):
     #ONLINE_PLATFORM = "Online Platform"
     drive_name = config.DRIVE_NAME
     logging.info('Preparing videos to update/sync')
+    print('Preparing videos to update/sync')
     update_counter = 0
     upload_counter = 0
     warning_counter = 0
@@ -654,6 +655,7 @@ def uploadAccessSubprocesses(v, quantity):
     # The script will automatically run on 5 files and then quit, but you can define how many files you want it to run on
     drive_name = config.DRIVE_NAME
     logging.info('Preparing media to upload')
+    print('Preparing media to upload')
     update_counter = 0
     upload_counter = 0
     vimeo_upload_counter = 0
@@ -780,6 +782,7 @@ def uploadAccessSubprocesses(v, quantity):
                     upload_counter += 1
 
     logging.info('Completed preparing %i files for upload to Vimeo and %i files/albums for upload to Google Drive. %i warnings encountered' % (vimeo_upload_counter, gdrive_upload_counter, warning_counter))
+    print('Completed preparing %i files for upload to Vimeo and %i files/albums for upload to Google Drive. %i warnings encountered' % (vimeo_upload_counter, gdrive_upload_counter, warning_counter))
 
     #We process gdrive first in case vimeo errors out due to hitting limits
     gdrive_upload_files_dict_list_sorted = sorted(gdrive_upload_files_dict_list, key=lambda d: d['RID'])
@@ -788,6 +791,7 @@ def uploadAccessSubprocesses(v, quantity):
         counter_dict = uploadRecordToGdrive(gdrive_upload_files_dict, counter_dict)
     if gdrive_upload_counter > 0:   #don't display logging if we didn't do any uploading
         logging.info('Gdrive uploading complete. %i file uploaded, %i airtable records updated, %i errors' % (counter_dict['upload_counter'], counter_dict['update_counter'], counter_dict['error_counter']))
+        print('Gdrive uploading complete. %i file uploaded, %i airtable records updated, %i errors' % (counter_dict['upload_counter'], counter_dict['update_counter'], counter_dict['error_counter']))
 
     #We process vimeo second
     #but what's missing is a while to properly deal with vimeo's upload limits!
@@ -810,6 +814,7 @@ def uploadAccessSubprocesses(v, quantity):
 
     if vimeo_upload_counter > 0:    #don't display logging if we didn't do any uploading
         logging.info('Vimeo uploading complete. %i file uploaded, %i airtable records updated, %i errors' % (counter_dict['upload_counter'], counter_dict['update_counter'], counter_dict['error_counter']))
+        print('Vimeo uploading complete. %i file uploaded, %i airtable records updated, %i errors' % (counter_dict['upload_counter'], counter_dict['update_counter'], counter_dict['error_counter']))
 
 
 def getMediaInfo(filePath):
