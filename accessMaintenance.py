@@ -337,11 +337,11 @@ def driveAudit():
                     logging.warning('Record %s has no status. Please enter a status for this record.' % RID)
 
     if no_status > 1:
-        logging.warning('Record level drive audit has identified %i record(s) without a status. Please fix this before continuing.' % no_status)
+        logging.warning('Record level drive audit has identified %i records without a status. Please fix this before continuing.' % no_status)
     if missing_from_drive_count > 0:
-        print('ERROR: Record level drive audit has found %i missing record(s). Please consult the log and fix this problem before continuing. %i record(s) were succesfully located' % (missing_from_drive_count, correct_on_drive_count))
-        logging.error('Record level drive audit has identified %i missing record(s). Please fix this before continuing.' % missing_from_drive_count)
-        logging.info('%i record(s) were succesfully located' % correct_on_drive_count)
+        print('ERROR: Record level drive audit has found %i missing records. Please consult the log and fix this problem before continuing. %i records were succesfully located' % (missing_from_drive_count, correct_on_drive_count))
+        logging.error('Record level drive audit has identified %i missing records. Please fix this before continuing.' % missing_from_drive_count)
+        logging.info('%i records were succesfully located' % correct_on_drive_count)
 #        if not_added_record_count > 0:
 #            logging.warning('There are records in the Airtable that have not yet been added onto the drive. This should be addressed as soon as possible')
 #            warning_count += 1
@@ -351,8 +351,8 @@ def driveAudit():
 #            logging.warning('There are records in the Airtable that have not yet been added onto the drive. This should be addressed as soon as possible')
 #            warning_count += 1
 #        if warning_count == 0:
-        print('Record level drive audit completed. %i record(s) were succesfully located' % correct_on_drive_count)
-        logging.info('Record level drive audit completed succesfully. %i record(s) were succesfully located' % correct_on_drive_count)
+        print('Record level drive audit completed. %i records were succesfully located' % correct_on_drive_count)
+        logging.info('Record level drive audit completed succesfully. %i records were succesfully located' % correct_on_drive_count)
 #        else:
 #            print('Record Level Audit completed succesfully, however '+ str(warning_count) +' warnings were encountered. Please read the log for details')
 #            logging.info('Record Level Audit completed succesfully, however %i warnings were encountered. Please read the log for details', warning_count)
@@ -393,22 +393,21 @@ def airtableAudit():
                     logging.error('Could not find record %s on the Airtable' % item)
                     missing_from_airtable_count += 1
     if missing_from_airtable_count > 0:
-        print('ERROR: This script has found %i record(s) on driving missing from the Airtable. Please consult the log and fix this problem before continuing.' % missing_from_airtable_count)
-        logging.error('This script identified %i record(s) missing from Airtable. Please fix this before continuing.' % missing_from_airtable_count)
+        print('ERROR: This script has found %i records on driving missing from the Airtable. Please consult the log and fix this problem before continuing.' % missing_from_airtable_count)
+        logging.error('This script identified %i records missing from Airtable. Please fix this before continuing.' % missing_from_airtable_count)
     if in_airtable_not_in_library > 0:
-        print('ERROR: This script has found %i record(s) on the drive marked as "Not In Library" in Airtable. Please consult the log and fix this problem before continuing.' % in_airtable_not_in_library)
-        logging.error('This script identified %i record(s) on the drive marked as "Not In Library" in Airtable. Please fix this before continuing.' % in_airtable_not_in_library)
+        print('ERROR: This script has found %i records on the drive marked as "Not In Library" in Airtable. Please consult the log and fix this problem before continuing.' % in_airtable_not_in_library)
+        logging.error('This script identified %i records on the drive marked as "Not In Library" in Airtable. Please fix this before continuing.' % in_airtable_not_in_library)
     if missing_from_airtable_count == 0 and in_airtable_not_in_library == 0:
-        print('Record level Airtable audit completed succesfully, no errors found. %i record(s) were succesfully located.' % in_airtable_and_in_library)
-        logging.info('Record level Airtable audit completed succesfully, no errors found. %i record(s) were succesfully located.' % in_airtable_and_in_library)
+        print('Record level Airtable audit completed succesfully, no errors found. %i records were succesfully located.' % in_airtable_and_in_library)
+        logging.info('Record level Airtable audit completed succesfully, no errors found. %i records were succesfully located.' % in_airtable_and_in_library)
         return True
     else:
-        logging.info('Record level Airtable audit complete with errors, %i record(s) were succesfully located' % in_airtable_and_in_library)
+        logging.info('Record level Airtable audit complete with errors, %i records were succesfully located' % in_airtable_and_in_library)
         return False
 
 def fileAudit():
     drive_name = config.DRIVE_NAME
-    print('Performing a file-level audit')
     logging.info('Performing a file-level audit')
     missing_file_counter = 0
     file_found_counter = 0
@@ -457,9 +456,12 @@ def fileAudit():
                 #    if airtable_filename != files_list[0]:
                 #        missing_file_counter += 1
                 #        logging.error('Filename Mismatch for record %s. Please fix this before continuing' % RID)
-
-    logging.info('File-level audit complete, %i errors found.' % error_count)
-    return
+    logging.info('File level Airtable audit completed succesfully. %i records were succesfully located. %i records encountered.' % (file_found_counter, error_count))
+    print('File level Airtable audit completed succesfully. %i records were succesfully located. %i records encountered.' % (file_found_counter, error_count))
+    if error_count == 0:
+        return True
+    else:
+        return False
 
 def downloadVimeo(airtable, drive_name):
     print('Performing the Download Vimeo subprocess')
