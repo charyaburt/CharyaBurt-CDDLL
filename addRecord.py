@@ -1,4 +1,4 @@
-#!/usr/local/bin/python3
+#!/usr/bin/env python3
 
 import logging          # This loads the "logging" module, which handles logging very simply
 import os               # This loads the "os" module, useful for dealing with filepaths
