@@ -19,7 +19,7 @@
 # You can create any custom variable you would like, and they will be accessible
 # in the templates via {{ site.myvariable }}.
 
-title: Charya Burt CDDLL Documentation
+title: Charya Burt CDDLL
 description: This site describes how to use the CDDLL Airtable-based CMS
 search_enabled: true
 remote_theme: pmarsceill/just-the-docs
