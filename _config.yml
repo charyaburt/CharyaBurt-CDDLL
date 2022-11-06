@@ -19,7 +19,7 @@
 # You can create any custom variable you would like, and they will be accessible
 # in the templates via {{ site.myvariable }}.
 
-title: Charya Burt CDDLL Documentation Page
+title: Charya Burt CDDLL Documentation
 description: This site describes how to use the CDDLL Airtable-based CMS
 search_enabled: true
 remote_theme: pmarsceill/just-the-docs
@@ -31,5 +31,5 @@ color_scheme: "dark"
 baseurl: "/CharyaBurt-CDDLL" # the subpath of your site, e.g. /blog
 #theme: "just-the-docs"
 aux_links:
-  "BAVC Resources source on GitHub":
+  "Charya Burt CDDLL source on GitHub":
     - "//github.com/iamdamosuzuki/CharyaBurt-CDDLL"
