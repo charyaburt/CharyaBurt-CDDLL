@@ -1,6 +1,6 @@
 ---
 layout: page
-title: Salesforce
+title: Scripts
 has_children: true
 ---
 {:toc}
