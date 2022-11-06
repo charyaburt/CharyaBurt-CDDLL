@@ -92,47 +92,6 @@ For now the only hardcoded value is `MAX_SIZE`, which defines how large a file c
 
 This section is prefilled to work with the template version of the Airtable. If you decide you'd like to change field name in the Airtable make sure to change the field name here as well. This is how the python scripts know the names of the fields in Airtable.
 
-## Scripts
-
-### addRecord.py
-
-#### Hardcoded Values Airtable Fields Used
-
-##### Hardcoded Values:
-- `BASE_ID`
-- `API_KEY`
-- `DRIVE_NAME`
-- `MAX_SIZE`
-- `FFMPEG_PATH`
-- `CONVERT_PATH`
-- `MEDIAINFO_PATH`
-
-##### Airtable Field Names:
-- `RECORD_NUMBER`
-- `RECORD_STATUS`
-- `RECORD_NUMBER`
-- `FILE_PROCESS_STATUS`
-- `CHECKSUM`
-- `PARENT_ID`
-- `FILE_COUNT`
-- `FILENAME`
-- `FULL_FILE_NAME`
-- `DURATION`
-- `FILE_SIZE_STRING`
-- `FILE_SIZE`
-- `FILE_FORMAT`
-- `VIDEO_CODEC`
-- `VIDEO_BIT_DEPTH`
-- `VIDEO_SCAN_TYPE`
-- `VIDEO_FRAME_RATE`
-- `VIDEO_FRAME_SIZE`
-- `VIDEO_ASPECT_RATIO`
-- `AUDIO_SAMPLING_RATE`
-- `AUDIO_CODEC`
-- `COPY_VERSION`
-
-#### Airtable Data Entries:
-- `FILE_INTAKE_FLAG`
 
 ## random thoughts that need to be fleshed output
 
