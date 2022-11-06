@@ -1,0 +1,836 @@
+{"0": {
+    "doc": "Barcodes and Filenames",
+    "title": "Barcodes and Filenames: What You Need To Know",
+    "content": " ",
+    "url": "/bavc-resources/docs/CollectionHolderInfo/BarcodesAndFilenames.html#barcodes-and-filenames-what-you-need-to-know",
+    "relUrl": "/docs/CollectionHolderInfo/BarcodesAndFilenames.html#barcodes-and-filenames-what-you-need-to-know"
+  },"1": {
+    "doc": "Barcodes and Filenames",
+    "title": "Barcodes at BAVC",
+    "content": "During ingest BAVC will afix a small (1.5” x 0.75”) barcode to each tape and tape case. We use these labels for processing the tape and its associated files during our assessment, transfer, and quality control workflows. These barcodes do not damage or harm the tape or inhibit its playback. However, if you prefer that we do not affix these barcodes to your tapes we’re happy to skip this step in the process. For small-format tapes, such as Hi8 and MiniDV, the larger barcode stickers are trimmed down and only the 7-digit number is affixed to the tape. ",
+    "url": "/bavc-resources/docs/CollectionHolderInfo/BarcodesAndFilenames.html#barcodes-at-bavc",
+    "relUrl": "/docs/CollectionHolderInfo/BarcodesAndFilenames.html#barcodes-at-bavc"
+  },"2": {
+    "doc": "Barcodes and Filenames",
+    "title": "Filenames at barcodes",
+    "content": "We name the digital files we create from your tapes after the bacodes that we affix to the tapes. If your tapes have a unique identifier on them (such as a catalogin number, accession number, or your own sticker/barcode) we will append that to the filename after the BAVC barcode. The Preservation files have no extra suffix appended to them. Mezzanine and Access files do have an identifying suffix appended to the filename. Collection holders can also provide BAVC with a spreadsheet containing a “Filename Root” field for each tape. If this information is provided the Filename Root will appended to the filename after the barcode. If you prefer that we remove the BAVC Barcode number from the files before delivery please let us know at the start of your project. We’re happy to do this, and require that you provide either your own Unique Identifier or Filename Root for each tape. BAVC can also provide custom suffxes to any file deliverable. Again, this must be agreed upon at the onset of the project. Examples . This is an example of what a set of Preservation, Mezzanine, and Access files with no supplied identifier from the collection holder. This this case the BAVC barcode number is BAVC1012345: . | Preservation File: BAVC1012345.mov | Mezzanine File: BAVC1012345_mezzanine.mov | Access File: BAVC1012345_access.mp4 | . This is an example of what a set of Preservation, Mezzanine, and Access files with a supplied identifier from the collection holder. This this case the Unique Identifier is SFJAZZ_102933 BAVC barcode number is BAVC1012345: . | Preservation File: BAVC1012345_SFJAZZ_102933.mov | Mezzanine File: BAVC1012345_SFJAZZ_102933_mezzanine.mov | Access File: BAVC1012345_SFJAZZ_102933_access.mp4 | . This is an example of what a set of Preservation, Mezzanine, and Access files with a supplied Filename Root from the collection holder and custom suffixes. This this case the Filename Root is AV_CAM_01429 and the BAVC barcode number is BAVC1012345. This collection holder as asked that all preservation files and in “prsv”, all mezzanine files end in “m” and all access files in “a”: . | Preservation File: BAVC1012345_AV_CAM_01429_prsv.mov | Mezzanine File: BAVC1012345_AV_CAM_01429_m.mov | Access File: BAVC1012345_AV_CAM_01429_a.mp4 | . The second two of the above three examples may have the BAVC Barcode removed before delivery. ",
+    "url": "/bavc-resources/docs/CollectionHolderInfo/BarcodesAndFilenames.html#filenames-at-barcodes",
+    "relUrl": "/docs/CollectionHolderInfo/BarcodesAndFilenames.html#filenames-at-barcodes"
+  },"3": {
+    "doc": "Barcodes and Filenames",
+    "title": "Barcodes and Filenames",
+    "content": " ",
+    "url": "/bavc-resources/docs/CollectionHolderInfo/BarcodesAndFilenames.html",
+    "relUrl": "/docs/CollectionHolderInfo/BarcodesAndFilenames.html"
+  },"4": {
+    "doc": "Hard Drives and Digital Storage",
+    "title": "Hard Drives and Digital Storage",
+    "content": " ",
+    "url": "/bavc-resources/docs/CollectionHolderInfo/DriveGuide.html",
+    "relUrl": "/docs/CollectionHolderInfo/DriveGuide.html"
+  },"5": {
+    "doc": "Hard Drives and Digital Storage",
+    "title": "File Size Estimates",
+    "content": "You can estimate size you need if you know the duration of the your tapes and what format you’ll be receiving: . | 10-Bit Uncompressed (Preservation) -&gt; 100gb/hr | Lossless Compressed FFV1 / Matroska (Preservation) -&gt; 40gb/hr | ProRes 422 HQ (Mezzanine) -&gt; 30gb/hr | H.264 / MP4 (Access) -&gt; 1gb/hr | . If you’d like a more accurate estimate you can reach out to us and we will create one for you. Once you have your size estimate, make sure you that you won’t fill your hard drive above 85% capacity. ",
+    "url": "/bavc-resources/docs/CollectionHolderInfo/DriveGuide.html#file-size-estimates",
+    "relUrl": "/docs/CollectionHolderInfo/DriveGuide.html#file-size-estimates"
+  },"6": {
+    "doc": "Digital Deliverables",
+    "title": "Digital File Deliverables",
+    "content": " ",
+    "url": "/bavc-resources/docs/CollectionHolderInfo/PreservationFormats.html#digital-file-deliverables",
+    "relUrl": "/docs/CollectionHolderInfo/PreservationFormats.html#digital-file-deliverables"
+  },"7": {
+    "doc": "Digital Deliverables",
+    "title": "Preservation Formats for Analog Video",
+    "content": "V210 . Often referred to as 10-Bit Uncompressed YUV, this format can be thought of as the “vanilla” flavor of preservation formats for its ubiquity, simplicity, and wide appeal. With the correct codec installed,V210 files play in most video playback software and NLE workstations, making it an easy format to work with. The wide adoption of the format makes it a strong contender for long-term viability and support.This file doesn’t generally work well with embedded metadata, and has a small range of preservation-specific features.The largest drawback is the size; Clocking in at 100GB/Hr, V210 files can easily take up multiple terabytes of space for even medium-sized collections. FFV1 . This is an open source, losslessly compressed preservation format. Open source means all the documentation about the format is freely available to read, and the format specification is reviewed and updated transparently by the Internet Engineering Task Force. Lossless means that while the file is compressed, no information is lost during this process, and you’ll be able to store more information with smaller file sizes. The trade-off is that the format is not supported across the board by some playback or NLE software. However, this is changing rapidly and the format is supported by VLC, a free and cross-platform video player. Another advantage of FFV1 is that it supports many preservation-friendly features, such as checksums of video and audio frames and embedded metadata. These files are often around 40GB per hour . ",
+    "url": "/bavc-resources/docs/CollectionHolderInfo/PreservationFormats.html#preservation-formats-for-analog-video",
+    "relUrl": "/docs/CollectionHolderInfo/PreservationFormats.html#preservation-formats-for-analog-video"
+  },"8": {
+    "doc": "Digital Deliverables",
+    "title": "Preservation Formats for Digital Video",
+    "content": "DV wrapped in mov . When capturing born digital video tapes like MiniDV, DVCAM, and DVCPRO we use a purely digital signal chain to avoid transcoding from digital, to analog, and back to digital. Using the DVRescue software we’re able to create nearly perfect trasnfers of tapes, even in cases where the tape is problemtic or damaged. After capture, the files are packaged in the MOV wrapper to provide a superior preservation format to the otherwise naked DV wrapper. We do not suggest that any other format be used to deliver DV-style tape transfers. These files are about 12GB per hour . ",
+    "url": "/bavc-resources/docs/CollectionHolderInfo/PreservationFormats.html#preservation-formats-for-digital-video",
+    "relUrl": "/docs/CollectionHolderInfo/PreservationFormats.html#preservation-formats-for-digital-video"
+  },"9": {
+    "doc": "Digital Deliverables",
+    "title": "Preservation Formats for Analog Audio",
+    "content": "Broadcast WAVE (BWAV) . This format is an uncompressed Linear PCM audio file. It is similar to an uncompressed WAV file, except that it has an extra bit of embedded metadata referred to as the “bext chunk”. This bext chunk allows users to embed metadata such as a description, a unique identifier, information about the digitization signal chain, and when the file was created. BAVC embeds metadata into your BWAV files according to the Federal Agencies Digital Guidelines Initiative (FADGI) specification, which can be found here. Preservation files for analog materials are always transferred at 96kHz / 24 bit. However, born digital materials like DAT are transferred at their original resolution. These files are about 2GB per hour . ",
+    "url": "/bavc-resources/docs/CollectionHolderInfo/PreservationFormats.html#preservation-formats-for-analog-audio",
+    "relUrl": "/docs/CollectionHolderInfo/PreservationFormats.html#preservation-formats-for-analog-audio"
+  },"10": {
+    "doc": "Digital Deliverables",
+    "title": "Preservation Formats for Digital Audio",
+    "content": "Similarly to Analog Audio, we cpature Digital Audio tapes like DAT and MiniDisc as uncompressed Linear PCM audio file. However, for digital tapes we capture the audio in its native digital resolution using an all-digital signal chain to avoid any unecessary transcoding. These tapes are often 16 Bits at a 44.1 kHz sampling rate, which amounts to about 635MB per hour. DV wrapped in mov . When capturing born digital video tapes like MiniDV, DVCAM, and DVCPRO we use a purely digital signal chain to avoid transcoding from digital, to analog, and back to digital. Using the DVRescue software we’re able to create nearly perfect trasnfers of tapes, even in cases where the tape is problemtic or damaged. After capture, the files are packaged in the MOV wrapper to provide a superior preservation format to the otherwise naked DV wrapper. We do not suggest that any other format be used to deliver DV-style tape transfers. ",
+    "url": "/bavc-resources/docs/CollectionHolderInfo/PreservationFormats.html#preservation-formats-for-digital-audio",
+    "relUrl": "/docs/CollectionHolderInfo/PreservationFormats.html#preservation-formats-for-digital-audio"
+  },"11": {
+    "doc": "Digital Deliverables",
+    "title": "Mezzanine files",
+    "content": "These deliverables are optimized for editting and production. The files are similar to the preservation file, but are lightly compressed and optimized for use in a Non-Linear Editing platform (NLE). If you don’t plan to edit your files or use them in a production these files can be omitted. ProRes 422 HQ . ProRes is a high-quality lossy proprietary Apple video format designed to be used in post-production workflows. 422 HQ is a high-bitrate version, which sacrifices a slightly larger file size for a higher quality image. The quality of this format is very good, making it difficult for the regular user to tell the difference between a ProRes Mezzanine file and its accompanying preservation file. We recommend this format for Mezzanine files because of its wide support and higher-quality image. These files are about 30GB per hour . DV25 . DV is a lossy video format. The DV25 version is the most common version of DV, with a bitrate of 25 Mbps.The file size is very small and it works well with NLE software. Unfortunately, the quality is generally worse than ProRes due to a smaller bitrate and the fact that the color space is 4:1:1 or 4:2:0, meaning that there is less color data per pixel. These files are about 12GB per hour . DV50 . Naturally, DV50 has twice the data rate of DV25 at 50 Mbps.Therefore, the quality is greater than DV25, is well-supported, and is still smaller than ProRes. These files are about 25GB per hour . ",
+    "url": "/bavc-resources/docs/CollectionHolderInfo/PreservationFormats.html#mezzanine-files",
+    "relUrl": "/docs/CollectionHolderInfo/PreservationFormats.html#mezzanine-files"
+  },"12": {
+    "doc": "Digital Deliverables",
+    "title": "Access Files For Video",
+    "content": "These deliverables are optimized for sharing, screening, and playback. The files are deinterlaced and any missing audio chanels are removed for an improved viewing experience. Bars and tone can be removed upon request for a small fee. Advanced Video Codec (AVC) . Also known as H.264 or MPEG-4, this is a compressed video format that creates a small file with excellent quality. At BAVC, we typically construct AVC files with a bitrate of 3 Mbps, which results in a file that is just over 1GB per hour and can be indistinguishable from the preservation file.This file is primarily meant to be viewed and performs well in most video playback software. However, it does not work well in NLE software and is not recommended in post-production workflows. These files are generally about 1GB per hour . DVD Image . As optical media reaches the end of its life, BAVC has moved away from the delivery of DVDs. We are able to provide DVD Image files upon request, which can be burned onto a playable DVD. We do not recommended DVDs as an access medium because of its low image quality and larger file size. These files are about 4GB per hour . ",
+    "url": "/bavc-resources/docs/CollectionHolderInfo/PreservationFormats.html#access-files-for-video",
+    "relUrl": "/docs/CollectionHolderInfo/PreservationFormats.html#access-files-for-video"
+  },"13": {
+    "doc": "Digital Deliverables",
+    "title": "Access Files For Audio",
+    "content": "MPEG Audio Layer-3 (MP3) . This is a common format for creating small and accessible audio files. MP3s allows users to embed metadata like “Title”,”Artist”, and “Album”, which makes them easy to view and search for in audio playback software. By default, BAVC creates MP3 files at 320 Kbps, which maintains a great deal of quality while still being small enough to send via email. BAVC automatically embeds metadata into the MP3s according to information provided by you and the information on the tape label. These files are about 150MB per hour . ",
+    "url": "/bavc-resources/docs/CollectionHolderInfo/PreservationFormats.html#access-files-for-audio",
+    "relUrl": "/docs/CollectionHolderInfo/PreservationFormats.html#access-files-for-audio"
+  },"14": {
+    "doc": "Digital Deliverables",
+    "title": "Digital Deliverables",
+    "content": " ",
+    "url": "/bavc-resources/docs/CollectionHolderInfo/PreservationFormats.html",
+    "relUrl": "/docs/CollectionHolderInfo/PreservationFormats.html"
+  },"15": {
+    "doc": "SAN and PresRAID Startup and Shutdown",
+    "title": "SAN and PresRAID Startup and Shutdown",
+    "content": " ",
+    "url": "/bavc-resources/docs/Technical%20Documentation/SANandPresRaidStartupAndShutdown.html",
+    "relUrl": "/docs/Technical%20Documentation/SANandPresRaidStartupAndShutdown.html"
+  },"16": {
+    "doc": "SAN and PresRAID Startup and Shutdown",
+    "title": "SAN Startup",
+    "content": ". | Power up the SAN by pressing the power button on the front right-hand side of the server. Note, the SAN should be plugged into a UPS ideally. | Wait about 15 minutes for things to start up | Go to the SAN management GUI at: https://192.168.253.61:8088. Login credentials can be found on 1Password | Once logged in, go to the VM (Virtual Machine) Tab on the right side of the browse window. If the tab doesn’t appear, wait 5 to 10 minutes and refresh the page. | Click the VM icon at the bottom of the screen (image attached) to enter the View and Management control panel | | Here, you’ll see statuses for both Metadata Controllers, MDC1 and MDC2. If you just started up the system, these should both have a Running Status of Powered Off. | Click on the row labeled MDC1 and press the Power On button | Once the Execution Result has succeeded you can close the popup window. Wait about 15 minutes, then to do the same for MDC2 | Once MDC2 is up and running you can closes the GUI and the SAN should be up and running | To mount the SAN on the transfers stations you need to run the following command in terminal . | sudo xsanctl mount SymplyUltra | . | . ",
+    "url": "/bavc-resources/docs/Technical%20Documentation/SANandPresRaidStartupAndShutdown.html#san-startup",
+    "relUrl": "/docs/Technical%20Documentation/SANandPresRaidStartupAndShutdown.html#san-startup"
+  },"17": {
+    "doc": "SAN and PresRAID Startup and Shutdown",
+    "title": "SAN Shutdown",
+    "content": ". | Make sure that the SAN is unmounted from all computers using this command . | sudo xsanctl unmount SymplyUltra | . | Login to the same web portal discussed above and stop services | Shutdown | . ",
+    "url": "/bavc-resources/docs/Technical%20Documentation/SANandPresRaidStartupAndShutdown.html#san-shutdown",
+    "relUrl": "/docs/Technical%20Documentation/SANandPresRaidStartupAndShutdown.html#san-shutdown"
+  },"18": {
+    "doc": "SAN and PresRAID Startup and Shutdown",
+    "title": "PresRAID Startup",
+    "content": ". | Power up the PresRAID by pressing the power button on the front left-hand side of the server Note: the PresRAID should be plugged into a UPS ideally | Wait about 15 minutes for things to start up | . ",
+    "url": "/bavc-resources/docs/Technical%20Documentation/SANandPresRaidStartupAndShutdown.html#presraid-startup",
+    "relUrl": "/docs/Technical%20Documentation/SANandPresRaidStartupAndShutdown.html#presraid-startup"
+  },"19": {
+    "doc": "SAN and PresRAID Startup and Shutdown",
+    "title": "PresRAID Shutdown",
+    "content": ". | Make sure that the PresRAID is ejected from all computers | Open a terminal window | Remotely log into the PresRAID as the user bavcadmin with the following command . | ssh bavcadmin@192.168.253.95 | . | You’ll be asked for a password, get it from 1password | Shutdown the PresRAID with the following command . | sudo shutdown -h now | . | If you’re prompted for a password it will be the same as before, available on 1password | That’s it. The PresRaid should be down in a few minutes | . ",
+    "url": "/bavc-resources/docs/Technical%20Documentation/SANandPresRaidStartupAndShutdown.html#presraid-shutdown",
+    "relUrl": "/docs/Technical%20Documentation/SANandPresRaidStartupAndShutdown.html#presraid-shutdown"
+  },"20": {
+    "doc": "Scripts",
+    "title": "Scripts",
+    "content": " ",
+    "url": "/bavc-resources/docs/Technical%20Documentation/Scripts.html",
+    "relUrl": "/docs/Technical%20Documentation/Scripts.html"
+  },"21": {
+    "doc": "Scripts",
+    "title": "Basic Unix Commands",
+    "content": ". | Change directories: cd [path] | Remove a directory: rmdir [file] | Run commands in presraid: ssh presraid@presraid | Change permissions (read, write, execute by everyone): chmod 777 [file] | . ",
+    "url": "/bavc-resources/docs/Technical%20Documentation/Scripts.html#basic-unix-commands",
+    "relUrl": "/docs/Technical%20Documentation/Scripts.html#basic-unix-commands"
+  },"22": {
+    "doc": "Scripts",
+    "title": "Homebrew",
+    "content": "Homebrew is a program that allows for the easy install and updating of a variety of applications that we use, including ffmpeg, qctools, vrecord, and micromediaservices. | Install Homebrew http://brew.sh | Brew Cheatsheet http://ricostacruz.com/cheatsheets/homebrew.html | FFmpeg Cookbook for Archivists https://avpres.net/FFmpeg/ . | Upgrade/Update Homebrew brew update&amp;&amp;upgrade . | Dave’s Mediamicroservices brew tap mediamicroservices/mm . | AMIA Open Source brew tap amiaopensource/amiaos . | . ",
+    "url": "/bavc-resources/docs/Technical%20Documentation/Scripts.html#homebrew",
+    "relUrl": "/docs/Technical%20Documentation/Scripts.html#homebrew"
+  },"23": {
+    "doc": "Scripts",
+    "title": "Bagging Drives",
+    "content": "Bagging a drive is a way to prove to provide a digital shipping manifest to the client, as well as ensure that all the files that were loaded onto the drive were loaded properly. When we bag drives, we do so on the client’s drive after all files have been reviewed. The “data” folder of the bag will include: files, transfer log, codec, readme.txt, qctools report . There are two tools that can be used: Bagit and Bagit.py. Bagit is outdated, and the library of congress is now just supporting Bagit.py. You can install bagit.py with homebrew: . brew install bagit . Bagit.py . Before running the command you’ll want to remove hidden files: . sudo find [Path to Directory] -name \".*\" -exec rm -vR {} \\; . Now you can run the basic bagging command for BAVC: . bagit.py --md5 --contact-name 'Bay Area Video Coalition' --contact-email 'preservation@bavc.org' --contact-phone '415-558-2158' [Path to Directory] . It is generating checksums so it will take a while to run, an overnight process for big projects. If you want to run this on a bunch of sub-directories within a directory, the easiest way to do that is to use the find command with a clever query. In this case [Path to Directory] refers to the path to the directory that contains the sub-directories you want bagged: . find [Path to Directory] -type d -maxdepth 1 -mindepth 1 -exec bagit.py --md5 --contact-name 'Bay Area Video Coalition' --contact-email 'preservation@bavc.org' --contact-phone '415-558-2158' {} \\; . ",
+    "url": "/bavc-resources/docs/Technical%20Documentation/Scripts.html#bagging-drives",
+    "relUrl": "/docs/Technical%20Documentation/Scripts.html#bagging-drives"
+  },"24": {
+    "doc": "Scripts",
+    "title": "FFmpeg",
+    "content": "FFmpeg is the command line tool for digital media manipulations that drives vRecord, QCtools, and most of our automated script processes. Install/update . Once Homebrew is installed, you can install or update ffmpeg by running: . brew install ffmpeg --HEAD brew reinstall ffmpeg --HEAD . Reto Kromer’s FFmpeg Cookbook for Archivists (great resource for installation and manipulations) https://avpres.net/FFmpeg/#ch1 . Transcode . The default specs for our access files are based on CAVPP’s target specifications: http://calpreservation.org/wp-content/uploads/2014/12/CAVPP-file-specs-2014.11.20.pdf . For all Transcoding strings you need to cd into the working directory before running the string. FFv1 . | Creating an MKV Master File from 10-Bit Uncompressed: for file in *.mov ; do ffmpeg -i \"$file\" -c:v ffv1 -level 3 -g 1 -slices 16 -slicecrc 1 -color_primaries smpte170m -color_trc bt709 -colorspace smpte170m -color_range mpeg -metadata:s:v:0 \"encoder= FFV1 version 3\" -c:a copy -vf setfield=bff,setsar=40/27,setdar=4/3 -metadata creation_time=now -f matroska \"${file%.*}.mkv\" ; done . | Creating a 10-but Uncompressed File from an FFV1/MKV files: for file in *.mkv ; do ffmpeg -i \"$file\" -movflags write_colr -c:v v210 -color_primaries smpte170m -color_trc bt709 -colorspace smpte170m -color_range mpeg -metadata:s:v:0 \"encoder=Uncompressed 10-bit 4:2:2\" -c:a copy -vf setfield=bff,setsar=40/27,setdar=4/3 -f mov \"${file%.*}.mov\" ; done . | . Access files . | Analog Master: 640 x 480 Access Files (De-Interlaced), Audio Channels Same as Original: for file in *.mov ; do ffmpeg -i \"$file\" -c:v libx264 -pix_fmt yuv420p -movflags faststart -crf 18 -b:a 160000 -ar 48000 -s 640x480 -vf crop=720:480:0:4,yadif,setdar=4/3 \"${file%.*}_access.mp4\" ; done . | Analog Master: 640 x 480 Access Files (De-Interlaced), Audio Channels Same as Original (FROM PAL ORIGINAL): for file in *.mov ; do ffmpeg -i \"$file\" -c:v libx264 -pix_fmt yuv420p -movflags faststart -crf 18 -b:a 160000 -ar 48000 -s 640x480 -vf crop=720:570:0:4,yadif,setdar=4/3 \"${file%.*}_access.mp4\" ; done . | Analog Master: 640 x 480 Access Files (De-Interlaced), Left Channel Panned to Center: for file in *.mov ; do ffmpeg -i \"$file\" -c:v libx264 -pix_fmt yuv420p -movflags faststart -crf 18 -b:a 160000 -ar 48000 -s 640x480 -vf crop=720:480:0:4,yadif,setdar=4/3 -af \"pan=stereo|c0=c0|c1=c0\" \"${file%.*}_access.mp4\" ; done . | Analog Master: 640 x 480 Access Files (De-Interlaced), Right Channel Panned to Center: for file in *.mov ; do ffmpeg -i \"$file\" -c:v libx264 -pix_fmt yuv420p -movflags faststart -crf 18 -b:a 160000 -ar 48000 -s 640x480 -vf crop=720:480:0:4,yadif,setdar=4/3 -af \"pan=stereo|c0=c1|c1=c1\" \"${file%.*}_access.mp4\" ; done . | Analog Master: 640 x 480 Access Files (De-Interlaced), Stereo Channels Summed to Mono: for file in *.mov ; do ffmpeg -i \"$file\" -c:v libx264 -pix_fmt yuv420p -movflags faststart -crf 18 -b:a 160000 -ar 48000 -s 640x480 -vf crop=720:480:0:4,yadif,setdar=4/3 -af \"pan=stereo|c0=c0+c1|c1=c0+c1\" \"${file%.*}_access.mp4\" ; done . | Analog Master: 640 x 480 Access Files (De-Interlaced), 4 Channels summed to 2 Channel Mono: for file in *.mov ; do ffmpeg -i \"$file\" -c:v libx264 -pix_fmt yuv420p -movflags faststart -crf 18 -b:a 160000 -ar 48000 -ac 2 -s 640x480 -vf crop=720:480:0:4,yadif,setdar=4/3 -af \"pan=stereo|c0=c0+c1+c2+c3|c1=c0+c1+c2+c3\" \"${file%.*}_access.mp4\" ; done . | DV Master: 640 x 480 Access Files (De-Interlaced), Audio Channels Same as Original, 4:3 aspect ratio: for file in *.mov ; do ffmpeg -i \"$file\" -c:v libx264 -pix_fmt yuv420p -movflags faststart -crf 18 -b:a 160000 -ar 48000 -s 640x480 -vf yadif,setdar=4/3 \"${file%.*}_access.mp4\" ; done . | DV Master: 640 x 480 Access Files (De-Interlaced), Audio Channels Same as Original, 16:9 aspect ratio: for file in *.mov ; do ffmpeg -i \"$file\" -c:v libx264 -pix_fmt yuv420p -movflags faststart -crf 18 -b:a 160000 -ar 48000 -s 640x480 -vf yadif,setdar=16/9 \"${file%.*}_access.mp4\" ; done . | 1920 x 1080 Access Files from Upscaled Mezzanine Files for file in *_mezzanine.mov ; do ffmpeg -i \"$file\" -c:v libx264 -pix_fmt yuv420p -movflags faststart -crf 17 -b:a 160000 -ar 48000 -s 1920x1080 -ac 2 -af \"channelmap=map=FL|FR:channel_layout=stereo\" -y \"${file%_mezzanine.*}_access.mp4\" ; done . | 1920 x 1080 Access Files from Upscaled Mezzanine Files High Quality version (crf 12 instead of 17) for file in *_mezzanine.mov ; do ffmpeg -i \"$file\" -c:v libx264 -pix_fmt yuv420p -movflags faststart -crf 12 -b:a 160000 -ar 48000 -s 1920x1080 -ac 2 -af \"channelmap=map=FL|FR:channel_layout=stereo\" -y \"${file%_mezzanine.*}_access_HQ.mp4\" ; done . | 1920 x 1080 Access Files from HDV .m2t files for file in *.m2t ; do ffmpeg -i \"$file\" -c:v libx264 -pix_fmt yuv420p -movflags faststart -crf 17 -b:a 160000 -ar 48000 -s 1920x1080 -ac 2 -vf yadif -filter_complex \"[0:a:0]aresample=async=1:min_hard_comp=0.01\" -y \"${file%.*}_access.mp4\" ; done . Mezzanine files . | For Prores HQ, De-Interlaced, 24-bit PCM Audio [Note: Prores version determined by profile #: 0=Proxy; 1=LT, 2=422 Normal, 3=HQ) for file in *.mov ; do ffmpeg -i \"$file\" -c:v prores -profile:v 3 -vf yadif -c:a pcm_s24le \"${file%.*}_mezzanine.mov\" ; done . | For Prores HQ, De-Interlaced, 24-bit PCM Audio Channels Same as Original [Note: Prores version determined by profile #: 0=Proxy; 1=LT, 2=422 Normal, 3=HQ) for file in *.mov ; do ffmpeg -vsync 0 -i \"$file\" -c:v prores -profile:v 3 -vf yadif -c:a pcm_s24le \"${file%.*}_mezzanine.mov\" ; done . | For Prores HQ, De-Interlaced, 24-bit PCM Audio Left Channel Panned to Center [Note: Prores version determined by profile #: 0=Proxy; 1=LT, 2=422 Normal, 3=HQ) for file in *.mov ; do ffmpeg -i \"$file\" -c:v prores -profile:v 3 -vf yadif -c:a pcm_s24le -af \"pan=stereo|c0=c0|c1=c0\" \"${file%.*}_mezzanine.mov\" ; done . | For Prores HQ, De-Interlaced, 24-bit PCM Audio Right Channel Panned to Center [Note: Prores version determined by profile #: 0=Proxy; 1=LT, 2=422 Normal, 3=HQ) for file in *.mov ; do ffmpeg -i \"$file\" -c:v prores -profile:v 3 -vf yadif -c:a pcm_s24le -af \"pan=stereo|c0=c1|c1=c1\" \"${file%.*}_mezzanine.mov\" ; done . | For Prores HQ, De-Interlaced, 24-bit PCM Audio Stereo Channels Summed to Mono [Note: Prores version determined by profile #: 0=Proxy; 1=LT, 2=422 Normal, 3=HQ) for file in *.mov ; do ffmpeg -i \"$file\" -c:v prores -profile:v 3 -vf yadif -c:a pcm_s24le -af \"pan=stereo|c0=c0+c1|c1=c0+c1\" \"${file%.*}_mezzanine.mov\" ; done . | For Prores HQ, De-Interlaced, 24-bit PCM Audio 4 Channels Channels Summed to 2 Channel Mono [Note: Prores version determined by profile #: 0=Proxy; 1=LT, 2=422 Normal, 3=HQ) for file in *.mov ; do ffmpeg -i \"$file\" -c:v prores -profile:v 3 -vf yadif -c:a pcm_s24le -ac 2 -af \"pan=stereo|c0=c0+c1+c2+c3|c1=c0+c1+c2+c3\" \"${file%.*}_mezzanine.mov\" ; done . | For Prores HQ, Interlaced, 24-bit PCM Audio Channels Same as Original [Note: Prores version determined by profile #: 0=Proxy; 1=LT, 2=422 Normal, 3=HQ) for file in *.mov ; do ffmpeg -i \"$file\" -c:v prores -profile:v 3 -c:a pcm_s24le \"${file%.*}_mezzanine.mov\" ; done . | For Prores HQ, Interlaced, 24-bit PCM Audio Left Channel Panned to Center [Note: Prores version determined by profile #: 0=Proxy; 1=LT, 2=422 Normal, 3=HQ) for file in *.mov ; do ffmpeg -i \"$file\" -c:v prores -profile:v 3 -c:a pcm_s24le -af \"pan=stereo|c0=c0|c1=c0\" \"${file%.*}_mezzanine.mov\" ; done . | For Prores HQ, Interlaced, 24-bit PCM Audio Right Channel Panned to Center [Note: Prores version determined by profile #: 0=Proxy; 1=LT, 2=422 Normal, 3=HQ) for file in *.mov ; do ffmpeg -i \"$file\" -c:v prores -profile:v 3 -c:a pcm_s24le -af \"pan=stereo|c0=c1|c1=c1\" \"${file%.*}_mezzanine.mov\" ; done . | For Prores HQ, Interlaced, 24-bit PCM Audio Stereo Channels Summed to Mono [Note: Prores version determined by profile #: 0=Proxy; 1=LT, 2=422 Normal, 3=HQ) for file in *.mov ; do ffmpeg -i \"$file\" -c:v prores -profile:v 3 -c:a pcm_s24le -af \"pan=stereo|c0=c0+c1|c1=c0+c1\" \"${file%.*}_mezzanine.mov\" ; done . | For Prores HQ, Interlaced, 24-bit PCM Audio 4 Channels Summed to 2 Channel Mono [Note: Prores version determined by profile #: 0=Proxy; 1=LT, 2=422 Normal, 3=HQ) for file in *.mov ; do ffmpeg -i \"$file\" -c:v prores -profile:v 3 -c:a pcm_s24le -ac 2-af \"pan=stereo|c0=c0+c1+c2+c3|c1=c0+c1+c2+c3\" \"${file%.*}_mezzanine.mov\" ; done . | For CAVPP Standards (2015) Production files: for file in *.mov ; do ffmbc -i \"$file\" -target dvcpro50 -pix_fmt yuv422p -r ntsc -acodec copy \"${file%.*}_dv50.mov\" ; done . | 1920 x 1080 ProRes HQ Files from HDV .m2t files for file in *.m2t ; do ffmpeg -i \"$file\" -c:v prores -profile:v 3 -vf yadif -filter_complex \"[0:a:0]aresample=async=1:min_hard_comp=0.01\" -c:a pcm_s24le -y \"${file%.*}_access.mp4\" ; done . | . Upres SD Files to HD . | For HD Prores HQ, De-Interlaced, 24-bit PCM Audio, Pillarboxed 16:9 1080 Files for file in *.mov ; do ffmpeg -i \"$file\" -c:v prores -profile:v 3 -aspect 16:9 -vf yadif,scale=w=1440:h=1080:flags=lanczos,pad=1920:1080:240:0 -c:a pcm_s24le -s 1920x1080 \"${file%.*}_mezzanineHD.mov\" ; done . | For HD Prores HQ, De-Interlaced, 24-bit PCM Audio, Full Frame 16:9 1080 Files for file in *.mov ; do ffmpeg -i \"$file\" -c:v prores -profile:v 3 -vf yadif,scale=w=1920:h=1080:flags=lanczos -aspect 16:9 -c:a pcm_s24le \"${file%.*}_mezzanineHD.mov\" ; done . | For HD Access HQ, De-Interlaced, Pillarboxed 16:9 1080 Files for file in *.mov ; do ffmpeg -i \"$file\" -c:v libx264 -pix_fmt yuv420p -movflags faststart -b:v 3500000 -b:a 160000 -ar 48000 -aspect 16:9 -vf yadif,scale=w=1440:h=1080:flags=lanczos,pad=1920:1080:240:0 -s 1920x1080 \"${file%.*}_accesHD.mp4\" ; done . | For HD Access HQ, De-Interlaced, Full Frame 16:9 1080 Files for file in *.mov ; do ffmpeg -i \"$file\" -c:v libx264 -pix_fmt yuv420p -movflags faststart -b:v 3500000 -b:a 160000 -ar 48000 -vf yadif,scale=w=1920:h=1080:flags=lanczos -aspect 16:9 \"${file%.*}_accessHD.mp4\" ; done . | . Trimming . | Trim the end of a file. In this case you can either use the HH:MM:SS format or just put the number of seconds for [output duration] ffmpeg -i [/Path/To/OriginalFile.mov] -c copy -movflags write_colr -t [output duration] [/Path/To/TrimmedFile.mov] . | Trim the beginning of a file. In this case you must use the HH:MM:SS format to specify the start time ffmpeg -ss [start time] -i [/Path/To/OriginalFile.mov] -c copy -movflags write_colr [/Path/To/TrimmedFile.mov] . | . Other . | Turn a 16:9 Pillarboxed video with 4:3 content into full-screen 16:9 content by cropping the pillars and resizing the content: ffmpeg -i [input.mov] -movflags write_colr -color_range mpeg -color_primaries smpte170m -color_trc bt709 -colorspace smpte170m -aspect 16:9 -s 1920x1080 -c:v prores -profile:v 3 -vf crop=1440:1080:240:0,setdar=16/9 -c:a pcm_s24le [output.mov] . -movflags write_colr -color_range mpeg -color_primaries smpte170m -color_trc bt709 -colorspace smpte170m -aspect 16:9 -c:v prores -profile:v 3 -vf crop=1440:1080:240:0,yadif,setdar=16/9 . | If accidentally captured a file with 2 stereo audio tracks (4 channels total) instead of 1 stereo audio track (2 channels total) this is a quick fix for removing the extra audio track ffmpeg -i [input.mov] -movflags write_colr -map 0 -map -0:a:1 -c copy [output.mov] . | If you export a file from Premiere this command MUST be run on the output file before running it through the Transcode Engine ffmpeg -i [input.mov] -dn -map_metadata \"-1\" -movflags write_colr -c:v v210 -color_range mpeg -color_primaries smpte170m -color_trc bt709 -colorspace smpte170m -vf \"setfield=bff,setsar=40/27,setdar=4/3\" -c:a copy [output.mov] . | Basic command for re-wrapping a file while maintaining the codec streams ffmpeg -i input.ext -c:v copy -c:a copy -map 0 output.ext . | Creating FrameMD5 Manifests for video streams in all files in a folder: for file in *; do ffmpeg -i \"$file\" -an -f framemd5 -y \"${file%}.fd5\" ; done . | Extract DV stream from a .MOV wrapped DV file ffmpeg -i BAVC1004511_2385M_1.mov -c:v copy -f rawvideo BAVC1004511_2385M_1.dv . | Create 5 seconds of SMPTE Bars with 1kHz Tone ffmpeg -f lavfi -i smptebars=s=720x486:r=30000/1001 -f lavfi -i \"sine=frequency=1000:sample_rate=48000\" -movflags write_colr+faststart -color_primaries smpte170m -color_trc bt709 -colorspace smpte170m -color_range mpeg -vf \"setfield=bff,setdar=4/3\" -c:v v210 -c:a pcm_s24le -t 5 -y tn2162_v210.mov . | Create 5 seconds of Black Bars with Silent Audio ffmpeg -f lavfi -i color=c=black:s=720x486:r=30000/1001 -f lavfi -i anullsrc=channel_layout=stereo:sample_rate=48000 -movflags write_colr+faststart -color_primaries smpte170m -color_trc bt709 -colorspace smpte170m -color_range mpeg -vf \"setfield=bff,setdar=4/3\" -c:v v210 -c:a pcm_s24le -t 5 -y tn2162_v210_black_silent.mov . ",
+    "url": "/bavc-resources/docs/Technical%20Documentation/Scripts.html#ffmpeg",
+    "relUrl": "/docs/Technical%20Documentation/Scripts.html#ffmpeg"
+  },"25": {
+    "doc": "Scripts",
+    "title": "QCTools/vRecord",
+    "content": "| How to install QCLI brew install qcli . | For running QCLI on a single file: qcli -i [file name] . | For running QCLI on a whole directory: for file in *.mov; do qcli -i \"$file\" ; done . ",
+    "url": "/bavc-resources/docs/Technical%20Documentation/Scripts.html#qctoolsvrecord",
+    "relUrl": "/docs/Technical%20Documentation/Scripts.html#qctoolsvrecord"
+  },"26": {
+    "doc": "Scripts",
+    "title": "Audio",
+    "content": "| See the max peak of the audio of a file (you can use this to check for digital clipping. If the Max Volume is 0dB it has clipped ffmpeg -i input.wav -filter:a volumedetect -f null /dev/null . | For creating an MP3 from a folder of WAV files, maintaining channels for file in *.wav ; do ffmpeg -i \"$file\" -c:a libmp3lame -b:a 320k -write_xing 0 -ac 2 \"${file%.*}_access.mp3\" ; done . | For creating an MP3 from a folder of WAV files, Left Channel Panned to Center for file in *.wav ; do ffmpeg -i \"$file\" -c:a libmp3lame -b:a 320k -write_xing 0 -ac 2 -af \"pan=stereo|c0=c0|c1=c0\" \"${file%.*}_access.mp3\" ; done . | For creating an MP3 from a folder of WAV files, Right Channel Panned to Center for file in *.wav ; do ffmpeg -i \"$file\" -c:a libmp3lame -b:a 320k -write_xing 0 -ac 2 -af \"pan=stereo|c0=c1|c1=c1\" \"${file%.*}_access.mp3\" ; done . | For creating an MP3 from a folder of WAV files, Stereo Channels Summed to Mono for file in *.wav ; do ffmpeg -i \"$file\" -c:a libmp3lame -b:a 320k -write_xing 0 -ac 2 -af \"pan=stereo|c0=c0+c1|c1=c0+c1\" \"${file%.*}_access.mp3\" ; done . ",
+    "url": "/bavc-resources/docs/Technical%20Documentation/Scripts.html#audio",
+    "relUrl": "/docs/Technical%20Documentation/Scripts.html#audio"
+  },"27": {
+    "doc": "Scripts",
+    "title": "Mediainfo",
+    "content": "| Salesforce syntax for Filename, Duration, and FileSize mediainfo --Inform=\"General;\\n%FileName%\\n%Duration/String4%\\n%FileSize/String4%\\n\" [FILE NAME or DIRECTORY] . ",
+    "url": "/bavc-resources/docs/Technical%20Documentation/Scripts.html#mediainfo",
+    "relUrl": "/docs/Technical%20Documentation/Scripts.html#mediainfo"
+  },"28": {
+    "doc": "Scripts",
+    "title": "Checksums",
+    "content": "| . A checksum is a string of letters and numbers that acts like a fingerprint for a file. If two files have the same sum, it is safe to assume the files are the same. To obtain a file’s Md5 checksum: . | Open Terminal app, type “md5 “ (without quotes, with space after) | Drop file(s) from finder window into terminal window, and press enter, and wait… | Copy md5 checksum codes from terminal window and paste into MD5 field in Salesforce . More on MD5’s here: http://www.codejacked.com/using-md5sum-to-validate-the-integrity-of-downloaded-files/ . | Create an MD5 Checksum Sidecar file for each file in the working directory for file in *.* ; do md5 -q \"$file\"&gt;\"${file}.md5\" ; done . ",
+    "url": "/bavc-resources/docs/Technical%20Documentation/Scripts.html#checksums",
+    "relUrl": "/docs/Technical%20Documentation/Scripts.html#checksums"
+  },"29": {
+    "doc": "Scripts",
+    "title": "Rsync",
+    "content": "| rsync to presraid rsync -avv --progress [FILE OR DIRECTORY] presraid@presraid.bavc-int.org:/presraid . | rsync to client drive rsync -avv --progress [FILE OR DIRECTORY] [DESTINATION FOLDER] . ",
+    "url": "/bavc-resources/docs/Technical%20Documentation/Scripts.html#rsync",
+    "relUrl": "/docs/Technical%20Documentation/Scripts.html#rsync"
+  },"30": {
+    "doc": "Scripts",
+    "title": "DVRescue",
+    "content": "DVRescue is a suite of tools that allow you to fix and re-wrap dv diles. | . DVPackager is a part of the suite that slipts up dv streams with different attributes contained in a single file. The input is always a DV file. You can use it to package a .dv file as 1 or many .mov files with the following command: . dvpackager -e mov [path/to/file.dv] . You can also run in a folder using this command: . find [path/to/folder] -name \"*.dv\" -not -name \".*\" -exec dvpackager -e mov {} \\; . It’s possible to merge multiple transfers of a tape into a single file to remove errors. You can input as many files as you’d like, as long as they have an overlap in content. You can use this with .dv or .mov files: . dvrescue [path/to/file1.dv] [path/to/file2.dv] [path/to/file3.dv] -m [path/to/OutputFile.dv] . Like iwth QCTools, it’s possible to generate DVRescue reports using the command line. This string will create an .xml report for every .mov file in the current directory. This will make it so that the DVRescue GUI opens instantly. To run this command you first need to change the current directory of terminal to the target folder using cd /path/to/directory/ . for i in *.mov ; do dvrescue \"$i\" -x \"$i.dvrescue.xml\" -c \"$i.dvrescue.scc\" -s \"$i.dvrescue.vtt\" ; done ; cowsay \"done\" . ",
+    "url": "/bavc-resources/docs/Technical%20Documentation/Scripts.html#dvrescue",
+    "relUrl": "/docs/Technical%20Documentation/Scripts.html#dvrescue"
+  },"31": {
+    "doc": "Scripts",
+    "title": "Transcode Engine",
+    "content": " ",
+    "url": "/bavc-resources/docs/Technical%20Documentation/Scripts.html#transcode-engine",
+    "relUrl": "/docs/Technical%20Documentation/Scripts.html#transcode-engine"
+  },"32": {
+    "doc": "Shipping Your Tapes to BAVC",
+    "title": "Shipping Your Tapes to BAVC",
+    "content": " ",
+    "url": "/bavc-resources/docs/CollectionHolderInfo/ShippingGuide.html",
+    "relUrl": "/docs/CollectionHolderInfo/ShippingGuide.html"
+  },"33": {
+    "doc": "Shipping Your Tapes to BAVC",
+    "title": "How to Properly Pack Your Tapes",
+    "content": ". | The safest way to ship tapes is to use two boxes: Pack the tapes into a small box, then pack that small box into a larger box with packaging material between the boxes. Most people use archival boxes for the smaller inner box. | Use sturdy boxes and high quality packaging material when packing your tape. Thick bubble-wrap is the best packaging material. You do not need to wrap every tape individually in bubble wrap, as long as there sufficient bubble wrap between the tapes and the box they are packed in. | Do NOT use packing peanuts! They make a mess and do not sufficiently protect tapes during shipping. | Properly packed materials should be snug in the box. If you shake the box you shouldn’t be able to hear or feel the tapes moving around inside of the box. | Orient your tapes vertically, not horizontally! (Remember, Video and Vertical both start with V). This will protect the tapes from damage and misalignment during shipping. | Alway print two shipping labels. Affix one label to the outside of the box, and place the other in the box. That way if the label affixed to the outside falls off, there will be another inside. | Try to keep any box under 30 pounds. A little more is ok, but the heavier the box the more likely it will be mishandled or damaged during shipping. | . ",
+    "url": "/bavc-resources/docs/CollectionHolderInfo/ShippingGuide.html#how-to-properly-pack-your-tapes",
+    "relUrl": "/docs/CollectionHolderInfo/ShippingGuide.html#how-to-properly-pack-your-tapes"
+  },"34": {
+    "doc": "Shipping Your Tapes to BAVC",
+    "title": "Be Careful What Day You Ship",
+    "content": "At BAVC we ship all materials via FedEx 2-Day Express unless asked otherwise. We recommend you do so as well. With 2-day shipping it’s best to ship between Monday and Wednesday, so that the tapes will arrive the same week they are shippined. If shipped later than the last pickup time on Wednesday, the tapes will site in a warehouse over the weekend, or even possibly be delivered over the weeked while we are not in the office. To avoid these issues, make sure to ship between Monday and Wednedsay. ",
+    "url": "/bavc-resources/docs/CollectionHolderInfo/ShippingGuide.html#be-careful-what-day-you-ship",
+    "relUrl": "/docs/CollectionHolderInfo/ShippingGuide.html#be-careful-what-day-you-ship"
+  },"35": {
+    "doc": "Shipping Your Tapes to BAVC",
+    "title": "We Can Help You Ship!",
+    "content": "If you need help making a shipping label, just let us know! We can easily create a shipping label for you, which can make shipping much easier for you. If you want us to create a label for you please send us the weight and dimensions (Width x Length x Height) of the box. ",
+    "url": "/bavc-resources/docs/CollectionHolderInfo/ShippingGuide.html#we-can-help-you-ship",
+    "relUrl": "/docs/CollectionHolderInfo/ShippingGuide.html#we-can-help-you-ship"
+  },"36": {
+    "doc": "Shipping Your Tapes to BAVC",
+    "title": "Include a Hard Drive",
+    "content": "Please make sure you include a hard drive with your tapes! Without a hard drive we can’t start digitizing your files. If you want more information about which hard drive to purchase you can check our hard drive guide. ",
+    "url": "/bavc-resources/docs/CollectionHolderInfo/ShippingGuide.html#include-a-hard-drive",
+    "relUrl": "/docs/CollectionHolderInfo/ShippingGuide.html#include-a-hard-drive"
+  },"37": {
+    "doc": "Shipping Your Tapes to BAVC",
+    "title": "Check Your Tapes For Mold",
+    "content": "Before shipping us your tapes please make sure to check them for mold. Mold generally looks like collections of white powder or fuzz growing on the tape. This is visible through the reel windows. If you notice that your tapes have any mold on them please let us know before you ship us your tapes. We cannot process mold at our facility, and we will need to have the moldy tapes shipped to a third-party in New Jersey. we use Spec Bros, run by Peter “Specs” Brothers to process any moldy tapes we come across. You can contact them through their website, and you can also email or call them at: (973) 777-5055. It may be easier and more cost-effective for you to ship those materials directly to New Jersey. Here are some examples of moldy tapes: . ",
+    "url": "/bavc-resources/docs/CollectionHolderInfo/ShippingGuide.html#check-your-tapes-for-mold",
+    "relUrl": "/docs/CollectionHolderInfo/ShippingGuide.html#check-your-tapes-for-mold"
+  },"38": {
+    "doc": "Template Article",
+    "title": "h1 Heading 8-) :-&gt;",
+    "content": " ",
+    "url": "/bavc-resources/docs/TemplateFolder/TemplateArticle.html#h1-heading-8---",
+    "relUrl": "/docs/TemplateFolder/TemplateArticle.html#h1-heading-8---"
+  },"39": {
+    "doc": "Template Article",
+    "title": "h2 Heading",
+    "content": "h3 Heading . h4 Heading . h5 Heading . h6 Heading . ",
+    "url": "/bavc-resources/docs/TemplateFolder/TemplateArticle.html#h2-heading",
+    "relUrl": "/docs/TemplateFolder/TemplateArticle.html#h2-heading"
+  },"40": {
+    "doc": "Template Article",
+    "title": "Horizontal Rules",
+    "content": ". ",
+    "url": "/bavc-resources/docs/TemplateFolder/TemplateArticle.html#horizontal-rules",
+    "relUrl": "/docs/TemplateFolder/TemplateArticle.html#horizontal-rules"
+  },"41": {
+    "doc": "Template Article",
+    "title": "Typographic replacements",
+    "content": "Enable typographer option to see result. (c) (C) (r) (R) (tm) (TM) (p) (P) +- . test.. test… test….. test?….. test!…. !!!!!! ???? ,, – — . “Smartypants, double quotes” and ‘single quotes’ . ",
+    "url": "/bavc-resources/docs/TemplateFolder/TemplateArticle.html#typographic-replacements",
+    "relUrl": "/docs/TemplateFolder/TemplateArticle.html#typographic-replacements"
+  },"42": {
+    "doc": "Template Article",
+    "title": "Emphasis",
+    "content": "This is bold text . This is bold text . This is italic text . This is italic text . Strikethrough . ",
+    "url": "/bavc-resources/docs/TemplateFolder/TemplateArticle.html#emphasis",
+    "relUrl": "/docs/TemplateFolder/TemplateArticle.html#emphasis"
+  },"43": {
+    "doc": "Template Article",
+    "title": "Blockquotes",
+    "content": "Blockquotes can also be nested… . …by using additional greater-than signs right next to each other… . …or with spaces between arrows. ",
+    "url": "/bavc-resources/docs/TemplateFolder/TemplateArticle.html#blockquotes",
+    "relUrl": "/docs/TemplateFolder/TemplateArticle.html#blockquotes"
+  },"44": {
+    "doc": "Template Article",
+    "title": "Lists",
+    "content": "Unordered . | Create a list by starting a line with +, -, or * | Sub-lists are made by indenting 2 spaces: . | Marker character change forces new list start: . | Ac tristique libero volutpat at | Facilisis in pretium nisl aliquet | Nulla volutpat aliquam velit | . | . | Very easy! | . Ordered . | Lorem ipsum dolor sit amet | Consectetur adipiscing elit | Integer molestie lorem at massa . | You can use sequential numbers… | …or keep all the numbers as 1. | . Start numbering with offset: . | foo | bar | . ",
+    "url": "/bavc-resources/docs/TemplateFolder/TemplateArticle.html#lists",
+    "relUrl": "/docs/TemplateFolder/TemplateArticle.html#lists"
+  },"45": {
+    "doc": "Template Article",
+    "title": "Code",
+    "content": "Inline code . Indented code . // Some comments line 1 of code line 2 of code line 3 of code . Block code “fences” . Sample text here... Syntax highlighting . var foo = function (bar) { return bar++; }; console.log(foo(5)); . ",
+    "url": "/bavc-resources/docs/TemplateFolder/TemplateArticle.html#code",
+    "relUrl": "/docs/TemplateFolder/TemplateArticle.html#code"
+  },"46": {
+    "doc": "Template Article",
+    "title": "Tables",
+    "content": "| Option | Description | . | data | path to data files to supply the data that will be passed into templates. | . | engine | engine to be used for processing templates. Handlebars is the default. | . | ext | extension to be used for dest files. | . Right aligned columns . | Option | Description | . | data | path to data files to supply the data that will be passed into templates. | . | engine | engine to be used for processing templates. Handlebars is the default. | . | ext | extension to be used for dest files. | . ",
+    "url": "/bavc-resources/docs/TemplateFolder/TemplateArticle.html#tables",
+    "relUrl": "/docs/TemplateFolder/TemplateArticle.html#tables"
+  },"47": {
+    "doc": "Template Article",
+    "title": "Links",
+    "content": "link text . link with title . Autoconverted link https://github.com/nodeca/pica (enable linkify to see) . ",
+    "url": "/bavc-resources/docs/TemplateFolder/TemplateArticle.html#links",
+    "relUrl": "/docs/TemplateFolder/TemplateArticle.html#links"
+  },"48": {
+    "doc": "Template Article",
+    "title": "Images",
+    "content": "Make sure to put any images you want in the /assets/images/ folder. Then you’ll want to use the following format to insert images into a page. ![Alt Text Goes Here](/bavc-resources/assets/images/BAVCLogoOrange.png) . ",
+    "url": "/bavc-resources/docs/TemplateFolder/TemplateArticle.html#images",
+    "relUrl": "/docs/TemplateFolder/TemplateArticle.html#images"
+  },"49": {
+    "doc": "Template Article",
+    "title": "Plugins",
+    "content": "The killer feature of markdown-it is very effective support of syntax plugins. Emojies . Classic markup: :wink: :crush: :cry: :tear: :laughing: :yum: . Shortcuts (emoticons): :-) :-( 8-) ;) . see how to change output with twemoji. Subscript / Superscript . | 19^th^ | H~2~O | . &lt;ins&gt; . ++Inserted text++ . &lt;mark&gt; . ==Marked text== . Footnotes . Footnote 1 link1. Footnote 2 link2. Inline footnote^[Text of inline footnote] definition. Duplicated footnote reference2. Definition lists . Term 1 Definition 1 with lazy continuation. Term 2 with inline markup Definition 2 . { some code, part of Definition 2 } . Third paragraph of definition 2. Compact style: . Term 1 ~ Definition 1 . Term 2 ~ Definition 2a ~ Definition 2b . Abbreviations . This is HTML abbreviation example. It converts “HTML”, but keep intact partial entries like “xxxHTMLyyy” and so on. Custom containers . ::: warning here be dragons ::: . | Footnote can have markup . and multiple paragraphs. &#8617; . | Footnote text. &#8617; &#8617;2 . | . ",
+    "url": "/bavc-resources/docs/TemplateFolder/TemplateArticle.html#plugins",
+    "relUrl": "/docs/TemplateFolder/TemplateArticle.html#plugins"
+  },"50": {
+    "doc": "Template Article",
+    "title": "Template Article",
+    "content": " ",
+    "url": "/bavc-resources/docs/TemplateFolder/TemplateArticle.html",
+    "relUrl": "/docs/TemplateFolder/TemplateArticle.html"
+  },"51": {
+    "doc": "Audio Transfer Workflow",
+    "title": "Audio Transfer Workflow",
+    "content": " ",
+    "url": "/bavc-resources/docs/Services/audioTransfer.html",
+    "relUrl": "/docs/Services/audioTransfer.html"
+  },"52": {
+    "doc": "Audio Transfer Workflow",
+    "title": "Baking",
+    "content": ". | Test the tape to see if it’s sticky . | If the tape is from the 80’s or later and has black backing, it’s likely sticky | Test the tape by slowly unreeling the tape off the reel. If it’s sticky, the tape will not easily fall off the reel. | If you are already playing back the tape and it’s squaling, it will need to be baked. | Only bake tapes that are polyester, NEVER bake acetate tapes. An easy way to remember this is “if it’s opaque, you can bake!” Acetate tapes are translucent when held up to bright lights, and will melt if you bake them. | . | If sticky, bake the tape using Program 3 . | 50 degrees C | 4.0 degrees C/min | 48 hour cycle | Fan speed 60% | . | Salesforce . | Notate any baking you do as a Preservation Activity in Salesforce . | Click “New Preservation Activity” from the Preservation Object page | Select the date | Select “Baking” | Make sure the correct Preservation Object is associated | Make sure a note about which program was used, or any extra info | . | . | . ",
+    "url": "/bavc-resources/docs/Services/audioTransfer.html#baking",
+    "relUrl": "/docs/Services/audioTransfer.html#baking"
+  },"53": {
+    "doc": "Audio Transfer Workflow",
+    "title": "Audio Transfer Station Setup",
+    "content": ". | Here is the typical signal chain for an analog audio transfer . | Tape Deck (Otari for Reel to Reel, Tascam for cassettes) | A/D converter (MOTU Ultralite Mk4) | Computer (Mac laptop running REAPER) | . | Set up the signal chain . | Connect the Left and Right outputs of the Tape Deck to Inputs 1 and 2 respectively of the MOTU. | Connect the MOTU to the Mac laptop via USB | Open REAPER, create a new project . | Press File -&gt; Open in New Project tab | Select a template by pressing File -&gt; Project Template . | Select the appropriate template for the tape type you’re using | Analog tapes: 96k_24b_Analog | DAT tapes: 48k_16b_DAT | MiniDisc: 48k_16b_DAT | . | Name the project after the BAVC Barcode Number. Save it in a folder named after the Opportunity on the Scratch RAID | Make sure the project settings are correct. You can see them at the top of the screen. | . | Project Templates should have the inputs already set up. However, you can click on the audio meters per track to set the inputs accordingly. | . | You can monitor the audio being recorded on the studio monitors. Make sure they are on and click the “Main Volume” encoder on the MOTU until Main 1-2 appears. Adjust the levels appropriately. | . ",
+    "url": "/bavc-resources/docs/Services/audioTransfer.html#audio-transfer-station-setup",
+    "relUrl": "/docs/Services/audioTransfer.html#audio-transfer-station-setup"
+  },"54": {
+    "doc": "Audio Transfer Workflow",
+    "title": "Salesforce",
+    "content": ". | Fill out the Transfer Environment section . | Transfer Suite (Preservtion Grotto) | Transfer Technician (User) | Transfer Date | Source Deck | TBC/Frame Sync 1 (will always be None) | SDI Converter (will always be None) | Host Computer | Operating System Name | Operating System Version | Capture Hardware | Capture Software | . | Fill out the Audio Metdata sections. This metadata gets embedded directly into the audio files, so make sure it is correct and has no typos! You can get this info either from the metadata provided by the client, or from the content on the tape. | Audio Metadata: Title . | You can just use the label if it is descriptive. If not, just give it a good title according to the metadata. If that doesn’t work, just enter the barcode. | . | Audio metadata: Artist . | If there is an interviewee, artist, or musician and you have their full name, use that. If you can’t get that then use the Archive or Collection Holder’s name. | . | Audio metadata: Date . | Enter the original recording date if you have it. If not, leave blank. | . | Audio Metadata: Album . | Use the collection name if you have it. If not, use the Archive or Collection Holder’s name. | . | . | . ",
+    "url": "/bavc-resources/docs/Services/audioTransfer.html#salesforce",
+    "relUrl": "/docs/Services/audioTransfer.html#salesforce"
+  },"55": {
+    "doc": "Audio Transfer Workflow",
+    "title": "Prep",
+    "content": ". | Track Configuration . | Determine what the track configuration is | . | Leader . | When auditioning, test to see if the audio goes right to the beginning and end of the tape. If so, add leader to either side before transferring. | . | Levels . | The Otari decks are calibrated against test tones. However, if the levels are way too low or clipping, you can turn off SRL (Standard Record Level) and adjust the levels manually. | . | Cleaning . | Clean the entire signal path of the tape deck with cotton swabs, texwipes, and isopropyl alcohol before transferring. | . | Salesforce . | Fill out the Audio Transfer Elements section . | Audio Material Type | Audio Speed | Audio Reel Size | Audio Track Configuration | Audio Sound Configuration | Audio Transfer Notes (This is just to be used for internal notes, this does not go to the client) | . | BUG REPORT . | You’ll also need to fill out all of the Video Transfer Elements, or Salesforce won’t let you save the record. This will be fixed. | . | . | . ",
+    "url": "/bavc-resources/docs/Services/audioTransfer.html#prep",
+    "relUrl": "/docs/Services/audioTransfer.html#prep"
+  },"56": {
+    "doc": "Audio Transfer Workflow",
+    "title": "Transferring",
+    "content": ". | During the transfer process, monitor the audio and make notes about any momentary or constant errors. Make sure to pass on as much information about the audio to the client. | There are two Salesforce fields where we put information about the audio quality. Each has a slightly different format: . | Technicians Notes . | This field contains info about the audio quality in general | Here are some common notes . | Audio Buzz | Audio Hiss | Native Clipping | Wow and flutter | Low recording levels | . | . | Timecode Stamped Notes . | This field contains info for momentary errors, or any content of note specific to a certain time. | Use the following format for each instance: . | HH:MM:SS - This is a timecode stamped note; | HH:MM:SS - Every note but the last ends with a semicolon; | HH:MM:SS - The last note does not have a semicolon | . | . | . | . ",
+    "url": "/bavc-resources/docs/Services/audioTransfer.html#transferring",
+    "relUrl": "/docs/Services/audioTransfer.html#transferring"
+  },"57": {
+    "doc": "Audio Transfer Workflow",
+    "title": "Post-Digitization",
+    "content": ". | Exporting the file . | Trim the audio to the appropriate length and according to project/client specs . | Default is 5 seconds or less of silence at the tail or head | . | Press File -&gt; Render | Select the proper Sample Rate and Bit Depth, according to the recording specs | Name the output files appropriately . | BAVC#######_ClientID_Face## | . | Press Render 1 File | . | Updating Metadata . | The transcode engine will automatically insert metadata into the files. This needs to come from the following fields in Salesforce: . | Audio Metadata: Title . | No apostrophes or quotes! | . | Audio Metadata: Artist . | Use artist or interviewee name is possible | . | Audio Metadata: Date . | Must be in format YYYY-MM-DD | . | Audio Metadata: Album . | Use collection name if possible | . | . | Creating Derivatives . | transcodeEngine.py can process audio files . | Select 1 derivative | Select MP3 | Select bitrate (default is 320kbps) | . | . | Moving to the SAN for QC . | If not mounted, mount the SAN . | Select Finder | Go -&gt; Connect to Server… (or ⌘K) | Server address is smb://presfsan | . | Make sure there is a folder on the SAN for the Opportunity | rsync -av –progress [path to sounce file/folder] [path to destination folder] | . | Backup file on PresRaid . | If not mounted, mount the PresRaid . | Select Finder | Go -&gt; Connect to Server… (or ⌘K) | Server address is smb://presraid | . | Make sure there is a folder on the PresRaid for the project | rsync -av –progress [path to sounce file/folder] [path to destination folder] | . | Salesforce . | Once this is all complete, fill out the following fields: . | Loaded to PresRaid | Digitization Status (Pass) | . | . | . | . ",
+    "url": "/bavc-resources/docs/Services/audioTransfer.html#post-digitization",
+    "relUrl": "/docs/Services/audioTransfer.html#post-digitization"
+  },"58": {
+    "doc": "CD Ripping",
+    "title": "CD Ripping",
+    "content": "There are generally 2 types of CDs: CD-ROM and CD-DA. CD-ROMs contain an imaged volume with data, and can generally be treated like DVDs but with slightly different ripping parameters. CD-DAs contain just audio, and need to be ripped with special software. ",
+    "url": "/bavc-resources/docs/Technical%20Documentation/cdRipping.html",
+    "relUrl": "/docs/Technical%20Documentation/cdRipping.html"
+  },"59": {
+    "doc": "CD Ripping",
+    "title": "Ripping CD-DA discs",
+    "content": "At BAVC we have created specific workflow for ripping CD-DAs. Our preferred method is to use XLD to rip the CD to a single WAV file. Once the file is ripped, it is possible to either create just a single MP3 access file per disc, or to split the MP3 access files according to the original tracklist on the CD. The reason we rip the CD as a single WAV file is because it’s easier to manage a single file. Our system has trouble keeping track of multiple files in a single record, especially if the number of files is variable like it often is with CDs. However, since our automation embeds the tracklist into the file, the original tracklist can always be extracted from the single WAV file. ",
+    "url": "/bavc-resources/docs/Technical%20Documentation/cdRipping.html#ripping-cd-da-discs",
+    "relUrl": "/docs/Technical%20Documentation/cdRipping.html#ripping-cd-da-discs"
+  },"60": {
+    "doc": "CD Ripping",
+    "title": "Required Software",
+    "content": ". | XLD . | You can install by either: . | Installing the DMG file from this site | If you have homebrew install you can run the command brew install xld | . | . | . ",
+    "url": "/bavc-resources/docs/Technical%20Documentation/cdRipping.html#required-software",
+    "relUrl": "/docs/Technical%20Documentation/cdRipping.html#required-software"
+  },"61": {
+    "doc": "CD Ripping",
+    "title": "How To Rip",
+    "content": ". | Create folder with unique file name (BAVCbarcode_client ID) | Open XLD, set output directory to new folder | Under file name, set to custom and paste in folder name | Under CD Rip, set ripping mode to CDParanoia III 10.2 | Click the following settings . | REQUIRED . | Ripper Mode: CDParanoia III 10.2 | Read samples offset correction value: 0 . | ✅ Set automatically if possible. | . | Save Log File: Always | Save Cue File: Always | . | OPTIONAL . | Max retry count: 20 . | You can set this to more or less if you’d like. | . | Drive Speed Control: Automatic | ✅ Query AccurateRip database to check integrity | ✅ Automatically open disc upon insertion | All other fields are optional, set them as you’d like | . | You can use this image for reference: . | . | Insert CD | Second window will pop up. Make sure option in top left says Save as a single file (+ cue) . | . | Make sure you rip as a single file! | . | . ",
+    "url": "/bavc-resources/docs/Technical%20Documentation/cdRipping.html#how-to-rip",
+    "relUrl": "/docs/Technical%20Documentation/cdRipping.html#how-to-rip"
+  },"62": {
+    "doc": "CD Ripping",
+    "title": "During Rip",
+    "content": ". | Barcode Case | Do NOT barcode CD | Update Intake details | Update as much of the following metadata fields as possible. Any of these fields can be left blank if they are unknown or unapplicable . | Embedded Metadata: Title . | Label on the tape | Or, if the title is clearly a subset of the label just put the title | . | Embedded Metadata: Artist . | Music or art = Main artist or musical group | Oral history or interview = Interviewee’s name | . | Embedded Metadata: Date . | Year only = 1/1/YYYY | Year and month = MM/1/YYYY | Year months and day = MM/DD/YYYY | Unknown = leave blank | . | Embedded Metadata: Album . | If it’s actually an album then use the album name | Otherwise, use the collection name | . | Embedded Metadata: Institution . | Use the collection holder’s institutional name | . | Embedded Metadata: Comment . | Optional field, but could include any errors encountered during transfer or any other salient information | Mention if the tracklist noted in liner notes or on the container differs from the cue file tracklist. | Essentially, any information from the Technicians Notes field could go here, but it is optional | . | Embedded Metadata: Copyright . | If the collection holder has mention specific copyright information it should be included here. This is mostly used by California evealed | . | Technicians Notes . | Any errors encountered during transfer or any other salient information | Mention if the tracklist noted in liner notes or on the container differs from the cue file tracklist. | . | . | . ",
+    "url": "/bavc-resources/docs/Technical%20Documentation/cdRipping.html#during-rip",
+    "relUrl": "/docs/Technical%20Documentation/cdRipping.html#during-rip"
+  },"63": {
+    "doc": "CD Ripping",
+    "title": "After Rip",
+    "content": ". | Rename log file to match ripped wav file name, but with .log extension | Check log file for track number, any errors . | If there are errors, Mark file as review in Salesforce and check the file’s spectrogram for an obvious errors | If no errors are audible in the file or clearly visible in the spectrogram you should note any errors mentioned in the log in the Technicians Note, mark the file as pass and move on. | . | Run the cdEngine.py script on a folder containing all folders that need to be processed. Check to ensure metadata is uploaded on Salesforce . | Run the script with the following command to create a single MP3 from the rippped WAV file: . | cdEngine.py -i /Path/To/Folder | . | Run the script with the following command to create an MP3 for every track on the original CD file: . | cdEngine.py -i /Path/To/Folder -s | . | Run the script with the following command to create an MP3 for every track on the original CD file, along with a single MP3 containing all of the CD content: . | cdEngine.py -i /Path/To/Folder -s -m | . | It is also possible to run the cdEngine.py script on a single folder containing the files for a single CD if you’d like. | . | . ",
+    "url": "/bavc-resources/docs/Technical%20Documentation/cdRipping.html#after-rip",
+    "relUrl": "/docs/Technical%20Documentation/cdRipping.html#after-rip"
+  },"64": {
+    "doc": "CD Ripping",
+    "title": "Quality Control",
+    "content": "Bulk Quality Control . Since CDs are often transferred in large volumes, it’s best to check specifics about the metadata in bulk using BWFMetaEdit. | Open BWFMetaEdit | Drag the folder containing all the CD subfolders into BWFMetaEdit. | Technical Metadata Check . | Click on the Tech tab | Check that every file meets the following specs: . | Format: Wave | CodecID: 0001 | Channels: 2 | SampleRate: 44100 | BitRate: 1411200 | BitPerSample: 16 | Note: The specifications for CDs are very strict. If any of these specs don’t match then the file wasn’t properly ripped from the CD | . | . | Descriptive Metadata Check . | Click on the Core tab | Make sure that the embedded descriptive metadata for every file makes sense and has been properly filled out. | Here are the fields that are most important to check . | Description . | Should include the Title and the date. Make sure it doesn’t include the date twice by accident, which is a common way for this to fail based on how the script works. | . | Originator . | Should be “BAVC” | . | OriginationDate . | Should be the date the file was ripped, so within a few days of QC | . | BextVersion . | Should be “1” | . | CodingHistory . | Should contain the entire log file. If it’s empty there is an error | . | ICRD . | Should be the original recording date of the CD (if it exists) | . | . | . | . File by file Quality Control . For the most part these files can be QC’d in bulk, but there are a few things that need to be checked individually. | File playback . | Preview the file quickly to make sure it plays. No need to check heads and tails because we do not trim these manually | If any files have been flagged for having a high number of errors during the rip they should be played back to ensure that these errors are not present during playback. If the errors are present then the disc should either be retransferred, or the errors should be noted according to the technician’s discretion. | . | MP3 Metadata . | Opening the MP3 in iTunes will show the file’s embedded metadata. Make sure that it looks correct compared to the metadata in the Salesforce record | If MP3 is split, check that the number of MP3 files matches the tracklist in the CUE and LOG files. | . | . Bulk QC Updates in Salesforce . Because CDs often come in large numbers, it’s easier to update the QC records for them in bulk using Views in Preservation. | Open the Preservation Object View named !(CD QC)[https://bavc.lightning.force.com/lightning/o/Preservation_Object__c/list?filterName=00B2J000009e0vzUAA] | This view will show any CD objects that have been marked Digitization Status: Pass, but have not been marked Quality Control Status: Pass | In order for these records to be considered a QC Pass, the following fields visible in this view need to be filled out. None of these fields can be empty: . | Digital File Name . | This should reflect the file name without the extension | . | Digital File Duration . | This should reflect the file duration in format HH:MM:SS:mmm | . | Digital Audio Sampling Rate . | This should always be 44100 | . | Checksum . | This should have checksum in it. | . | Source Deck . | This should reflect the disc drive used to rip the CD | If the drive is internal to a computer is should say “Internal” | . | Host Computer . | This should reflect the computer that was used to rip the CD | . | . | If the above fields are properly filled, you will need to update the following fields. These fields can be easily updated in bulk by clicking the checkbox on the far left side of the list for every record you want to update. Then, when you update each field make sure to click the box that says “Update X selected items” (where “X” is how many records you’ve selected) . | Quality Control Date . | The date that you are performing QC | . | Quality Control Notes . | This should only be filled out if there is a problem. The format should be: | QC User Initials - Date - Note | . | Quality Control User . | Your username | . | Metadata . | “Pass” | This is the only “QC Checklist” record we’re updating unless you’re performing full single-file QC | . | Quality Control Status . | “Pass” | This is the most important field, since it determines the QC status of the record. | . | . | . Ripping CDs Outside of BAVC . If you plan to rip CDs at an institution outside of BAVC you can follow most of the main steps. You’ll still want to use XLD, but you won’t be using Salesforce at all to handle the metadata. Instead of using cdEngine.py, which by design needs to be connected to salesforce, you can use simple_cd.py, which works the same way, but allows the user to manually enter any embedded metadata. | Run the script with the following command to create a single MP3 from the rippped WAV file: . | simple_cd.py -i /Path/To/Folder | . | Run the script with the following command to create an MP3 for every track on the original CD file: . | simple_cd.py -i /Path/To/Folder -s | . | Run the script with the following command to create an MP3 for every track on the original CD file, along with a single MP3 containing all of the CD content: . | simple_cd.py -i /Path/To/Folder -s -m | . | . ",
+    "url": "/bavc-resources/docs/Technical%20Documentation/cdRipping.html#quality-control",
+    "relUrl": "/docs/Technical%20Documentation/cdRipping.html#quality-control"
+  },"65": {
+    "doc": "Cleaning Decks",
+    "title": "Cleaning Decks",
+    "content": "- Ensure deck is powered off - Moisten a cloth with alcohol - Clean entire tape path, making sure that all points of contact with tape are wiped clean - Hold the cloth with gentle pressure against the side of tape drum and rotate the drum, cleaning heads - Clean edges of tape path and area between heads (though not heads themselves) with cotton-tipped applicators moistened with alcohol - Clean difficult to reach areas with cotton-tipped applicators moistened with alcohol - Clean rubber rollers with Rubber Roller Restorer applied to cotton cloth (wear gloves and ensure room is properly ventilated when using this fluid) - Repeat above processes as often as necessary to remove all signs of dirt, grease, and dust from tape path - Clean deck before setting levels, after setting levels, and after every capture . | Creating Digibetas | . Museums, archives, and libraries will sometimes request an additional Digibeta copy of the digital master file. Part of the Digibeta mastering process is laying down 30 seconds of black, 1 minute of bars/tone, and 30 seconds of black before the picture begins. Set-Up - Clean heads and tape path carefully; use swab to clean the rollers. - Thread a BNC cable out of DIGITAL I/O Serial V/A input directly into the Blackmagic Capture Card - Set Remote part of patch bay from Kona to Digibeta. - Video Patch - Digibeta–&gt;VDA1 - Audio Patch - Digibeta –&gt; RANE Mix - Find a blank tape of the right length. They are stored in a filing cabinet in the tape closet. - Open Media Express and import the file you are mastering to tape. - Pack the tape by fast-forwarding and rewinding. - Ensure the tape is wound to the beginning before laying down timecode. Lay Black and Timecode - Switch deck to “Setup 1” by opening the control panel to reveal advance settings. Turn the deck off and back on again to activate. - Set the “TG Generator” to “interior” and “preset.” - Press the “hold” button that is underneath the timecode panel. - Set timecode to 00:58:00 - Press “Jog” and use the knob to move between the sections of the timecode. Set the numbers by pressing “Jog” at the same time as the knob is turned. - Press “Set” button under timecode. - Test by pressing REC - Pres REC + PLAY to record black and let run past 01:00:00 - Stop . Lay Bars and Tone - Switch deck to “Setup 2” by opening the control panel to reveal advance settings. Turn the deck off and back on again to activate. - Set the “TG Generator” to “interior” and “regen.” - Rewind tape to 00:58:30 - Under “INSERT” press “video” and all four audio channels - Press “Entry” and “In” at the same time - Forward tape to 00:59:30 - Press “Entry” and “Out” at the same time - Identify Audio and Video - Press and hold SIF/CH1 on the Audio Input section until all audio channels light up. - Press and hold SIF in the Video Input section until all video channels light up. - Press Auto Edit . Mastering - Follow the procedures in the “Setup” section of this page. - Switch deck to “Setup 1” - On the Digibeta deck, Turn on Remote 1(9P) on - In Media Express–&gt;Edit to Tape, set In Point to 1:00:00. You shouldn’t have to set out point (if you do, use time code on file). - Click Assemble button - When ready to go, click the “Master” button. The tape will automatically stop when the file ends. - Check to make sure blacks, bars, and file all begin at the established in/out points. Labeling tba . Tips/Troubleshooting - Do not use Media Express at the same time as you are recording blacks. You might accidentally record the file prematurely. - The file should be imported from the computer’s local storage drive, not the presraid. Importing from the presraid will result in dropped frames. ",
+    "url": "/bavc-resources/docs/Services/cleaningDecks.html",
+    "relUrl": "/docs/Services/cleaningDecks.html"
+  },"66": {
+    "doc": "Cleaning Tapes",
+    "title": "Cleaning Tapes",
+    "content": ". | 1/2 Inch . | Remove lid of 1/2” cleaning deck | Ensure that a 1/4” audio reel is in place on right side of deck to support take up reel | Turn on deck | Ensure tension pin is blocked | Choose a take up reel which corresponds in size with the reel you wish to clean | Thread source tape anti clockwise around take up reel’s hub directly across top of deck - DO NOT thread through tape path | Fold a DRY cotton swatch over exposed tape between reels and pinch lightly | Put control in FORWARD position | Allow tape to run through pinched fingers, applying even pressure | Pause occasionally and check level of dirt being removed | Replace dirty cloth with fresh cloth as often as necessary while cleaning | Once tape has finished forwarding, thread back on to source reel and rewind entirely | Repeat as necessary | . | U-Matic . | Open lid of cleaning deck, and hang lid from nail above deck using rubber bands attached to lid | Clean entire tape path with cotton swatches and alcohol | Turn on power switch bottom right underneath deck (and step back or you will get hit in the face!) | Once alcohol has evaporated, put tape in deck | Press CLEAN button followed by AUTO - tape will now fast forward and then rewind while cleaning | Once tape has self ejected following cleaning, use dentist’s mirror to check how much dirt has been removed by cleaning rolls | If cleaning rolls has removed a lot of dirt, repeat cleaning procedure | If cleaning roll is collecting thick, sticky detritus, you should bake tape | If machine is stopping mid wind and showing the BIND warning, you will likely have to bake tape (though in some cases rehousing is necessary rather than baking) | If baking is necessary, try to pack tape back to start if possible before baking | Clean tape path between each cleaning pass | Once tape is satisfactorily clean, turn off machine, clean tape path again, close lid of cleaning deck. | . | VHS . | Open lid of cleaning deck. | Clean entire tape path with cotton swatches and alcohol. | Turn on deck (power switch bottom left underneath deck). | Once alcohol has evaporated, put tape in deck. | Press START. | Once tape has self ejected following cleaning, use dentist’s mirror to check how much dirt has been removed by cleaning rolls | If cleaning rolls has removed a lot of dirt, repeat cleaning procedure | Clean tape path between each cleaning pass | Once tape is satisfactorily clean, turn off machine, clean tape path again, close lid of cleaning deck. | . | . ",
+    "url": "/bavc-resources/docs/Services/cleaningTapes.html",
+    "relUrl": "/docs/Services/cleaningTapes.html"
+  },"67": {
+    "doc": "Sharing Client Files via Google Drive",
+    "title": "Sharing Client Files via Google Drive",
+    "content": ". | Our current method for supplying clients with Google Drive is not very secure. Ergo, you must do this sparingly, only when time-sensitive retrieval is needed by the client. Files should only be available for 48 hours and then removed from the Google Drive once you can ensure that the files have been downloaded. | Log Into Google Drive using the preservation@gmail.com account | Navigate to the Preservation Files for Clients folder | Create a new folder based off of the Opportunity Name | Drag in the typical BAVC_Preservation delivery folder | Drag in the files into their appropriate folders | Share the main folder with the client’s email | Email the client and tell them they have 48 hours to download the files. | . | . ",
+    "url": "/bavc-resources/docs/Technical%20Documentation/clientFiles.html",
+    "relUrl": "/docs/Technical%20Documentation/clientFiles.html"
+  },"68": {
+    "doc": "DVD Creation",
+    "title": "DVD Creation",
+    "content": " ",
+    "url": "/bavc-resources/docs/Technical%20Documentation/dvdCreation.html",
+    "relUrl": "/docs/Technical%20Documentation/dvdCreation.html"
+  },"69": {
+    "doc": "DVD Creation",
+    "title": "DVD Creation From File",
+    "content": "Using Terminal . | Run make_dvd_iso.sh . | We have a script called make_dvd_iso.sh (attached). | If you already have it installed on your machine, simply run the following two scripts in Terminal: . | cd (directory) | make_dvd_iso.sh * | . | . | **Install make_dvd.iso.sh . | In order for the script to work, your computer needs to have the following installed: ffmpeg, ffprobe, dvdauthor, and cdrtools. If you don’t have these, submit a ticket to get them installed (or use homebrew). If you don’t have the script installed, do the following: . | Install, update, or upgrade Homebrew | Download the attached make_dvd-iso.sh script | Move the script to the /usr/location/bin folder and change permissions . | cd (directory that make_dvd_iso is in) | mv make_dvd_iso.sh /usr/local/bin | cd /usr/local/bin | chmod 777 make_dvd_iso.sh | . | Install dvdauthor &amp; cdrtools . | brew install dvdauthor | brew install cdrtools If your original files do not have a “.mov” wrapper, change that part in the command as well | . | . | . | . ",
+    "url": "/bavc-resources/docs/Technical%20Documentation/dvdCreation.html#dvd-creation-from-file",
+    "relUrl": "/docs/Technical%20Documentation/dvdCreation.html#dvd-creation-from-file"
+  },"70": {
+    "doc": "DVD Creation",
+    "title": "Burning an ISO to DVD",
+    "content": ". | Put in blank disk* | Right click on the ISO file and choose “Burn [file name] to disk” | Keep ISO file, we give them to clients when they request DVDs | . *DVD stock should be: DVD-R Inkjet Printable (also known as “hub printable). We like the Verbatim brands. ",
+    "url": "/bavc-resources/docs/Technical%20Documentation/dvdCreation.html#burning-an-iso-to-dvd",
+    "relUrl": "/docs/Technical%20Documentation/dvdCreation.html#burning-an-iso-to-dvd"
+  },"71": {
+    "doc": "DVD Creation",
+    "title": "Labeling a DVD",
+    "content": ". | As of this writing, we use the Epson Stylus Photo R2000 printer (Barcode 102181) to print CDs. We are still using a rather antiquated software to print from: Epson Print CD 2.0. The extension of Epson files is .printcd2. | . ",
+    "url": "/bavc-resources/docs/Technical%20Documentation/dvdCreation.html#labeling-a-dvd",
+    "relUrl": "/docs/Technical%20Documentation/dvdCreation.html#labeling-a-dvd"
+  },"72": {
+    "doc": "Supported Formats",
+    "title": "Formats",
+    "content": " ",
+    "url": "/bavc-resources/docs/Technical%20Documentation/formats.html#formats",
+    "relUrl": "/docs/Technical%20Documentation/formats.html#formats"
+  },"73": {
+    "doc": "Supported Formats",
+    "title": "Formats We Transfer",
+    "content": ". | Open Reel: . | 1/4” Reel-to-Reel Audio | 1/2” EIAJ Type 1 | 1/2” EIAJ | 1/2” CV | . | Cassette: . | 1/8” Audio Cassette | 8mm: Digital-8 | 8mm: Video 8 | 8mm: Hi8 | Betacam | Betacam Digital (aka Digibeta) | Betamax | Betamax SP | Betamax HB | Betamax Super | MiniDV - Standard Definition | U-Matic 3/4” | VHS/S-VHS/VHS-C | . | Optical Media . | CD | DVD | . | . ",
+    "url": "/bavc-resources/docs/Technical%20Documentation/formats.html#formats-we-transfer",
+    "relUrl": "/docs/Technical%20Documentation/formats.html#formats-we-transfer"
+  },"74": {
+    "doc": "Supported Formats",
+    "title": "Formats We Do NOT Transfer",
+    "content": ". | 2” Quadruplex | MiniDV - High Definition (HDV) | . ",
+    "url": "/bavc-resources/docs/Technical%20Documentation/formats.html#formats-we-do-not-transfer",
+    "relUrl": "/docs/Technical%20Documentation/formats.html#formats-we-do-not-transfer"
+  },"75": {
+    "doc": "Supported Formats",
+    "title": "Supported Formats",
+    "content": " ",
+    "url": "/bavc-resources/docs/Technical%20Documentation/formats.html",
+    "relUrl": "/docs/Technical%20Documentation/formats.html"
+  },"76": {
+    "doc": "Getting Started",
+    "title": "Getting Started with a GitHub Documentation Page!",
+    "content": " ",
+    "url": "/bavc-resources/gettingstarted/#getting-started-with-a-github-documentation-page",
+    "relUrl": "/gettingstarted/#getting-started-with-a-github-documentation-page"
+  },"77": {
+    "doc": "Getting Started",
+    "title": "Installing Homebrew and Github on Mac OS",
+    "content": ". | Install Homebrew /bin/bash -c \"$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)\" . | Install Git: brew install git . | . ",
+    "url": "/bavc-resources/gettingstarted/#installing-homebrew-and-github-on-mac-os",
+    "relUrl": "/gettingstarted/#installing-homebrew-and-github-on-mac-os"
+  },"78": {
+    "doc": "Getting Started",
+    "title": "Cloning GitHub Repo to your local computer",
+    "content": "This can be done either using the Git command line tool git or by using the GitHub desktop tool. The GitHub repo lives here. Use your preferred method to clone the repo to your local drive. You’ll eventually need to navigate your terminal window to this repo using the cd command, so make sure you clone the repo somewhere that is easily accessible. ",
+    "url": "/bavc-resources/gettingstarted/#cloning-github-repo-to-your-local-computer",
+    "relUrl": "/gettingstarted/#cloning-github-repo-to-your-local-computer"
+  },"79": {
+    "doc": "Getting Started",
+    "title": "Installing the rest of the software needed on Mac OS",
+    "content": ". | Install rbenv brew install rbenv . | Set up rbenv for your shell: rbenv init . | This might put out a message like this: | . # Load rbenv automatically by appending # the following to ~/.zshrc: eval \"$(rbenv init - zsh)\" . | Make sure to so what it says. In this case, you should run the command it says: eval \"$(rbenv init - zsh)\" . | Setup your terminal to start rbenv on open: echo 'eval \"$(rbenv init -)\"' &gt;&gt; ~/.bash_profile source ~/.bash_profile . | Check your installation (you should see a bunch of “OK”s) curl -fsSL https://github.com/rbenv/rbenv-installer/raw/main/bin/rbenv-doctor | bash . | Install Ruby 2.7.2 using rbenv, which is not the latest version, but is the version required for GitHub Pages. rbenv install 2.7.2 . | Set Ruby 2.7.2 as your global version Note: This will set version 2.7.2 as your default Ruby version. If you’re working on other Ruby projects with the computer you’re using for this workshop, feel free to contact us for help maintaining multiple versions. rbenv global 2.7.2 . | Restart your terminal . | Download / update Ruby gems: gem update --system . note: you might need to run this with sudo if you get permissions errors . | Install the jekyll and bundler gems. gem install jekyll bundler . note: you might need to run this with sudo if you get permissions errors . | . ",
+    "url": "/bavc-resources/gettingstarted/#installing-the-rest-of-the-software-needed-on-mac-os",
+    "relUrl": "/gettingstarted/#installing-the-rest-of-the-software-needed-on-mac-os"
+  },"80": {
+    "doc": "Getting Started",
+    "title": "Getting a local intance of the website running on your local server",
+    "content": ". | Navigate your terminal window to the Repository Directory using the cd command . | Run the following command bundle install . | Now you can start the local server on your machine with the following command bundle exec jekyll serve . You’ll probably see something like this: . Configuration file: /Users/preservation/Documents/Github/bavc-resources/_config.yml To use retry middleware with Faraday v2.0+, install `faraday-retry` gem Source: /Users/preservation/Documents/Github/bavc-resources Destination: /Users/preservation/Documents/Github/bavc-resources/_site Incremental build: disabled. Enable with --incremental Generating... Remote Theme: Using theme pmarsceill/just-the-docs Jekyll Feed: Generating feed for posts done in 4.72 seconds. Auto-regeneration: enabled for '/Users/preservation/Documents/Github/bavc-resources' Server address: http://127.0.0.1:4000/bavc-resources/ Server running... press ctrl-c to stop. | . This means that you have a local instance of the page running at http://127.0.0.1:4000/bavc-resources/ . The purpose of running the local server on your machine is so that you can see the changes you’re making to site. These changes will be made to the live site at http://bavc.github.io/bavc-resources when you push them to the repo, but the local instance is as great way to test them beforehand. ",
+    "url": "/bavc-resources/gettingstarted/#getting-a-local-intance-of-the-website-running-on-your-local-server",
+    "relUrl": "/gettingstarted/#getting-a-local-intance-of-the-website-running-on-your-local-server"
+  },"81": {
+    "doc": "Getting Started",
+    "title": "Making updates to the Resource Pages",
+    "content": "Github Etiquitte . Now that you have the repo clone and a local instance running on your computer you can make changes to the documentation and see them happen in real time before they’re pushed to the main branch in the remote repository. Proper GitHub etiquitte states that any changes you make should made to your own branch. When you’re ready for these changes to be made to the main branch (what you see on the public website) you should create a Pull Request, which pulls your changes into the main branch. So, the first thing you need to do is create your own branch. Here’s an article about creating a new branch using Atom or the command line. Once you’ve created a new branch you can push all the changes you want to this branch. Remember, the workflow for this is as follows: . | Make changes to the files | Stage the changes | Commit the changes with a helpful description/message | Push the changes to your branch. | . Once you’re happy with all the changes you’ve pushed you can make a Pull Request. Someone else on your team should review the Pull Request, then will confirm that it’s all ok, and then it will Merged into the main branch of the remote repository. Making changes to the documentation . The documentation lives in text files that in the Markdown language. The TemplateArticle.md file contains all the different ways you can use Markdown to make pretty and readable documentation. The files are best edited in a program like Atom or Visual Studio Code. These programs are a little confusing at first, so if you’re lost you should watch a YouTube tutorial about them (as an added bonus, these programs integrate Git features like commits and pull requests into their GUIs). Once you have a good editing environment setup all you have to do edit the text in the documents. Once you save the files you’ll see the updates reflected instantly in your local instance. Adding a new Article . Articles all live in the /docs/ folder, which is located in the root level of the repository. Inside docs there are a bunch of subfolders. Each of these subfolders represents a category of articles on the website. Inside each subfolder are a bunch of .md files. These files each correspond to an article. To make a new article you can simply copy an existing article, or copy the TemplateArticle.md file. Make sure you nest the new article in its associated subfolder, and that you update layout, title, and parent information at the top of the document. Adding a new subfolder / categeory . To add a new subfolder or category, you’ll need to add a new subfolder to the docs folder. You’ll also need to create a new index.md file inside of that folder. The index.md file is critical, as it tells the website that this new folder corresponds to a new category, and creates a landing page for that category. To make creating a new folder easier, you can just duplicate and rename the TemplateFolder directory. Just make sure you rename the folder, and rename title info in the header of the index.md file within that folder. ",
+    "url": "/bavc-resources/gettingstarted/#making-updates-to-the-resource-pages",
+    "relUrl": "/gettingstarted/#making-updates-to-the-resource-pages"
+  },"82": {
+    "doc": "Getting Started",
+    "title": "Getting Started",
+    "content": " ",
+    "url": "/bavc-resources/gettingstarted/",
+    "relUrl": "/gettingstarted/"
+  },"83": {
+    "doc": "Template Folder",
+    "title": "Template Folder",
+    "content": " ",
+    "url": "/bavc-resources/docs/TemplateFolder/",
+    "relUrl": "/docs/TemplateFolder/"
+  },"84": {
+    "doc": "Information for Collection Holders",
+    "title": "Information for Collection Holders",
+    "content": " ",
+    "url": "/bavc-resources/docs/CollectionHolderInfo/",
+    "relUrl": "/docs/CollectionHolderInfo/"
+  },"85": {
+    "doc": "Salesforce",
+    "title": "Salesforce",
+    "content": " ",
+    "url": "/bavc-resources/docs/Salesforce/",
+    "relUrl": "/docs/Salesforce/"
+  },"86": {
+    "doc": "Services",
+    "title": "Services",
+    "content": " ",
+    "url": "/bavc-resources/docs/Services/",
+    "relUrl": "/docs/Services/"
+  },"87": {
+    "doc": "Welcome",
+    "title": "Welcome to BAVC Resources",
+    "content": "This is a landing page for all of BAVC Preservation’s public workflow and resource documents . ",
+    "url": "/bavc-resources/#welcome-to-bavc-resources",
+    "relUrl": "/#welcome-to-bavc-resources"
+  },"88": {
+    "doc": "Welcome",
+    "title": "Welcome",
+    "content": " ",
+    "url": "/bavc-resources/",
+    "relUrl": "/"
+  },"89": {
+    "doc": "Technical Documentation",
+    "title": "Technical Documentation",
+    "content": " ",
+    "url": "/bavc-resources/docs/Technical%20Documentation/",
+    "relUrl": "/docs/Technical%20Documentation/"
+  },"90": {
+    "doc": "Intake and Inspection",
+    "title": "Intake/Inspection",
+    "content": " ",
+    "url": "/bavc-resources/docs/Technical%20Documentation/intakeConservation.html#intakeinspection",
+    "relUrl": "/docs/Technical%20Documentation/intakeConservation.html#intakeinspection"
+  },"91": {
+    "doc": "Intake and Inspection",
+    "title": "Potential Setbacks",
+    "content": ". | Tapes are not barcoded properly; mold and conditions that impair playback are not noted; labels are lost; incorrect information is logged into Salesforce. | . ",
+    "url": "/bavc-resources/docs/Technical%20Documentation/intakeConservation.html#potential-setbacks",
+    "relUrl": "/docs/Technical%20Documentation/intakeConservation.html#potential-setbacks"
+  },"92": {
+    "doc": "Intake and Inspection",
+    "title": "Recommended Assurance",
+    "content": ". | Perform intake in three steps. First, prep the tapes: apply barcode, perform a condition inspection, remove write-protect tab, and tape down loose labels with paper tape. When all of the tapes are prepped, go back and enter the data in Salesforce. Finally, bag moldy tapes with desiccants and store tapes vertically This method gives you a second chance to spot discrepancies (missing barcodes, etc.) | . When entering data in Salesforce, NEVER guess. Always ask if you are unclear about how to describe an item. It is always better to leave a field blank than to misdirect the next person with a barely informed hypothesis. ",
+    "url": "/bavc-resources/docs/Technical%20Documentation/intakeConservation.html#recommended-assurance",
+    "relUrl": "/docs/Technical%20Documentation/intakeConservation.html#recommended-assurance"
+  },"93": {
+    "doc": "Intake and Inspection",
+    "title": "Conservation Treatment",
+    "content": " ",
+    "url": "/bavc-resources/docs/Technical%20Documentation/intakeConservation.html#conservation-treatment",
+    "relUrl": "/docs/Technical%20Documentation/intakeConservation.html#conservation-treatment"
+  },"94": {
+    "doc": "Intake and Inspection",
+    "title": "Potential Setbacks",
+    "content": ". | Tapes are left in the oven too long and/or to hot; tapes are baked/clean more than necessary or not at all; cleaning machines “eat” or break tapes; tapes sent to Peter Brothers for mold treatment are lost/forgotten by Peter Brothers; mold on tapes increases and/or spreads to other tapes in the collection while in storage; sticky shed syndrome intensifies in storage. | . ",
+    "url": "/bavc-resources/docs/Technical%20Documentation/intakeConservation.html#potential-setbacks-1",
+    "relUrl": "/docs/Technical%20Documentation/intakeConservation.html#potential-setbacks-1"
+  },"95": {
+    "doc": "Intake and Inspection",
+    "title": "Recommended Assurance",
+    "content": ". | All conservation treatment and activities should be logged in the object’s preservation record in Salesforce to prevent duplicate efforts and confusion. Every clean and bake should be logged in the ‘Preservation Activities” module. Our ovens have their temperatures locked in to prevent changes; if you’d like to change the oven temperature, please talk to your supervisor. | . To avoid the spread of mold, any tape suspected of mold should be sealed in a ziploc bag with desiccants. The tape should remain that way until it has been determined either that there is no mold, or it has been treated by Peter Brothers. Peter Brothers runs a small, high-volume operation and does not have the staff to accurately track the move of materials. The onus is on us to make sure he has received the tape and servicing us in a timely manner. Whenever a tape is sent to Spec Bros for mold treatment, the activity should be logged in the Activity module of Salesforce. Attach a record of the FedEx tracking number and note the estimated arrival of the tape. When the tape has arrived according to FedEx, call Peter and make sure the package was received. Follow up with him every two weeks on the status of the service. ",
+    "url": "/bavc-resources/docs/Technical%20Documentation/intakeConservation.html#recommended-assurance-1",
+    "relUrl": "/docs/Technical%20Documentation/intakeConservation.html#recommended-assurance-1"
+  },"96": {
+    "doc": "Intake and Inspection",
+    "title": "Intake and Inspection",
+    "content": " ",
+    "url": "/bavc-resources/docs/Technical%20Documentation/intakeConservation.html",
+    "relUrl": "/docs/Technical%20Documentation/intakeConservation.html"
+  },"97": {
+    "doc": "Intake Visual Workflow",
+    "title": "Intake Visual Workflow",
+    "content": ". | One way to perform intake is by using the Intake Visual Workflow. This is accessed on the Opportunity page, when clicking the “Launch Intake” button. | This page will need to be fleshed out, but for now here’s info about how to edit the Visual Workflow. | In SalesForce, click “Setup” on the top bar | On the left side navigate to Build -&gt; Create -&gt; Workflow &amp; Approvals -&gt; Flows | From here, select Preservation Intake | All of the earlier versions of the Visual Workflow are available on this page. | To edit a workflow press Open | If you make any changes please press Save As so that it can be tested before going into production | . ",
+    "url": "/bavc-resources/docs/Salesforce/intakeWorkflow.html",
+    "relUrl": "/docs/Salesforce/intakeWorkflow.html"
+  },"98": {
+    "doc": "Inventory",
+    "title": "Inventory",
+    "content": ". | There are a number of steps to complete upon receipt of a collection: . | Look through the collection, checking for series numbers or descriptive information that may inform the order in which you inventory the collection, eg. if there there are three tapes of the same name numbered 1,2,3, inventory these tapes in numerical order. | In Salesforce, navigate to the collection opportunity. | Scroll to the bottom of the Opportunity page, and select New Preservation Object. | Begin with your visual inspection of the first tape. | During inspection you should be looking for any signs of tape or cassette damage, dirt, dust, water damage, creasing etc. | If mold is found, please let a staff member know immediately, and place the suspect tape in a zip lock bag with a number of desiccants. The tape can remain with the rest of the collection until it is sent out for treatment. | Place a barcode on the tape case and cassette. | Complete the Intake/Inventory section in Salesforce (instructions can be found in section on Salesforce). | As you finish inventory on each tape, place it in numerical order in a BAVC container. | Once you have completed inventory of the collection, write the opportunity name on two Post It notes, and tape these notes to the front and back of the container. | Finally, place the container on a shelf in the tape closet. | . | . ",
+    "url": "/bavc-resources/docs/Salesforce/inventory.html",
+    "relUrl": "/docs/Salesforce/inventory.html"
+  },"99": {
+    "doc": "Packing Tapes",
+    "title": "Packing Tapes",
+    "content": "Packing tapes at a controlled tension and speed redistributes tape pack stresses and creates an even tension during playback. For tapes with heavy cinching, windows or other pack problems, this process can be repeated as often as needed. | 1 inch . | We currently do not pack 1 inch tapes for safety reasons | . | 1/2 inch . | Remove lid of 1/2” cleaning deck | Ensure that a 1/4” audio reel is in place on right side of deck to support take up reel | Turn on deck | Ensure tension pin is blocked | Chose a take up reel which corresponds in size with the reel you wish to clean | Thread source tape anti clockwise around take up reel’s hub directly across top of deck - DO NOT thread through tape path | Put control in FORWARD position | Once tape has finished forwarding, thread back on to source reel and rewind entirely | . | Cassette Based Formats . | Ensure deck tape path is clean | Place tape in deck | Fast-forward | Rewind | . | . ",
+    "url": "/bavc-resources/docs/Services/packingTapes.html",
+    "relUrl": "/docs/Services/packingTapes.html"
+  },"100": {
+    "doc": "Preservation Objects",
+    "title": "Preservation Objects",
+    "content": " ",
+    "url": "/bavc-resources/docs/Salesforce/preservationObjects.html",
+    "relUrl": "/docs/Salesforce/preservationObjects.html"
+  },"101": {
+    "doc": "Preservation Objects",
+    "title": "Preservation Object Detail",
+    "content": "Intake/Inspection . Complete during intake . | Intake/Inspection covers all inventorying and condition information gathered upon (you guessed it) initial intake and inspection! . | Media Type: Almost always Video or Audio | Opportunity: Should auto fill with collection name | Barcode: Enter BAVC barcode number you apply to tape | Intake Date: Current date | Intake Contact: Your name | Label on Original: Any label or information on tape or case. Please be as correct as possible, but if there is a lot of information on the tape, you should be succinct rather than comprehensive. | Client Identifier: Any identifying number appearing consistently within the collection | Box: Only relevant if collection comprises of multiple boxes | Tape Series: Rarely used, as generally covered by client identifier | Format of Original: Choose from drop down menu. If format is missing, please inform staff member. | Manufacturer Length of Tape: Often printed on base of tape, or printed on tape or case label. If length on tape differs from length on label, defer to tape, as it may have been rehoused at some point. | Manufacturer on Tape: Choose from drop down menu if manufacturer known | Model of Tape: If not printed on label, may be printed on base of tape, ex. KCA-60 | Magnetic Pigment Formulation: Choose from drop down menu. Generally Oxide, but DV tapes will be MP (metal particle) or ME (metal evaporate) | Back Matting: Check box if back matting present on tape | Inspection/Condition Notes: Note any physical issues related to the tape or it’s housing here. Examples of notes you may make are popped strands, stepping, no case, dirty, removed record tape etc. If mold is found, please note in inspection/condition notes AND technician notes. Also, alert a staff member immediately. | . | . ",
+    "url": "/bavc-resources/docs/Salesforce/preservationObjects.html#preservation-object-detail",
+    "relUrl": "/docs/Salesforce/preservationObjects.html#preservation-object-detail"
+  },"102": {
+    "doc": "Preservation Objects",
+    "title": "Transfer Environment",
+    "content": "Complete before capture * - Transfer Suite: Choose the preservation room you are working in from drop down menu - Transfer Technician: Begin typing your own name. It should appear quickly and you can chose it from the list that appears - Transfer Date: Current date - Host Computer: The computer you are using to capture. Type in computer’s inventory number and search, then choose from search list - Operating System Name: Mac OS - Source Deck: The deck you are using for this capture. Type in deck’s inventory number and search, then choose from search list - SDI Converter: Most transfers utilize an SDI converter before being captured on the computer disk. Type in the inventory number and search, then choose from search list - Operating System Version: Choose computer’s current OS from drop down menu. If not present, please alert a staff member - Capture Hardware: Choose from drop down menu. Black Magic 4K Extreme currently in use at all stations. - Capture Software: Choose from drop down menu - Trim Software: Choose from drop down menu. We currently use QuickTime7 almost exclusively to trim files. ",
+    "url": "/bavc-resources/docs/Salesforce/preservationObjects.html#transfer-environment",
+    "relUrl": "/docs/Salesforce/preservationObjects.html#transfer-environment"
+  },"103": {
+    "doc": "Preservation Objects",
+    "title": "Video Transfer Elements",
+    "content": "Complete before capture - Video . - **Analog Video Transmission:** Choose the transmission method from the drop down menu - **Color:** Choose from drop down menu - **Audio Source Channels:** Choose from drop down menu. While the majority of formats have two channels (CH1, CH2), ½ inch and occasionally Umatic have one channel, and Betacam can have more than two. - **Audio Source Channel Layout:** Choose from drop down menu - **Audio Source Recording Method:** Choose from drop down menu. Particularly relevant for VHS transfer, as cabling must be adjusted for HiFi - **TBC/Frame Sync:** The time base corrector(TBC) you are using to capture. Type in TBC’s inventory number and search, then choose from search list. If using internal TBC, note this in **Proc Amp Notes** - **Proc Amp Notes:** Note all adjustments you made to TBC (Black, Luma; Chroma, Hue, H Position) - **Bars/Tone:** Choose from drop down menu - **Timecode:** Choose from drop down menu if capturing timecode. Timecode is almost always dropped frame. - **Alternate Modes:** Choose relevant headings, or leave blank if none apply - **Video Transfer Notes:** Notes about the transfer you would like your colleagues and QC technician to see, ex. *File captured twice on two different TBCs. Please review both.* . ",
+    "url": "/bavc-resources/docs/Salesforce/preservationObjects.html#video-transfer-elements",
+    "relUrl": "/docs/Salesforce/preservationObjects.html#video-transfer-elements"
+  },"104": {
+    "doc": "Preservation Objects",
+    "title": "Audio Transfer Elements",
+    "content": "Complete before capture - Audio . - **Audio Material Type:** Choose from drop down menu - **Audio Speed:** Choose from drop down menu - **Audio Reel Size:** Choose from drop down menu - **Audio Track Configuration:** Choose from drop down menu - **Audio Size Configuration:** Choose from drop down menu - **Audio Transfer Notes:** Notes about the transfer you would like your colleagues and QC technician to see . ",
+    "url": "/bavc-resources/docs/Salesforce/preservationObjects.html#audio-transfer-elements",
+    "relUrl": "/docs/Salesforce/preservationObjects.html#audio-transfer-elements"
+  },"105": {
+    "doc": "Preservation Objects",
+    "title": "Supervised Transfer Notes",
+    "content": "Complete after capture . | Technician’s Notes . | Technician’s Notes should contain general information about the overall condition of the tape content, ex. regularity of drop outs (occasional, regular, heavy), presence of double headswitching, regular instances of sync loss. | Video notes should come before audio notes, ex. Regular drop outs. Numerous sync errors, audio buzz present throughout. Intermittent audio drop outs. | . | Timecode Stamped Notes . | Timecode Stamped Notes indicate particular instances of damage or image/audio variation of which you wish to alert the client. | Timecode Stamped Notes should appear as follows: . | 00:00:00(space)-(space)Capitalized note; ex. 01:02:03 - Drop out; | . | Each note (barring the final note you make) should have it’s own line and end in a semi-colon. This is to ensure that the information displaces legibly in the Excel transfer log we provide to clients. | . | . ",
+    "url": "/bavc-resources/docs/Salesforce/preservationObjects.html#supervised-transfer-notes",
+    "relUrl": "/docs/Salesforce/preservationObjects.html#supervised-transfer-notes"
+  },"106": {
+    "doc": "Preservation Objects",
+    "title": "Digitization Status",
+    "content": ". | In Progress - The transfer process has been started and is proceeding as normal, but has not yet been completed. | Pass - You are satisfied with your captured file and notes. | Review - There is an issue with your file that you would like to review, either by yourself or with colleagues. | Fail - Your capture was not successful. | Not Captured - The tape has not and will not be captured. | Sent to Sub - The tape is not at BAVC, and has been sent to a subcontractor like Specs Brothers. | . ",
+    "url": "/bavc-resources/docs/Salesforce/preservationObjects.html#digitization-status",
+    "relUrl": "/docs/Salesforce/preservationObjects.html#digitization-status"
+  },"107": {
+    "doc": "Preservation Objects",
+    "title": "Digital Object Elements",
+    "content": ". | The information for Digital Object Elements are auto-populated into the Salesforce record via a script appended to the transcodeEngine. The majority of the fields in Digital Object Elements will remain the same from record to record. For 10-bit uncompressed capture, your fields should read as follows: . | Digital File Format: MOV | Digital Video Codec: Uncompressed 10-bit (v210) | Digital Video Bit Depth: 10 bit | Digital Compression Mode: Lossless | Digital Video Scan Type: Interlaced | Digital Video Frame Rate: 29.97 | Digital Video Frame Size: 720 x 486 | Digital Video Aspect Ratio: 4:3 | Digital Video Data Rate: 224 Mbps | Digital Video Color Matrix: BT.601 | Digital Video Color Space: YUV | Digital Video Chroma Subsampling: 4:2:2 | Digital Video Audio Data Rate: 2 304 Kbps | Digital Audio Bit Depth: 24 bit | Digital Audio Sampling Rate: 48 kHz | Digital Audio Codec: Linear PCM | Digital Audio Channel Positions: L R | Digital Audio Channel(s): 2 Channels | Checksum Generator: MD5 | . | The only contantly variable fields are: . | Digital File Name | Digital File Duration | Digital File Size | Checksum | . | . Non 10-bit Captures . | While we largely capture files as 10 bit uncompressed (v210), there are occasions when we will capture to other codecs. These situations require some changes to the normally static Digital Object Elements fields. | ProRes 422 HQ . | Digital Video Codec: Prores 422 HQ | Digital Compression Mode: Lossy | Digital Video Scan Type: Progressive | Digital Video Frame Size: 648 x 486 | Digital Video Data Rate: Variable | . | DV (DVCAM, MiniDV) . | Digital Video Codec: DV | Digital Video Bit Depth: 8 bit | Digital Compression Mode: Lossy | Digital Video Frame Size: 720 x 480 | Digital Video Data Rate: 24.4 Mbps | Digital Video Chroma Subsampling: 4:1:1 | Digital Audio Data Rate: 1 536 Kbps | Digital Audio Bit Depth: 16 bit | Digital Audio Sampling Rate: 48 kHz OR 32 kHz | . | . | . ",
+    "url": "/bavc-resources/docs/Salesforce/preservationObjects.html#digital-object-elements",
+    "relUrl": "/docs/Salesforce/preservationObjects.html#digital-object-elements"
+  },"108": {
+    "doc": "Preservation Objects",
+    "title": "Quality Control Elements",
+    "content": ". | Checklist . | Trimming: . | Is any content at the beginning or end cutoff? | Is there excessive static/snow or dead air at the beginning or end of the file? | Are client requested bars/slates present? | . | Metadata: Is every required field filled out? | Time Code: . | Does timecode exist in the file? | If so, is it correct? | . | Audio Sync: Is the audio and video content in sync throughout the entire file? | Notes: . | Do notes properly describe errors, artifacts, or other salient details? | Is the correct vocabulary used to describe errors? | Are any major errors missing from the notes? | . | QCTools Report: Does the report open properly in QCTools? | MediaConch: Do all files pass associated Policies? | Quality Control Notes: Note any issues, errors or oversights that need to be addressed by digitization technician | Quality Control User: Autofills when QC Technician is assigned at outset of project | Quality Control Date: Today’s date | Quality Control Status: Select Pass, Review or Not Captured, dependent on outcome of QC process | Loaded to Drive: Check box when all files associated with record have been successfully loaded to client drive | . | . ",
+    "url": "/bavc-resources/docs/Salesforce/preservationObjects.html#quality-control-elements",
+    "relUrl": "/docs/Salesforce/preservationObjects.html#quality-control-elements"
+  },"109": {
+    "doc": "Preservation Objects",
+    "title": "Preservation Activities",
+    "content": ". | Any interventionist actions taken on a tape must be recorded in Preservation Activities. The most common activities are cleaning and baking, but actions such as splicing or rehousing should also be recorded here. | Select New Preservation Activities | Activity Type: Select option from drop down menu. If Other selected, please specify which activity was taken in the Note field | Activity Date: Date activity was undertaken | Preservation Object: Should already contain object barcode number | Note: space for short, relevant notes, such as the type of action taken (if not listed in Activity Type drop down menu) or number of cleaning passes if tape required repeated cleaning | . | . ",
+    "url": "/bavc-resources/docs/Salesforce/preservationObjects.html#preservation-activities",
+    "relUrl": "/docs/Salesforce/preservationObjects.html#preservation-activities"
+  },"110": {
+    "doc": "Preservation Objects",
+    "title": "Google Docs, Notes, and Attachments",
+    "content": ". | This field is rarely used at the object level. | . ",
+    "url": "/bavc-resources/docs/Salesforce/preservationObjects.html#google-docs-notes-and-attachments",
+    "relUrl": "/docs/Salesforce/preservationObjects.html#google-docs-notes-and-attachments"
+  },"111": {
+    "doc": "Preservation Objects",
+    "title": "Notes",
+    "content": ". | This field is rarely used at the object level. | . ",
+    "url": "/bavc-resources/docs/Salesforce/preservationObjects.html#notes",
+    "relUrl": "/docs/Salesforce/preservationObjects.html#notes"
+  },"112": {
+    "doc": "Quality Control (QC)",
+    "title": "Quality Control (QC)",
+    "content": " ",
+    "url": "/bavc-resources/docs/Technical%20Documentation/qualityControl.html",
+    "relUrl": "/docs/Technical%20Documentation/qualityControl.html"
+  },"113": {
+    "doc": "Quality Control (QC)",
+    "title": "QCing Files Using Salesforce",
+    "content": "QC Overview . | Quality Control(QC) procedures occur in all phases of our workflow for conserving magnetic media and migrating the content to digital formats. This document provides guidelines for the QC technician to properly assess the integrity of Transfer Technicians’ work in transferring analog media. The purpose of QC in our organization is four-fold: . | QC will ensure that only the highest quality files and documentation are delivered to the client | QC will ensure that all equipment is functioning as expected | QC will ensure that workflows and tasks are being performed as expected | QC will help tell us where to focus resources | . | . While errors will be found on a file-by-file basis, analysis of QC data can help us holistically improve the quality of our work. Keep in mind that communication between the QC Technician and the Transfer Technician is very important when discussing files for review. | Below are a few key guidelines for performing QC: . | QC Should be performed by someone other than the Transfer Technician | QC should be performing as soon as possible following transfer | QC should be performed before loading files to the delivery media | QC should be performed on the Storage Area Network (SAN) | QC should be performed before deleting any files from the SAN | Any QC fails or issues found by the QC Technician should be addressed by the Transfer Technician | . | . QC Software . | Salesforce . | A web-app used for tracking our work. Each tape is represented as a Preservation Object within an Opportunity. Salesforce allows us to create reports that can give us an overview of tasks and workflows. | . | QuickTime 7 . | Playback software used for QC. Other playback software exists, and can be useful for troubleshooting, but this is the main software to be used during QC. | . | QCTools . | An open-source app built specifically for performing QC on digitized a/v content. The software on its own does not perform QC, but provides the user with data visualizations and playback filters that can help them perform QC. | . | MediaConch . | An open-source app used to analyse files through a series of BAVC specific policies, ensuring file specifications are correct. | . | . QC Reports . | These reports can be found by clicking on the Reports tab in Salesforce, then clicking on the Preservation: Quality Control folder on the left-hand side of the screen. Each report has been designed to give the QC Technician specific overviews of their tasks and progress. | QC Queue . | A list of all Preservation Objects that have been marked as Transfer Passed but not marked QC Passed | . | QC Needs Review . | A list of all Preservation Objects that have been marked QC Needs Review | . | QC Stats . | A list of all items transferred and QC’d within an adjustable timeframe | . | QC Review History . | A running list of all items that have QC Notes, organized by Original Format | . | . | . QC Checklist . | Each of the following bullet points correspond to a checkbox in Salesforce in the Quality Control Elements section . | Derivatives . | Do the derivatives exist and playback properly in QuickTime 7? | Is the audio and video in sync? | . | Trimming . | Is any content at the beginning or end cutoff? | Is there excessive static/snow or dead air at the beginning or end of the file? | If client has requested bars/slates, are they present? | . | Metadata . | Is every required field filled? | Does the Video duration match the duration notated in Digital File Duration? | ONLY FOR AUDIO . | Check the embedded metadata in the audio files: . | Drag the WAV files into BWFMetaEdit and ensure the following fields are filled out . | Description: Title; Date (if any) | Originator: “BAVC” | OriginatorReference: BAVC Barcode | OriginationDate: Date of file creation | OriginationTime: Time of file creation | TimeReference: “0” | BextVersion: “1” | CodingHistory: This will be a long string of text. | . | Drag the MP# files into iTunes and ensure the following: . | Title: Title | Artist: Creator, producer, artist, etc… (if any) | Year: Recording year, if any | . | . | . | . | Time Code (ONLY FOR VIDEO, DO NOT CHECK BOX FOR AUDIO) . | Does timecode exist in the file? | If so, is it correct? . | Drop Frame vs Non Drop Frame | . | . | Audio Sync (ONLY FOR VIDEO, DO NOT CHECK BOX FOR AUDIO) . | Is the audio and video content in sync throughout the entire file? . | Check beginning, middle, and end of file | . | . | Notes . | Do notes properly describe errors, artifacts, or other salient details? . | Transfer Notes should describe details that occur throughout the content, over large portions of content, or any extra intervention taken to complete the transfer | Timecode Stamped Notes should describe errors or salient details that occur at specific times in the video file, using the format . | The format of the note should be: HH:MM:SS - Description of error; | . | . | Is the correct vocabulary used to describe errors? | Are any major errors missing from the notes? | . | QCTools Report (ONLY FOR VIDEO, DO NOT CHECK BOX FOR AUDIO) . | Does the report open properly in QCTools? | General signal analysis: . | Are Y levels within range? | Are Saturation levels within range? | Are MSEF spikes at expected locations? | Does waveform look smooth and not quantized? | . | . | MediaConch . | Do files all pass associated Policies? | . | . | . QC Status . | There are five possible entries for QC Status . | Blank . | QC has not been performed at all on the Object | . | Pass . | QC has been performed and the Object passes all checks | . | Review . | QC has been performed and one or more of the checks has failed or has a questionable status | When marking an Object as Review, make sure to always enter a description of the issue into Quality Control Notes. Upon saving the Salesforce record, a bot will send the QC Tech and Transfer Tech an email containing the Barcode and Quality Control Notes. | . | Review Addressed . | Transfer Technician has addressed the reviews flagged by the QC Technician, by either correcting errors or by ensuring the errors are inherent to the tape | Transfer Technician will enter a description of tasks performed to address errors in Quality Control Notes | . | Not Captured . | If the Object has not been transferred for any reason, often because it is a duplicate or is beyond intervention. In any case where an Object has not been transferred the Digitization Status and QC Status should both be marked Not Captured, and there should be a Technicians Notes describing why it was not captured. | . | . | . ",
+    "url": "/bavc-resources/docs/Technical%20Documentation/qualityControl.html#qcing-files-using-salesforce",
+    "relUrl": "/docs/Technical%20Documentation/qualityControl.html#qcing-files-using-salesforce"
+  },"114": {
+    "doc": "Quality Control (QC)",
+    "title": "QC Workflow",
+    "content": ". | Navigate to QC Queue report | Find the Opportunity you will be performing QC on . | Priorities will most commonly be decided by the Preservation Manager | If no priorities are clear, navigate to the opportunity with the fewest number of Preservation Items that are ready for QC. This makes it easier to close any existing gaps. | Every Preservation Object associated with the selected Opportunity should be visible in the report. If they are not visible, press the Show Details button. | . | Navigate to the QCReady folder of the OPportunity you will be QCing . | SymplyUltra (SAN) . | TransferProjects . | Opportunity Name . | 03_QCReady | . | . | . | NOTE: All files in the QCReady folder should be marked ready for QC according to Salesforce. Do not QC anything that isn’t ready according to Salesforce. Additionally, make sure to clear up any discrepancies about the status of an Object with the transfer technician. | . | Run MediaConch on all Preservation files in the QCReady folder . | The most common Policy used on Preservation files is CAVPP Preservation Master, which is used for 10-Bit Uncompressed MOV files . | If the Preservation file being delivered to the client is not a typical 10-Bit Uncompressed file, work with the Preservation Manager to find or create a profile that works for the Opportunity | . | If any fails occur, investigate the failure to determine whether the Object should be marked for review . | Not all MediaConch failures are grounds for an overall fail, but they must all be investigated | . | . | Navigate to the Preservation Object you will be QCing by right-clicking the Barcode number and opening a new tab or new window . | DO NOT QC the object if it has not been loaded to the PresRaid | . | Step through the checkboxes in the Quality Control Elements section of the Salesforce page . | Stepping through the checkboxes in order will ensure that you are following the workflow in the prescribed manner . | The exception to this is the MediaConch box, which will be checked in bulk at the beginning of the QC Workflow. If you know that the files associated with this object have passed the MediaConch check you may check off this box at any time. | . | Check off each box once you have ensured that the associated details pass QC | Upon encountering any fail, describe the problem in Quality Control Notes, mark the QC Status of the record Review, and save the record. Move onto the next record. | . | Once all of the check boxes are ticked, enter the Quality Control Date with today’s date, and mark the Quality Control Status as Pass | Close the Object window and navigate back to the QC Queue report | Move onto the next Object in the Opportunity | . ",
+    "url": "/bavc-resources/docs/Technical%20Documentation/qualityControl.html#qc-workflow",
+    "relUrl": "/docs/Technical%20Documentation/qualityControl.html#qc-workflow"
+  },"115": {
+    "doc": "Quality Control (QC)",
+    "title": "Drive Load Workflow",
+    "content": ". | Drive loads should generally be started at the end of the day. Too many drive loads on a single station can slow the station’s SAN connection, and QCing during a drive load can be very slow. | Drive Formatting . | Attach labels to all important parts of the drive . | Box | Drive | Power Brick | Computer end of USB Cable | . | Mark drive as received in Salesforce Opportunity, and include notes on make/model/capacity | Plug Drive into computer | Format the Drive . | ONLY PERFORM THE FOLLOW STEPS IF THE CLIENT DOES NOT HAVE MATERIALS ON THE DRIVE ALREADY . | Open Disk Utility | Click on the corresponding drive under External on the left-hand side of the window | Click the Erase button at the top of the window . | ***WARNING: THIS WILL DEFINITELY ERASE THE DRIVE | . | Enter the name of the Drive. You can only use 10 characters, so make them count! | Set the format to ExFAT | Set the Scheme to GUID Partition Map | Click Erase. This process should run quickly | . | Drag the BAVC_Preservation folder from the desktop of your computer to the root level of the hard drive | Once finished, you can either start loading to the drive, or place it on the PresSuite shelf if it will not be used immediately. | . | Drive Loading . | Plug the drive into the load station | Open a Terminal Window | Type in the following command . | rsync -rlgtvD –progress | Press the space bar | Drag in the contents on 05_Loading from the opportunity folder on the SAN | Drag in the BAVC_Preservation folder on the Drive | The resulting string should look something like this: | . rsync -avv –progress /Volumes/SymplyUltra/TransferProjects/OpportinityName/05_Loading/Files_Access /Volumes/SymplyUltra/TransferProjects/OpportinityName/05_Loading/test/Files_Preservation /Volumes/ClientDriveName/BAVC_Preservation . | Press Return and watch the files start to load! | When complete, move files into appropriate (Pres or Access) folders. | . | . | Click the “Loaded to Drive” box on each record in Salesforce. | . | . ",
+    "url": "/bavc-resources/docs/Technical%20Documentation/qualityControl.html#drive-load-workflow",
+    "relUrl": "/docs/Technical%20Documentation/qualityControl.html#drive-load-workflow"
+  },"116": {
+    "doc": "Creating Quotes and Invoices",
+    "title": "Quotes and Invoices",
+    "content": ". | While the Finance department handles accounting, bookkeeping, and sometimes payments, it is on us to negotiate with the client on services fees. We first create a quote in Salesforce for the client only, then generate an invoice for Finance to process. We are also responsible for locking in the initial deposit (either 100% or 50% of the quoted amount). | . ",
+    "url": "/bavc-resources/docs/Salesforce/quotesInvoices.html#quotes-and-invoices",
+    "relUrl": "/docs/Salesforce/quotesInvoices.html#quotes-and-invoices"
+  },"117": {
+    "doc": "Creating Quotes and Invoices",
+    "title": "Quotes",
+    "content": ". | Quotes are only for the the client and for Preservation’s internal moves management. Quotes are usually generated during the “Negotiation” stage of an Opportunity. We generally do not alert the Finance department of income while a project is in this phase; the money is not guaranteed. | . ",
+    "url": "/bavc-resources/docs/Salesforce/quotesInvoices.html#quotes",
+    "relUrl": "/docs/Salesforce/quotesInvoices.html#quotes"
+  },"118": {
+    "doc": "Creating Quotes and Invoices",
+    "title": "Invoices",
+    "content": ". | Invoices are for the the client and the Finance department. Note, the invoicing functionality is constantly evolving. Please update this page if you notice missing, added, or replaced steps in the process, or if you encounter new terminology. | In the Quotes, choose “Create PDF” then from the dropdown menu chose “EMAIL 50” template. (This method only works if you have created a quote with line items first) | Look over the PDF and make sure it is correct. Choose “Save and Send and Email” | At the bottom of email page, close “Select Template.” | Choose “QUOTE INVOICE” and the invoice payment template should appear. Please test the link and make sure it is working. (The Quote/Invoice number needs to be in the body of the email in order for Finance to process the email accordingly) | Change the Related To field to “Opportunity” | Add the contacts name in the To field | In the CC field, type innesa@bavc.org | In the BCC field, type preservation@bavc.org | Edit the Subject Line, Text, and Email fields as you see fit. (this invoice will be sent from your email address). | You might have to email the client in your other correspondence that you have sent an invoice and that they should check their spam folder if they haven’t received it (this happens sometimes when sending emails through Salesforce). | . | . ",
+    "url": "/bavc-resources/docs/Salesforce/quotesInvoices.html#invoices",
+    "relUrl": "/docs/Salesforce/quotesInvoices.html#invoices"
+  },"119": {
+    "doc": "Creating Quotes and Invoices",
+    "title": "Creating Quotes and Invoices",
+    "content": " ",
+    "url": "/bavc-resources/docs/Salesforce/quotesInvoices.html",
+    "relUrl": "/docs/Salesforce/quotesInvoices.html"
+  },"120": {
+    "doc": "SAN Organization",
+    "title": "SAN Organization",
+    "content": ". | The SAN (Storage Area Network) is BAVC’s primary, albeit temporary, file storage system for housing AV files and their accessories (such as scripts, transfer logs, etc) only. It does not, and should not, contain documentation pertaining to the department or any employee information. Each capture station in Preservation has direct access to the SAN via Finder, where it is inconveniently named SymplyUltra. For departmental documentation, you will need access to the Preservation Team Drive. | The organization of it is pretty straightforward, but keep in mind the naming convention for folders and files require consistency in order for the scripts to locate the files and work their magic. It is best to copy &amp; paste templates (located on the SAN) for this reason. | . ",
+    "url": "/bavc-resources/docs/Technical%20Documentation/sanOrganization.html",
+    "relUrl": "/docs/Technical%20Documentation/sanOrganization.html"
+  },"121": {
+    "doc": "SAN Organization",
+    "title": "Create a New Client Folder",
+    "content": ". | Note: The project folder name should match the Salesforce Opportunity Name. | Create a client folder on the SAN using the naming convention PV(Last two digits of current year) followed by an underscore and the project name. | Example: PV20_BeyonceKnowles | . | The PAP naming convention follows the same rule, replacing PV(year) with PAP(current round). | Example: PAP12_BeyonceKnowles | . | Copy the folders located under ProjectTemplate and paste them under the newly created client folder. | . ",
+    "url": "/bavc-resources/docs/Technical%20Documentation/sanOrganization.html#create-a-new-client-folder",
+    "relUrl": "/docs/Technical%20Documentation/sanOrganization.html#create-a-new-client-folder"
+  },"122": {
+    "doc": "SAN Organization",
+    "title": "Keeping Up With Storage",
+    "content": ". | Keep an eye on the amount of storage left on the SAN. Anytime the amount of available space drops below 7 TB, then files will need to be QC’d and loaded to drives, deleted, or moved before much more can be added. | Low space can cause playback issues with the files already stored there. | Empty the TrashCan on the SAN every morning by dragging the trashed files to your desktop’s trashcan and selecting EMPTY TRASH. | . ",
+    "url": "/bavc-resources/docs/Technical%20Documentation/sanOrganization.html#keeping-up-with-storage",
+    "relUrl": "/docs/Technical%20Documentation/sanOrganization.html#keeping-up-with-storage"
+  },"123": {
+    "doc": "SAN Organization",
+    "title": "SAN Troubleshooting",
+    "content": ". | Other documentation is only accessible to employees who can access the Preservation Team Drive or via the IT/OPS team. See a manager or someone from IT if you discover any problems that require immediate attention. | . ",
+    "url": "/bavc-resources/docs/Technical%20Documentation/sanOrganization.html#san-troubleshooting",
+    "relUrl": "/docs/Technical%20Documentation/sanOrganization.html#san-troubleshooting"
+  },"124": {
+    "doc": "Transfer Logs",
+    "title": "Transfer Logs",
+    "content": ". | Transfer logs are included on the client’s drive along with their preservation master files. For more information about client deliverables, go here: . | In Salesforce, go to Reports. | Navigate to the report called either Client_TransferLog_Audio or Client_TransferLog_Video depending on the format (they have different schemas). | Run the report and click the Customize button. | Click the Edit button next to the Opportunity Name filter | Type in the first few letters of the opportunity name of the project you are completing | Click OK | Run the report | Check that all the fields have consistent and correct information | Click Export Details | Export as an .xls file | Open the .xls file in Excel and remove the text at the bottom about time/user that ran the report. | Highlight the sheet and reformat row height to 0.19 | Scan through all content checking for inconsistencies or missing information | Save on the client’s drive as (OpportunityName_TransferLog) for example “PAP7_OregonHistoricalSociety_TransferLog.” | . | . ",
+    "url": "/bavc-resources/docs/Technical%20Documentation/transferLogs.html",
+    "relUrl": "/docs/Technical%20Documentation/transferLogs.html"
+  },"125": {
+    "doc": "Video Formats",
+    "title": "Video Formats",
+    "content": " ",
+    "url": "/bavc-resources/docs/Services/videoFormats.html",
+    "relUrl": "/docs/Services/videoFormats.html"
+  },"126": {
+    "doc": "Video Formats",
+    "title": "2” Quadraplex",
+    "content": "We do not transfer 2”. We sub-contract to Larry Odham in Tennessee . ",
+    "url": "/bavc-resources/docs/Services/videoFormats.html#2-quadraplex",
+    "relUrl": "/docs/Services/videoFormats.html#2-quadraplex"
+  },"127": {
+    "doc": "Video Formats",
+    "title": "1” Video",
+    "content": ". | CAUTION! Don’t slow down or use shuttle while playing or TAPE WILL BREAK | Don’t pack tapes (for safety) | Leave empty reel on deck when not in use | 3rd audio channel is timecode | BVH-2000 deck plays type C | Take cover screws off to use deck, lock reel on left side | For right pickup reel use large hub | Shuttle to rewind and FF - turn all the way, don’t adjust speed | Shuttle a 2nd time to get tape off reel | . ",
+    "url": "/bavc-resources/docs/Services/videoFormats.html#1-video",
+    "relUrl": "/docs/Services/videoFormats.html#1-video"
+  },"128": {
+    "doc": "Video Formats",
+    "title": "1/2” Open Reel",
+    "content": ". | No time code | Watch for dropouts, creases in tape | Squealing or sticky tape should be stopped and baked before playback | One audio and one video channel | Don’t stop tape immediately if tape appears to be over - watch remainder of tape to ensure there is no further content | CV vs AV: CV tape is unbacked, appearing shiny on both sides. While this is occasionally the case for AV tapes, a lack of backing is a good indicator that a tape is CV | If there are heavy dropouts, utilize either of the two TBCs with dropout correctors (DOC). Make sure to connect RF out of the deck to the RF scope, and make sure the scope is connected to the correct TBC . | BVT-800 . | Make sure the advanced sync from the BVT is connected to the Video In of the deck | . | DPS-290 . | The Video In of the deck can be connected to the general blackburst in the rack | The DOC can be tuned with a trim pot inside the TBC. Do this if you see lots of weird lines instead of a clear picture | . | . | . ",
+    "url": "/bavc-resources/docs/Services/videoFormats.html#12-open-reel",
+    "relUrl": "/docs/Services/videoFormats.html#12-open-reel"
+  },"129": {
+    "doc": "Video Transfer Workflow",
+    "title": "General Tape Transfer Workflow",
+    "content": " ",
+    "url": "/bavc-resources/docs/Services/videoTransfer.html#general-tape-transfer-workflow",
+    "relUrl": "/docs/Services/videoTransfer.html#general-tape-transfer-workflow"
+  },"130": {
+    "doc": "Video Transfer Workflow",
+    "title": "Start of Day",
+    "content": ". | Check that the previous day’s transcodes and scripts have completed processing | Restart every computer that ran overnight | Patch the Audio and Video for the format you are using at your station | Power on all equipment, allowing it to warm up (monitor, TBC, scopes, blackburst, audio mixer, etc) | Empty the dehumidifier located in the Tape Closet if necessary | Pack and/or clean tapes prior to transfer | Bring only the tapes you intend on capturing for the day to your Capture Station | . ",
+    "url": "/bavc-resources/docs/Services/videoTransfer.html#start-of-day",
+    "relUrl": "/docs/Services/videoTransfer.html#start-of-day"
+  },"131": {
+    "doc": "Video Transfer Workflow",
+    "title": "Capturing with vrecord",
+    "content": ". | Follow Start of Day steps above to ensure that your station is ready to run | Clean deck thoroughly, ensuring the entire tape path and heads are free of dirt | Open Terminal and type in vrecord -p (passthrough mode) | Ensure that your video settings in vrecord are correct. If not, type vrecord -e and select the appropriate configuration for that specific client and/or format. Return to vrecord’s passthrough mode | Insert a Bars &amp; Tone tape to adjust waveform/vectorscope and audio within Broadcast range (or -18dB) . | In some case, audio levels may need to be adjusted on a TBC | . | Eject the Bars &amp; Tone tape and insert or thread the client tape to be captured | Observe the threading and press Play (if necessary) . | Watch and listen to the tape movement in the deck. If there is ever any sign of struggling or loud squeaking; if you have any concerns whatsoever - STOP THE TAPE | . | Set the levels to the program utilizing the scopes or vrecord to guide you . | If Bars &amp; Tone is present on the client tape, set to these levels first. If those levels are off, make subjective adjustments to the content | If you feel your eyes have adjusted and hue or saturation is still off, look away for 30 seconds and come back to it | . | Set the audio levels during the loudest moments of the content. Do not allow the dB to drift into single digits. -10 dB should be the threshold | Center the Horizontal framing by locating Input H-Position or H-Pos in a TBC | If you are pleased with the settings, rewind and eject the tape, and re-clean the tape path | Open Salesforce and locate the Preservation Object by typing in the tape’s 7-digit barcode | Copy the entire Digital File Name | Exit and reopen vrecord, this time typing in vrecord -e | Double check that the configuration is correct | Follow the prompts and paste the digital file name where it asks for the Client Identifier . | Type _take01 to the file name | . | Press Enter to activate the capture. Start/play the tape from head at the same moment | . ",
+    "url": "/bavc-resources/docs/Services/videoTransfer.html#capturing-with-vrecord",
+    "relUrl": "/docs/Services/videoTransfer.html#capturing-with-vrecord"
+  },"132": {
+    "doc": "Video Transfer Workflow",
+    "title": "Capturing with Media Express (only do this if you need to capture timecode or an upscaled video from the Teranex)",
+    "content": ". | Open BlackMagic Media Express | Open Log and Capture window | Save Media Express project as the same name as the project folder, and save to folder | In the top right-hand corner, go to Preferences and set Capture Audio and Video To: and Capture Still Frames To: to your project folder on the storage raid | While in Preferences, ensure that Project Video Format is set to the correct settings: . | For analog tape captures: . | Framerate: 29.97 NTSC | Capture File Format: 10 bit Uncompressed | Use Dropped Frame Timecode should be checked | . | For upscale HD captures: . | Framerate: Make sure to set this according to the client’s specifications | Capture File Format: ProRes 422 HQ | Use Dropped Frame Timecode should be checked | . | . | Navigate to Blackmagic Desktop Video Setup (should be in the dock) and ensure that your settings are correct for both video and audio set up | Use bars and tone tape to set levels | Ensure your capture station is set up correctly for the selected format AND the video input you are using | . ",
+    "url": "/bavc-resources/docs/Services/videoTransfer.html#capturing-with-media-express-only-do-this-if-you-need-to-capture-timecode-or-an-upscaled-video-from-the-teranex",
+    "relUrl": "/docs/Services/videoTransfer.html#capturing-with-media-express-only-do-this-if-you-need-to-capture-timecode-or-an-upscaled-video-from-the-teranex"
+  },"133": {
+    "doc": "Video Transfer Workflow",
+    "title": "During the Capture",
+    "content": ". | Keep your eyes and ears on the transfer, taking notes on any artifacts or errors . | Notate these artifacts using the following timecode formula HH:MM:SS (Hours, Minutes, Seconds) . | Example: 01:13:42 - Crash record; | . | Regularly check the waveform monitor and vectorscope as you capture, being watchful for signal variances outside of broadcast range | Watch the audio meters, ensuring that the audio is not peaking | . | Once the recorded content has ended, press Esc | Ensure no more content exists on tape. If complete, rewind the tape fully | Eject or remove the tape and return it to it’s case | Wrap a green elastic band around the tape/case if the capture was successful. If unsuccessful, wrap an orange elastic band | Clean the tape path | . ",
+    "url": "/bavc-resources/docs/Services/videoTransfer.html#during-the-capture",
+    "relUrl": "/docs/Services/videoTransfer.html#during-the-capture"
+  },"134": {
+    "doc": "Video Transfer Workflow",
+    "title": "File Trimming",
+    "content": ". | There is now a script that can help with file trimming, located on the SAN . | /Volumes/SymplyUltra/Scripts/trimmer.sh | . | Open a terminal window | Drag in the script or type in the path to the script above | Drag in the file you want to trim | Enter the timecode you want the trimmed file to start and end in the format HH:MM:SS | Optional: enter how many hours you want the script to wait before running | This script only works on uncompressed .mov files. DV files (even .movs created from DV) will need to be trimmed manually using this ffmpeg command: . | ffmpeg -i [input file] -ss HH:MM:SS -to HH:MM:SS -c copy [output file] | . | . ",
+    "url": "/bavc-resources/docs/Services/videoTransfer.html#file-trimming",
+    "relUrl": "/docs/Services/videoTransfer.html#file-trimming"
+  },"135": {
+    "doc": "Video Transfer Workflow",
+    "title": "Transcoding",
+    "content": ". | Generally, transcoding should take place EOD as to not interfere with other processing | If the file was captured to a local RAID, it will first need to be rsync’d to the SAN | Regular BAVC clients and archives (such as the Walt Disney Archives) have variable requests pertaining to their deliverables. Check the project’s **Salesforce Opportunity for those specifications prior to creating the derivatives | For the most commonly used script, open Terminal . | Drag in the file from the SAN scripts folder called transcodeEngine.py | Add one space and type -i | Drag the folder containing similar .mov files to be transcoded alike (i.e. all files with left channel audio only - do not mix) | Hit Enter and follow each step . | creates the Access file or H.264/MP4 . | De-interlace (unless otherwise specified) | Choose how to map the audio (Usually choosing from “Keep Original” or “Sum Stereo to Mono”) | 640x480 unless otherwise specified | . | creates the Mezzanine file or ProRes/MOV . | De-interlace (unless otherwise specified) | Choose how to map the audio (typically “same as original” unless otherwise specified) - Move the files to the PresRaid | When prompted, enter the folder name on the PresRaid, i.e. PV22_ClientName . | Note: you do not need to type in the full path to the project folder, the script will automatically assume it goes in the InProgress folder - Create a QCTools file and Checksum | . | We typically create MD5 checksums without sidecar files | . | . | . | . ",
+    "url": "/bavc-resources/docs/Services/videoTransfer.html#transcoding",
+    "relUrl": "/docs/Services/videoTransfer.html#transcoding"
+  },"136": {
+    "doc": "Video Transfer Workflow",
+    "title": "Update Salesforce",
+    "content": ". | Transfer Details . | Fill out the Transfer Environment section | Fill out the Video Transfer Elements section | . | Signal Notes . | There are two Salesforce fields where we put information about the tape quality. Each has a slightly different format: . | Technicians Notes . | This field contains information about the tape’s quality in general | Here are some common notes: . | Intermittent dropouts | Flagging | Headswitch error in underscan | Audio buzz | Audio hiss | . | . | Timecode Stamped Notes . | This field contains information for mandatory errors, or any content of note specific to a certain time | Use the following format for each instance: . | HH:MM:SS - This is a timecode stamped note; | HH:MM:SS - Every note but the last ends with a semicolon; | HH:MM:SS - The last note does not have a semicolon | . | . | . | . | Digital File Metadata . | The transcodeEngine.py script will create a mediainfo.py file and automatically sync this file to Salesforce. If you want to do the sync manually you can run the sfsync.py script in the Scripts folder on the SAN | If you want to refresh the metadata in Salesforce, you can recreate it from any file or a folder of files using the metaharvest script | . | . ",
+    "url": "/bavc-resources/docs/Services/videoTransfer.html#update-salesforce",
+    "relUrl": "/docs/Services/videoTransfer.html#update-salesforce"
+  },"137": {
+    "doc": "Video Transfer Workflow",
+    "title": "End of Day",
+    "content": ". | Power off all decks, monitors, and power conditioners | Clean the deck(s) and replace the tops | Return tapes to the tape closet | Empty the dehumidifier | Turn off lights and lock door(s) | . ",
+    "url": "/bavc-resources/docs/Services/videoTransfer.html#end-of-day",
+    "relUrl": "/docs/Services/videoTransfer.html#end-of-day"
+  },"138": {
+    "doc": "Video Transfer Workflow",
+    "title": "Video Transfer Workflow",
+    "content": " ",
+    "url": "/bavc-resources/docs/Services/videoTransfer.html",
+    "relUrl": "/docs/Services/videoTransfer.html"
+  }
+}

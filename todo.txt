@@ -1,9 +1,0 @@
-list which fields are used in which scripts
-
-discuss taxonomy in documentation (what is an album vs a video? why?)
-
-One thing: for dependency paths, can you also document where we need to manually change the python3 path?
-
-And if you don't mind, you can also mention that from macOS Big Sur (I think) the path seems to be opt/homebrew/bin for all the dependencies.
-
-future thoughts: handling programs/events? more dance-specific objects?
