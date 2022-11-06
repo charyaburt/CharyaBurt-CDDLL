@@ -1,6 +1,6 @@
 ---
 layout: page
-title: Services
+title: Airtable Setup
 has_children: true
 ---
 {:toc}
