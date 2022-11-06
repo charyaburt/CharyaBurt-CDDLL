@@ -1,6 +1,6 @@
 # CharyaBurt-CDDLL
 
-This is a GitHub repo for hosting BAVC Preservation’s public workflow and resource documents on GitHub Pages.
+This is a GitHub repo for hosting Charya Burt's Digital Dance Library documentation.
 
 The page is accessible at https://github.com/iamdamosuzuki/CharyaBurt-CDDLL
 
