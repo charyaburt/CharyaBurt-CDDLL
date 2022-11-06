@@ -1,8 +1,8 @@
-# BAVC-resources
+# CharyaBurt-CDDLL
 
 This is a GitHub repo for hosting BAVC Preservation’s public workflow and resource documents on GitHub Pages.
 
-The page is accessible at https://bavc.github.io/bavc-resources/
+The page is accessible at https://github.com/iamdamosuzuki/CharyaBurt-CDDLL
 
 ## How This Page Was Created:
 

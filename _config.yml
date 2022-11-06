@@ -19,8 +19,8 @@
 # You can create any custom variable you would like, and they will be accessible
 # in the templates via {{ site.myvariable }}.
 
-title: BAVC Resources
-description: This site documents the policies and procedures of BAVC Media, a non-profit media digitization lab located in Oakland, CA
+title: Charya Burt CDDLL Documentation Page
+description: This site describes how to use the CDDLL Airtable-based CMS
 search_enabled: true
 remote_theme: pmarsceill/just-the-docs
 search_enabled: true
@@ -28,8 +28,8 @@ search.previews: 3
 search_tokenizer_separator: /[\s/]+/
 #heading_anchors: true
 color_scheme: "dark"
-baseurl: "/bavc-resources" # the subpath of your site, e.g. /blog
+baseurl: "/CharyaBurt-CDDLL" # the subpath of your site, e.g. /blog
 #theme: "just-the-docs"
 aux_links:
   "BAVC Resources source on GitHub":
-    - "//github.com/bavc/bavc-resources"
+    - "//github.com/iamdamosuzuki/CharyaBurt-CDDLL"
